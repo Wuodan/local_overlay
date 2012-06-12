@@ -81,7 +81,11 @@ src_install()
 		local latex_folder="/usr/share/texmf/tex/latex"
 		# find latex folder or fail
 		[ -d ${latex_folder} ] || die "LaTex support for ${PN} cannot be installed. Missing LaTex folder in /usr/share/texmf/tex/latex/"
-		echo todo		
+		exeinto ${DESTINATION_DIR}
+		einfo "Installing all scripts from the Support/Utilities to ${ROOT}${DESTINATION_DIR}/${file} ..."
+		doexe Support/Utilities/* || die "Installation of LaTex support utitity-scripts ${file} failed!"
+		einfo "Installing all scripts from the Support/bind to ${ROOT}${DESTINATION_DIR}/${file} ..."
+		doexe Support/bin/* || die "Installation of LaTex support utitity(-bin)-scripts ${file} failed!"
 	fi
 }
 
