@@ -17,19 +17,20 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 # USE flags
-IUSE="shortcuts latex xslt perl-conversions test"
+IUSE="shortcuts perl-conversions latex xslt test"
 
 # basic depenedencies
 DEPEND=""
 RDEPEND="${DEPEND}"
+PDEPEND="${DEPEND}"
 
 # conditional dependencies
 DEPEND="${DEPEND}
 	test? ( dev-lang/perl app-text/htmltidy )"
 RDEPEND="${RDEPEND}
+	perl-conversions? ( dev-lang/perl )
 	latex? ( dev-lang/perl virtual/latex-base )
-	xslt? ( dev-lang/perl dev-libs/libxslt )
-	perl-conversions? ( dev-lang/perl )"
+	xslt? ( dev-lang/perl dev-libs/libxslt )"
 if use test || use latex || use xslt || use perl-conversions ; then
 	# we also need the sub-modules, this triggers them in git-2.eclass
 	EGIT_HAS_SUBMODULES="Y"
