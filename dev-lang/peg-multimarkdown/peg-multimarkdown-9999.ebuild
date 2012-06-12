@@ -17,7 +17,7 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 # USE flags
-IUSE="shortcuts latex xslt test"
+IUSE="shortcuts latex xslt perl-conversions test"
 
 # basic depenedencies
 DEPEND=""
@@ -28,16 +28,18 @@ DEPEND="${DEPEND}
 	test? ( dev-lang/perl app-text/htmltidy )"
 RDEPEND="${RDEPEND}
 	latex? ( dev-lang/perl virtual/latex-base )
-	xslt? ( dev-lang/perl dev-libs/libxslt )"
-if use test || use latex || use xslt ; then
-	# we also need the sub-modules, this triggers it in git-2.eclass
+	xslt? ( dev-lang/perl dev-libs/libxslt )
+	perl-conversions? ( dev-lang/perl )"
+if use test || use latex || use xslt || use perl-conversions ; then
+	# we also need the sub-modules, this triggers them in git-2.eclass
 	EGIT_HAS_SUBMODULES="Y"
 fi
 
 # custom variables
 DESTINATION_DIR="usr/bin"
-SHORTCUTS_LIST="mmd mmd2tex mmd2opml mmd2odf"
-# mmd2all  mmd2pdf are excluded
+SHORTCUTS_LIST="mmd mmd2tex mmd2opml mmd2odf"	# mmd2all  mmd2pdf are excluded
+PERLSCRIPTS_LIST="mmd2RTF.pl mmd2XHTML.pl mmd2LaTeX.pl mmd2OPML.pl mmd2ODF.pl table_cleanup.pl mmd_merge.pl"
+
 
 src_test()
 {
@@ -69,23 +71,39 @@ src_install()
 	# USE flag based installation
 	# install shortcuts
 	if use shortcuts ; then
+		einfo "Installing shortcuts for ${PN}"
 		exeinto ${DESTINATION_DIR}
 		for file in ${SHORTCUTS_LIST}; do
 			einfo "Installing ${file} to ${ROOT}${DESTINATION_DIR}/${file} ..."
 			doexe scripts/${file} || ewarn "Installation of script ${file} failed!"
 		done
+		einfo "Done installing shortcuts for ${PN}"
+	fi
+	
+	# install perl-conversion scripts
+	if use perl-conversions ; then
+		einfo "Installing perl-conversion scripts for ${PN}"
+		exeinto ${DESTINATION_DIR}
+		for file in ${PERLSCRIPTS_LIST}; do
+			local file_path=`find Support/ -name '${file}'`
+			einfo "Installing ${file} to ${ROOT}${DESTINATION_DIR}/${file} ..."
+			doexe ${file_path} || die "Installation of script ${file} failed!"
+		done
+		einfo "Done installing perl-conversion scripts for ${PN}"
 	fi
 	
 	# install latex support
 	if use latex ; then
+		einfo "Installing latex support for ${PN}"
 		local latex_folder="/usr/share/texmf/tex/latex"
 		# find latex folder or fail
-		[ -d ${latex_folder} ] || die "LaTex support for ${PN} cannot be installed. Missing LaTex folder in /usr/share/texmf/tex/latex/"
+		[ -d ${latex_folder} ] || die "LaTex support for ${PN} cannot be installed. Missing LaTex folder in ${latex_folder}"
 		exeinto ${DESTINATION_DIR}
 		einfo "Installing all scripts from the Support/Utilities to ${ROOT}${DESTINATION_DIR}/${file} ..."
 		doexe Support/Utilities/* || die "Installation of LaTex support utitity-scripts ${file} failed!"
 		einfo "Installing all scripts from the Support/bind to ${ROOT}${DESTINATION_DIR}/${file} ..."
 		doexe Support/bin/* || die "Installation of LaTex support utitity(-bin)-scripts ${file} failed!"
+		einfo "Done installing latex support for ${PN}"
 	fi
 }
 
