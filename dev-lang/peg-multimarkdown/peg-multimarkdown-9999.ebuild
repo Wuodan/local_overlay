@@ -42,8 +42,11 @@ fi
 
 # custom variables
 DEST_DIR_EXE="/usr/bin"
-DEST_DIR_XSLT_TEMPL="/usr/share/${PN}"
-SHORTCUTS_LIST="mmd mmd2tex mmd2opml mmd2odf"	# mmd2all  mmd2pdf are excluded
+DEST_DIR_XSLT_TEMPL="/usr/share/${PN}/XSLT/"
+# known file collision with sys-fs/mtools on file /usr/bin/mmd
+# this is not fatal, the script is only a simple shortcut, so we just skip the
+# file ... mmd2all  mmd2pdf are also excluded (todo re-test them)
+SHORTCUTS_LIST="mmd2tex mmd2opml mmd2odf"	
 PERLSCRIPTS_LIST="mmd2RTF.pl mmd2XHTML.pl mmd2LaTeX.pl mmd2OPML.pl mmd2ODF.pl table_cleanup.pl mmd_merge.pl"
 XSLTSCRIPTS_LIST="mmd-xslt mmd2tex-xslt opml2html opml2mmd opml2tex"
 # prep_tufte.sh is not included, it would require perl and seems old
@@ -78,7 +81,7 @@ src_install()
 {
 	# install main binary
 	insinto ${DEST_DIR_EXE}
-	einfo "Installing multimarkdown to ${DEST_DIR_EXE}/multimarkdown ..."
+	einfo "Installing multimarkdown binary to ${DEST_DIR_EXE}/multimarkdown ..."
 	dobin multimarkdown || die "Install failed"
 
 	# USE flag based installation

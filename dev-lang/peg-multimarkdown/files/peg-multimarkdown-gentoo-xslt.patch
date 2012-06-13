@@ -5,11 +5,11 @@ Subject: [PATCH] Patch for Gentoo installation
 
 Path for XSLT-templates is altered in the scripts
 ---
- bin/mmd-xslt     |    2 +-
- bin/mmd2tex-xslt |    2 +-
- bin/opml2html    |    2 +-
- bin/opml2mmd     |    2 +-
- bin/opml2tex     |    2 +-
+ Support/bin/mmd-xslt     |    2 +-
+ Support/bin/mmd2tex-xslt |    2 +-
+ Support/bin/opml2html    |    2 +-
+ Support/bin/opml2mmd     |    2 +-
+ Support/bin/opml2tex     |    2 +-
  5 files changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/Support/bin/mmd-xslt b/Support/bin/mmd-xslt
