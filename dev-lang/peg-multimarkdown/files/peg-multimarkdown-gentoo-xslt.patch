@@ -1,0 +1,82 @@
+From 72d46151fd0d3456305fb42378f54b604373a2a3 Mon Sep 17 00:00:00 2001
+From: stefan <stefan@halley.(none)>
+Date: Wed, 13 Jun 2012 05:51:59 +0200
+Subject: [PATCH] Patch for Gentoo installation
+
+Path for XSLT-templates is altered in the scripts
+---
+ bin/mmd-xslt     |    2 +-
+ bin/mmd2tex-xslt |    2 +-
+ bin/opml2html    |    2 +-
+ bin/opml2mmd     |    2 +-
+ bin/opml2tex     |    2 +-
+ 5 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/Support/bin/mmd-xslt b/Support/bin/mmd-xslt
+index c67f09c..2b66679 100755
+--- a/Support/bin/mmd-xslt
++++ b/Support/bin/mmd-xslt
+@@ -14,7 +14,7 @@ export PATH="/usr/local/bin:$PATH"
+ 
+ 
+ # Locate XSLT directory
+-xslt_path=`dirname "$0"`
++xslt_path="/usr/share/peg-multimarkdown/XSLT/"
+ 
+ 
+ # Define subroutine to find proper XSLT to use
+diff --git a/Support/bin/mmd2tex-xslt b/Support/bin/mmd2tex-xslt
+index f6a8550..7e15dc8 100755
+--- a/Support/bin/mmd2tex-xslt
++++ b/Support/bin/mmd2tex-xslt
+@@ -14,7 +14,7 @@ export PATH="/usr/local/bin:$PATH"
+ 
+ 
+ # Locate XSLT directory
+-xslt_path=`dirname "$0"`
++xslt_path="/usr/share/peg-multimarkdown/XSLT/"
+ 
+ 
+ # Define subroutine to find proper XSLT to use
+diff --git a/Support/bin/opml2html b/Support/bin/opml2html
+index d3dd133..6962ad1 100755
+--- a/Support/bin/opml2html
++++ b/Support/bin/opml2html
+@@ -11,7 +11,7 @@
+ export PATH="/usr/local/bin:$PATH"
+ 
+ # Locate XSLT directory
+-xslt_path=`dirname "$0"`
++xslt_path="/usr/share/peg-multimarkdown/XSLT/"
+ 
+ if [ $# = 0 ]
+ then
+diff --git a/Support/bin/opml2mmd b/Support/bin/opml2mmd
+index f97fbe7..5a4c3db 100755
+--- a/Support/bin/opml2mmd
++++ b/Support/bin/opml2mmd
+@@ -11,7 +11,7 @@
+ export PATH="/usr/local/bin:$PATH"
+ 
+ # Locate XSLT directory
+-xslt_path=`dirname "$0"`
++xslt_path="/usr/share/peg-multimarkdown/XSLT/"
+ 
+ if [ $# = 0 ]
+ then
+diff --git a/Support/bin/opml2tex b/Support/bin/opml2tex
+index 6c460b4..3a81bd5 100755
+--- a/Support/bin/opml2tex
++++ b/Support/bin/opml2tex
+@@ -11,7 +11,7 @@
+ export PATH="/usr/local/bin:$PATH"
+ 
+ # Locate XSLT directory
+-xslt_path=`dirname "$0"`
++xslt_path="/usr/share/peg-multimarkdown/XSLT/"
+ 
+ if [ $# = 0 ]
+ then
+-- 
+1.7.3.4
+

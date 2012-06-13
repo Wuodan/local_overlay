@@ -6,7 +6,7 @@
 EAPI=2
 
 # project is hosted on github.com, so git-2 is needed (git is deprecated)
-inherit git-2
+inherit git-2 eutils
 
 DESCRIPTION="MMD is a superset of the Markdown syntax (more syntax features & output formats)"
 HOMEPAGE="http://http://fletcherpenney.net/multimarkdown"
@@ -45,31 +45,13 @@ DEST_DIR_EXE="/usr/bin"
 DEST_DIR_XSLT_TEMPL="/usr/share/${PN}"
 SHORTCUTS_LIST="mmd mmd2tex mmd2opml mmd2odf"	# mmd2all  mmd2pdf are excluded
 PERLSCRIPTS_LIST="mmd2RTF.pl mmd2XHTML.pl mmd2LaTeX.pl mmd2OPML.pl mmd2ODF.pl table_cleanup.pl mmd_merge.pl"
-# XSLTSCRIPTS_LIST="mmd-xslt mmd2tex-xslt opml2html opml2mmd opml2tex"
-XSLTSCRIPTS_LIST="" # list will be filled later
+XSLTSCRIPTS_LIST="mmd-xslt mmd2tex-xslt opml2html opml2mmd opml2tex"
 # prep_tufte.sh is not included, it would require perl and seems old
 
 src_prepare()
 {
-	# xslt support requires patching of some scripts
-	# they must know where the xslt templates are
-	if use xslt ; then
-		einfo "Searching for xslt scripts ..."
-		# XSLTSCRIPTS_LIST=`grep -l -e 'xslt_path=\`dirname "$0"\`' # ${WORKDIR}/${P}/Support/bin/*`
-		# search for 'xslt_path=`dirname "$0"` (escaped string below)
-		XSLTSCRIPTS_LIST=`grep -l -e '^xslt_path=\`dirname "$0"\`$' Support/bin/*`
-		# check list
-		echo "${XSLTSCRIPTS_LIST}"
-		[ "$XSLTSCRIPTS_LIST" != "" ] || die "XSLT scripts not found in ${WORKDIR}/${P}/Support/bin/"
-		# replace path
-		for file in ${XSLTSCRIPTS_LIST}; do
-			# simple sed is enough here, replace:
-			# xslt_path=`dirname "$0"` ==> # xslt_path='${DEST_DIR_XSLT_TEMPL}'
-			sed 's/^xslt_path=`dirname "$0"`$/xslt_path=\'${DEST_DIR_XSLT_TEMPL}\'/g' ${file} \
-				|| die "Patching the following script failed: ${file}"
-		done
-		die "todo"
-	fi
+	einfo "XSLT support requires patching of some scripts (they must know where the XSLT templates are)"
+	use xslt && epatch "${FILESDIR}/${PN}-gentoo-xslt.patch" || die "Patching of XSLT scripts for ${PN} failed!"
 }
 
 src_test()
@@ -116,9 +98,10 @@ src_install()
 		einfo "Installing perl-conversion scripts for ${PN}"
 		exeinto ${DEST_DIR_EXE}
 		for file in ${PERLSCRIPTS_LIST}; do
-			local file_path=`find Support/ -name '${file}'`
+			local file_path=`find Support/ -name "${file}"`
+			echo $file_path
 			einfo "Installing ${file} to ${DEST_DIR_EXE}/${file} ..."
-			doexe ${file_path} || die "Installation of script ${file} failed!"
+			doexe "${file_path}" || die "Installation of script ${file} failed!"
 		done
 		einfo "Done installing perl-conversion scripts for ${PN}"
 	fi
@@ -133,14 +116,15 @@ src_install()
 		doins Support/XSLT/* || die "Installation of XSLT templates failed!"
 		einfo "Installing XSLT scripts for ${PN}"
 		exeinto ${DEST_DIR_EXE}
-		for file in ${PERLSCRIPTS_LIST}; do
-			local file_path=`find Support/ -name '${file}'`
+		for file in ${XSLTSCRIPTS_LIST}; do
+			echo $file
+			local file_path=`find Support/ -name "${file}"`
 			einfo "Installing ${file} to ${DEST_DIR_EXE}/${file} ..."
 			doexe ${file_path} || die "Installation of script ${file} failed!"
 		done
 		einfo "Done installing perl-conversion scripts for ${PN}"
 	fi
-	}
+}
 
 pkg_postinst()
 {
