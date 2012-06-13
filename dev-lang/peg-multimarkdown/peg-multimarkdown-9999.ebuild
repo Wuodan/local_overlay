@@ -22,8 +22,9 @@ IUSE="shortcuts perl-conversions latex xslt test"
 
 # basic depenedencies
 DEPEND=""
-RDEPEND=">=dev-libs/glib-2
-	virtual/libintl"
+RDEPEND=""
+# RDEPEND=">=dev-libs/glib-2
+	# virtual/libintl"
 PDEPEND="${RDEPEND}"
 
 # conditional dependencies
@@ -54,8 +55,10 @@ XSLTSCRIPTS_LIST="mmd-xslt mmd2tex-xslt opml2html opml2mmd opml2tex"
 
 src_prepare()
 {
-	einfo "XSLT support requires patching of some scripts (they must know where the XSLT templates are)"
-	use xslt && epatch "${FILESDIR}/${PN}-gentoo-xslt.patch" || die "Patching of XSLT scripts for ${PN} failed!"
+	if [ use xslt ]; then
+		einfo "XSLT support requires patching of some scripts (they must know where the XSLT templates are)"
+		epatch "${FILESDIR}/${PN}-gentoo-xslt.patch" || die "Patching of XSLT scripts for ${PN} failed!"
+	fi
 }
 
 src_test()
@@ -133,9 +136,9 @@ src_install()
 pkg_postinst()
 {
 	einfo "The ${PN} was successfully installed. Type \"${PN} -h\" or \"${PN} file.txt\" to start using it."
-	euse shortcuts && einfo "The following additional shortcuts were also installed: ${SHORTCUTS_LIST}."
-	euse perl-converions && einfo "The following additional conversion shortcuts were also installed: ${PERLSCRIPTS_LIST}."
-	euse shortcuts && einfo "The following additional XSLT conversion shortcuts were also installed: ${XSLTSCRIPTS_LIST}."
+	use shortcuts && einfo "The following additional shortcuts were also installed: ${SHORTCUTS_LIST}."
+	use perl-conversions && einfo "The following additional conversion shortcuts were also installed: ${PERLSCRIPTS_LIST}."
+	use shortcuts && einfo "The following additional XSLT conversion shortcuts were also installed: ${XSLTSCRIPTS_LIST}."
 	ewarn "This ebuild is in alpha state!"
 	ewarn "Use it at your own risk ..."
 	elog "May the moon shine upon you ..."
