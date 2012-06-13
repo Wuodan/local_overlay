@@ -2,7 +2,8 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-EAPI=0
+# EAPI 2 needed to run src_prepare
+EAPI=2
 
 # project is hosted on github.com, so git-2 is needed (git is deprecated)
 inherit git-2
@@ -29,7 +30,7 @@ DEPEND="${DEPEND}
 	test? ( dev-lang/perl app-text/htmltidy )"
 RDEPEND="${RDEPEND}
 	perl-conversions? ( dev-lang/perl )
-	xslt? ( dev-lang/perl dev-libs/libxslt )"
+	xslt? ( dev-libs/libxslt )"
 # post depend for plugins
 # no idea why peg-multimarkdown-latex-support is is not included as git sub-module, but it requires a separate git clone thus a separate pkg
 PDEPEND="${PDEPEND}
@@ -40,10 +41,36 @@ if use test || use xslt || use perl-conversions ; then
 fi
 
 # custom variables
-DESTINATION_DIR="usr/bin"
+DEST_DIR_EXE="/usr/bin"
+DEST_DIR_XSLT_TEMPL="/usr/share/${PN}"
 SHORTCUTS_LIST="mmd mmd2tex mmd2opml mmd2odf"	# mmd2all  mmd2pdf are excluded
 PERLSCRIPTS_LIST="mmd2RTF.pl mmd2XHTML.pl mmd2LaTeX.pl mmd2OPML.pl mmd2ODF.pl table_cleanup.pl mmd_merge.pl"
+# XSLTSCRIPTS_LIST="mmd-xslt mmd2tex-xslt opml2html opml2mmd opml2tex"
+XSLTSCRIPTS_LIST="" # list will be filled later
+# prep_tufte.sh is not included, it would require perl and seems old
 
+src_prepare()
+{
+	# xslt support requires patching of some scripts
+	# they must know where the xslt templates are
+	if use xslt ; then
+		einfo "Searching for xslt scripts ..."
+		# XSLTSCRIPTS_LIST=`grep -l -e 'xslt_path=\`dirname "$0"\`' # ${WORKDIR}/${P}/Support/bin/*`
+		# search for 'xslt_path=`dirname "$0"` (escaped string below)
+		XSLTSCRIPTS_LIST=`grep -l -e '^xslt_path=\`dirname "$0"\`$' Support/bin/*`
+		# check list
+		echo "${XSLTSCRIPTS_LIST}"
+		[ "$XSLTSCRIPTS_LIST" != "" ] || die "XSLT scripts not found in ${WORKDIR}/${P}/Support/bin/"
+		# replace path
+		for file in ${XSLTSCRIPTS_LIST}; do
+			# simple sed is enough here, replace:
+			# xslt_path=`dirname "$0"` ==> # xslt_path='${DEST_DIR_XSLT_TEMPL}'
+			sed 's/^xslt_path=`dirname "$0"`$/xslt_path=\'${DEST_DIR_XSLT_TEMPL}\'/g' ${file} \
+				|| die "Patching the following script failed: ${file}"
+		done
+		die "todo"
+	fi
+}
 
 src_test()
 {
@@ -68,17 +95,17 @@ src_test()
 src_install()
 {
 	# install main binary
-	insinto ${DESTINATION_DIR}
-	einfo "Installing multimarkdown to ${ROOT}${DESTINATION_DIR}/multimarkdown ..."
+	insinto ${DEST_DIR_EXE}
+	einfo "Installing multimarkdown to ${DEST_DIR_EXE}/multimarkdown ..."
 	dobin multimarkdown || die "Install failed"
 
 	# USE flag based installation
 	# install shortcuts
 	if use shortcuts ; then
 		einfo "Installing shortcuts for ${PN}"
-		exeinto ${DESTINATION_DIR}
+		exeinto ${DEST_DIR_EXE}
 		for file in ${SHORTCUTS_LIST}; do
-			einfo "Installing ${file} to ${ROOT}${DESTINATION_DIR}/${file} ..."
+			einfo "Installing ${file} to ${DEST_DIR_EXE}/${file} ..."
 			doexe scripts/${file} || ewarn "Installation of script ${file} failed!"
 		done
 		einfo "Done installing shortcuts for ${PN}"
@@ -87,10 +114,10 @@ src_install()
 	# install perl-conversion scripts
 	if use perl-conversions ; then
 		einfo "Installing perl-conversion scripts for ${PN}"
-		exeinto ${DESTINATION_DIR}
+		exeinto ${DEST_DIR_EXE}
 		for file in ${PERLSCRIPTS_LIST}; do
 			local file_path=`find Support/ -name '${file}'`
-			einfo "Installing ${file} to ${ROOT}${DESTINATION_DIR}/${file} ..."
+			einfo "Installing ${file} to ${DEST_DIR_EXE}/${file} ..."
 			doexe ${file_path} || die "Installation of script ${file} failed!"
 		done
 		einfo "Done installing perl-conversion scripts for ${PN}"
@@ -98,7 +125,22 @@ src_install()
 	
 	# install latex support
 	# nothing to do, it's all in the plugin pkg
-}
+	
+	# install xslt support
+	if use xslt ; then
+		einfo "Installing XSLT templates for ${PN} to ${DEST_DIR_XSLT_TEMPL}"
+		insinto ${DEST_DIR_XSLT_TEMPL}
+		doins Support/XSLT/* || die "Installation of XSLT templates failed!"
+		einfo "Installing XSLT scripts for ${PN}"
+		exeinto ${DEST_DIR_EXE}
+		for file in ${PERLSCRIPTS_LIST}; do
+			local file_path=`find Support/ -name '${file}'`
+			einfo "Installing ${file} to ${DEST_DIR_EXE}/${file} ..."
+			doexe ${file_path} || die "Installation of script ${file} failed!"
+		done
+		einfo "Done installing perl-conversion scripts for ${PN}"
+	fi
+	}
 
 pkg_postinst()
 {
@@ -112,29 +154,29 @@ pkg_config()
 	# these messages seem not to go to normal log, einfo does the same, does it?
 	elog "Starting configuration of ${PN}"
 	# check if binary executable was installed
-	if [ ! -x "${ROOT}${DESTINATION_DIR}/multimarkdown" ]; then
+	if [ ! -x "${ROOT}${DEST_DIR_EXE}/multimarkdown" ]; then
 		ewarn "Installation of ${PN} failed"
-		ewarn "Missing executable in ${ROOT}${DESTINATION_DIR}/multimarkdown"
+		ewarn "Missing executable in ${ROOT}${DEST_DIR_EXE}/multimarkdown"
 		die "Previus installation of ${PN} failed"
 	else
-		einfo "multimarkdown binary installed in ${ROOT}${DESTINATION_DIR}/multimarkdown, displaying version"
+		einfo "multimarkdown binary installed in ${ROOT}${DEST_DIR_EXE}/multimarkdown, displaying version"
 		einfo "*** version start"
-		einfo `${ROOT}${DESTINATION_DIR}/multimarkdown -v`
+		einfo `${ROOT}${DEST_DIR_EXE}/multimarkdown -v`
 		einfo "*** version end"
 	fi
 	# check for the extra scripts
 	einfo "${PN} comes with some extra scripts. They are not necessary for the programm itself, but serve as shortcuts, see http://fletcherpenney.net/multimarkdown/use/"
 	einfo "You will now be asked if you want to keep these scripts or not:"
 	for file in mmd mmd2tex mmd2opml mmd2odf; do
-		if [ ! -x "${ROOT}${DESTINATION_DIR}/${file}" ]; then
-			elog "${file} not found in ${ROOT}${DESTINATION_DIR}/${file}, it was previously removed."
+		if [ ! -x "${ROOT}${DEST_DIR_EXE}/${file}" ]; then
+			elog "${file} not found in ${ROOT}${DEST_DIR_EXE}/${file}, it was previously removed."
 		else
 			# this seems to be bash4 syntax
-			elog "${file} found in ${ROOT}${DESTINATION_DIR}/${file}."
-			read -e -p "Do you want to keep the script at ${ROOT}${DESTINATION_DIR}/${file} [Y/n]?" -i "Y" keep_script
+			elog "${file} found in ${ROOT}${DEST_DIR_EXE}/${file}."
+			read -e -p "Do you want to keep the script at ${ROOT}${DEST_DIR_EXE}/${file} [Y/n]?" -i "Y" keep_script
 			if [ "${keep_script}" == "n" ]; then
-				rm ${ROOT}${DESTINATION_DIR}/${file}
-				elog "Removed script at ${ROOT}${DESTINATION_DIR}/${file}"
+				rm ${ROOT}${DEST_DIR_EXE}/${file}
+				elog "Removed script at ${ROOT}${DEST_DIR_EXE}/${file}"
 			fi
 		fi
 	done
@@ -143,5 +185,5 @@ pkg_config()
 
 pkg_info()
 {
-	${ROOT}${DESTINATION_DIR}/multimarkdown -v
+	${ROOT}${DEST_DIR_EXE}/multimarkdown -v
 }

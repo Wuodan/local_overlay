@@ -25,7 +25,7 @@
 			Adds optional default template files that can be used to create certain types of documents using LaTeX (typesetting package).
 		</flag>
 		<flag name="xslt">
-			Adds optional support for XSLT and utility scripts for that. Requires <pkg>dev-lang/perl</pkg> and <pkg>dev-libs/libxslt</pkg>.
+			Adds optional support for XSLT including utility scripts. Requires <pkg>dev-libs/libxslt</pkg>.
 		</flag>
 	</use>
 </pkgmetadata>
