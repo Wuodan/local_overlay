@@ -22,16 +22,19 @@ IUSE="shortcuts perl-conversions latex xslt test"
 # basic depenedencies
 DEPEND=""
 RDEPEND="${DEPEND}"
-PDEPEND="${DEPEND}"
+PDEPEND="${RDEPEND}"
 
 # conditional dependencies
 DEPEND="${DEPEND}
 	test? ( dev-lang/perl app-text/htmltidy )"
 RDEPEND="${RDEPEND}
 	perl-conversions? ( dev-lang/perl )
-	latex? ( dev-lang/perl virtual/latex-base )
 	xslt? ( dev-lang/perl dev-libs/libxslt )"
-if use test || use latex || use xslt || use perl-conversions ; then
+# post depend for plugins
+# no idea why peg-multimarkdown-latex-support is is not included as git sub-module, but it requires a separate git clone thus a separate pkg
+PDEPEND="${PDEPEND}
+	latex? ( dev-lang/peg-multimarkdown-latex-support )"
+if use test || use xslt || use perl-conversions ; then
 	# we also need the sub-modules, this triggers them in git-2.eclass
 	EGIT_HAS_SUBMODULES="Y"
 fi
@@ -45,7 +48,7 @@ PERLSCRIPTS_LIST="mmd2RTF.pl mmd2XHTML.pl mmd2LaTeX.pl mmd2OPML.pl mmd2ODF.pl ta
 src_test()
 {
 	einfo "Now running tests for package ${PN}"
-	einfo "It is considered \"normal\" for some tests to fails, but at least one should pass ..."
+	einfo "It is considered \"normal\" for some tests to fail, but at least one should pass ..."
 	# the Makefile does not have a check-target, but let's leave it in here
 	for test_phase in check test mmd-test compat-test latex-test ; do
 		# only run the latex test with latex use flag
@@ -94,18 +97,7 @@ src_install()
 	fi
 	
 	# install latex support
-	if use latex ; then
-		einfo "Installing latex support for ${PN}"
-		local latex_folder="/usr/share/texmf/tex/latex"
-		# find latex folder or fail
-		[ -d ${latex_folder} ] || die "LaTex support for ${PN} cannot be installed. Missing LaTex folder in ${latex_folder}"
-		exeinto ${DESTINATION_DIR}
-		einfo "Installing all scripts from the Support/Utilities to ${ROOT}${DESTINATION_DIR}/${file} ..."
-		doexe Support/Utilities/* || die "Installation of LaTex support utitity-scripts ${file} failed!"
-		einfo "Installing all scripts from the Support/bind to ${ROOT}${DESTINATION_DIR}/${file} ..."
-		doexe Support/bin/* || die "Installation of LaTex support utitity(-bin)-scripts ${file} failed!"
-		einfo "Done installing latex support for ${PN}"
-	fi
+	# nothing to do, it's all in the plugin pkg
 }
 
 pkg_postinst()

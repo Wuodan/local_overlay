@@ -7,10 +7,25 @@
 		<name>Stefan Kuhn</name>
 	</maintainer>
 	<longdescription lang="en">
-		peg-multimarkdown is a program to convert plain text into HTML or LaTeX. This project includes some default template files that can be used to create certain types of documents using LaTeX.
-		
-		You are not limited to using these classes or templates. You can create your own template files, or just embed your LaTeX commands within comments in your MultiMarkdown document itself. If you find yourself creating similar documents over and over again, however, you may be better off creating a few templates you can simply call with the LaTeX Input metadata fields in MultiMarkdown.
-		
-		These files were designed to handle some of the common metadata fields in a consistent way, an to implement some defaults that should prevent errors if you leave out important metadata (substituting Title, Author, etc).
+		MultiMarkdown, or MMD, is a tool to help turn minimally marked-up plain text into well formatted documents, including HTML, PDF (by way of LaTeX), OPML, or OpenDocument (specifically, Flat OpenDocument or .fodt, which can in turn be converted into RTF, Microsoft Word, or virtually any other word-processing format).
+
+		MMD is a superset of the Markdown syntax, originally created by John Gruber. It adds multiple syntax features (tables, footnotes, and citations, to name a few), in addition to the various output formats listed above (Markdown only creates HTML). Additionally, it builds in ?smart? typography for various languages (proper left- and right-sided quotes, for example).
+
+		MultiMarkdown was originally a fork of the Markdown Perl code, but as of version 3.0 has been rewritten as a fork of peg-markdown by John MacFarlane, written in C. It can be compiled for any major operating system, and as a native binary runs much faster than the Perl version it replaces. Many thanks to John for creating a great program, and sharing the source with the github community.  MultiMarkdown 3.0 would not be possible without his efforts!
 	</longdescription>
+	<use>
+		<!-- flags test and latex are general use flags, we can use that description there -->
+		<flag name="shortcuts">
+			Adds a few utility scripts in the bin directory.
+		</flag>
+		<flag name="perl-conversions">
+			Adds optional perl-scripts for conversions to other formats (RTF, XHTML, LaTex, OPML, ODF) and MMD convenience scripts. The latex flag is recommended for better LaTex support. Requires <pkg>dev-lang/perl</pkg>. ;-)
+		</flag>
+		<flag name="latex">
+			Adds optional default template files that can be used to create certain types of documents using LaTeX (typesetting package).
+		</flag>
+		<flag name="xslt">
+			Adds optional support for XSLT and utility scripts for that. Requires <pkg>dev-lang/perl</pkg> and <pkg>dev-libs/libxslt</pkg>.
+		</flag>
+	</use>
 </pkgmetadata>

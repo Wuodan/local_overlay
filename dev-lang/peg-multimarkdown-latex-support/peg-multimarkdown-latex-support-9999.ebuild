@@ -18,7 +18,7 @@ KEYWORDS="~amd64"
 IUSE=""
 
 # basic depenedencies
-DEPEND=""
+DEPEND="virtual/latex-base"
 RDEPEND="${DEPEND} dev-lang/peg-multimarkdown"
 
 # custom variables
