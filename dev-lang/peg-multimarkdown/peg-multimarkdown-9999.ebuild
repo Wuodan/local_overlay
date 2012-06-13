@@ -13,7 +13,7 @@ HOMEPAGE="http://http://fletcherpenney.net/multimarkdown"
 EGIT_REPO_URI="git://github.com/fletcher/peg-multimarkdown.git"
 SRC_URI=""
 
-LICENSE="GPL-2"
+LICENSE="GPL-2 MIT"
 SLOT="0"
 KEYWORDS="~amd64"
 
@@ -22,7 +22,8 @@ IUSE="shortcuts perl-conversions latex xslt test"
 
 # basic depenedencies
 DEPEND=""
-RDEPEND="${DEPEND}"
+RDEPEND=">=dev-libs/glib-2
+	virtual/libintl"
 PDEPEND="${RDEPEND}"
 
 # conditional dependencies
@@ -46,7 +47,7 @@ DEST_DIR_XSLT_TEMPL="/usr/share/${PN}/XSLT/"
 # known file collision with sys-fs/mtools on file /usr/bin/mmd
 # this is not fatal, the script is only a simple shortcut, so we just skip the
 # file ... mmd2all  mmd2pdf are also excluded (todo re-test them)
-SHORTCUTS_LIST="mmd2tex mmd2opml mmd2odf"	
+SHORTCUTS_LIST="mmd2tex mmd2opml mmd2odf"
 PERLSCRIPTS_LIST="mmd2RTF.pl mmd2XHTML.pl mmd2LaTeX.pl mmd2OPML.pl mmd2ODF.pl table_cleanup.pl mmd_merge.pl"
 XSLTSCRIPTS_LIST="mmd-xslt mmd2tex-xslt opml2html opml2mmd opml2tex"
 # prep_tufte.sh is not included, it would require perl and seems old
@@ -131,43 +132,13 @@ src_install()
 
 pkg_postinst()
 {
+	einfo "The ${PN} was successfully installed. Type \"${PN} -h\" or \"${PN} file.txt\" to start using it."
+	euse shortcuts && einfo "The following additional shortcuts were also installed: ${SHORTCUTS_LIST}."
+	euse perl-converions && einfo "The following additional conversion shortcuts were also installed: ${PERLSCRIPTS_LIST}."
+	euse shortcuts && einfo "The following additional XSLT conversion shortcuts were also installed: ${XSLTSCRIPTS_LIST}."
 	ewarn "This ebuild is in alpha state!"
 	ewarn "Use it at your own risk ..."
 	elog "May the moon shine upon you ..."
-}
-
-pkg_config()
-{
-	# these messages seem not to go to normal log, einfo does the same, does it?
-	elog "Starting configuration of ${PN}"
-	# check if binary executable was installed
-	if [ ! -x "${ROOT}${DEST_DIR_EXE}/multimarkdown" ]; then
-		ewarn "Installation of ${PN} failed"
-		ewarn "Missing executable in ${ROOT}${DEST_DIR_EXE}/multimarkdown"
-		die "Previus installation of ${PN} failed"
-	else
-		einfo "multimarkdown binary installed in ${ROOT}${DEST_DIR_EXE}/multimarkdown, displaying version"
-		einfo "*** version start"
-		einfo `${ROOT}${DEST_DIR_EXE}/multimarkdown -v`
-		einfo "*** version end"
-	fi
-	# check for the extra scripts
-	einfo "${PN} comes with some extra scripts. They are not necessary for the programm itself, but serve as shortcuts, see http://fletcherpenney.net/multimarkdown/use/"
-	einfo "You will now be asked if you want to keep these scripts or not:"
-	for file in mmd mmd2tex mmd2opml mmd2odf; do
-		if [ ! -x "${ROOT}${DEST_DIR_EXE}/${file}" ]; then
-			elog "${file} not found in ${ROOT}${DEST_DIR_EXE}/${file}, it was previously removed."
-		else
-			# this seems to be bash4 syntax
-			elog "${file} found in ${ROOT}${DEST_DIR_EXE}/${file}."
-			read -e -p "Do you want to keep the script at ${ROOT}${DEST_DIR_EXE}/${file} [Y/n]?" -i "Y" keep_script
-			if [ "${keep_script}" == "n" ]; then
-				rm ${ROOT}${DEST_DIR_EXE}/${file}
-				elog "Removed script at ${ROOT}${DEST_DIR_EXE}/${file}"
-			fi
-		fi
-	done
-	elog "Ending configuration of ${PN}"
 }
 
 pkg_info()
