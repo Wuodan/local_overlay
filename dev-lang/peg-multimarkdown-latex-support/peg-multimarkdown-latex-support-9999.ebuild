@@ -19,7 +19,10 @@ IUSE=""
 
 # basic depenedencies
 DEPEND="virtual/latex-base"
-RDEPEND="${DEPEND} dev-lang/peg-multimarkdown"
+# RDEPEND="${DEPEND} dev-lang/peg-multimarkdown"
+
+# post-depend: if this is installed first, then peg-mmd can run some tests
+PDEPEND="${DEPEND} dev-lang/peg-multimarkdown"
 
 # custom variables
 LATEX_DIR="${ROOT}/usr/share/texmf/tex/latex"

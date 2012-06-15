@@ -25,18 +25,19 @@ DEPEND=""
 RDEPEND=""
 # RDEPEND=">=dev-libs/glib-2
 	# virtual/libintl"
-PDEPEND="${RDEPEND}"
+# PDEPEND="${RDEPEND}"
 
 # conditional dependencies
 DEPEND="${DEPEND}
 	test? ( dev-lang/perl app-text/htmltidy )"
 RDEPEND="${RDEPEND}
 	perl-conversions? ( dev-lang/perl )
-	xslt? ( dev-libs/libxslt )"
+	xslt? ( dev-libs/libxslt )
+	latex? ( dev-lang/peg-multimarkdown-latex-support )"
 # post depend for plugins
 # no idea why peg-multimarkdown-latex-support is is not included as git sub-module, but it requires a separate git clone thus a separate pkg
-PDEPEND="${PDEPEND}
-	latex? ( dev-lang/peg-multimarkdown-latex-support )"
+# PDEPEND="${PDEPEND}
+	# latex? ( dev-lang/peg-multimarkdown-latex-support )"
 if use test || use xslt || use perl-conversions ; then
 	# we also need the sub-modules, this triggers them in git-2.eclass
 	EGIT_HAS_SUBMODULES="Y"
