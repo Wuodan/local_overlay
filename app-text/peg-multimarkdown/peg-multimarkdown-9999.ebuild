@@ -16,7 +16,7 @@ SRC_URI=""
 EGIT_REPO_URI="git://github.com/fletcher/${PN}.git"
 EPATCH_SOURCE="${FILESDIR}"
 
-LICENSE="GPL-2 MIT"
+LICENSE="|| ( GPL-2 MIT )"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE="shortcuts perl-conversions latex xslt test"

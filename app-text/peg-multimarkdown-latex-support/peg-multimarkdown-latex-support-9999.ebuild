@@ -10,7 +10,7 @@ HOMEPAGE="http://http://fletcherpenney.net/multimarkdown"
 SRC_URI=""
 EGIT_REPO_URI="git://github.com/fletcher/${PN}.git"
 
-LICENSE="GPL-2"
+LICENSE="|| ( GPL-2 MIT )"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
