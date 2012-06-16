@@ -133,11 +133,14 @@ src_install()
 
 pkg_postinst()
 {
-	einfo "The ${PN} was successfully installed. Type \"${PN} -h\" or \"${PN} file.txt\" to start using it."
+	einfo "${PN} was successfully installed."
+	einfo ""
+	einfo "Type \"${PN} -h\" or \"${PN} file.txt\" to start using it."
 	use shortcuts && einfo "The following additional shortcuts were also installed: ${SHORTCUTS_LIST}."
 	use shortcuts && einfo "The shortcut \"mmd\" was not installed due to known file collision with sys-fs/mtools on file /usr/bin/mmd"
 	use perl-conversions && einfo "The following additional conversion shortcuts were also installed: ${PERLSCRIPTS_LIST}."
 	use xslt && einfo "The following additional XSLT conversion shortcuts were also installed: ${XSLTSCRIPTS_LIST}."
+	einfo ""
 }
 
 pkg_info()
