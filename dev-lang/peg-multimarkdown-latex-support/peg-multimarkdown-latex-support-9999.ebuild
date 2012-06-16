@@ -7,7 +7,7 @@ inherit git-2
 
 DESCRIPTION="Default templates to create certain types of LaTex documents with MultiMarkdown"
 HOMEPAGE="http://http://fletcherpenney.net/multimarkdown"
-EGIT_REPO_URI="git://github.com/fletcher/peg-multimarkdown-latex-support.git"
+EGIT_REPO_URI="git://github.com/fletcher/${PN}.git"
 SRC_URI=""
 
 LICENSE="GPL-2"
