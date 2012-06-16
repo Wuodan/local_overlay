@@ -7,19 +7,16 @@ inherit git-2
 
 DESCRIPTION="Default templates to create certain types of LaTex documents with MultiMarkdown"
 HOMEPAGE="http://http://fletcherpenney.net/multimarkdown"
-EGIT_REPO_URI="git://github.com/fletcher/${PN}.git"
 SRC_URI=""
+EGIT_REPO_URI="git://github.com/fletcher/${PN}.git"
 
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-
-# USE flags
 IUSE=""
 
 # basic depenedencies
 DEPEND="virtual/latex-base"
-
 # post-depend: if this is installed first, then peg-mmd can run some tests
 PDEPEND="${DEPEND} dev-lang/peg-multimarkdown"
 RDEPEND="${PDEPEND}"

@@ -10,14 +10,12 @@ inherit git-2 eutils
 
 DESCRIPTION="MMD is a superset of the Markdown syntax (more syntax features & output formats)"
 HOMEPAGE="http://http://fletcherpenney.net/multimarkdown"
-EGIT_REPO_URI="git://github.com/fletcher/${PN}.git"
 SRC_URI=""
+EGIT_REPO_URI="git://github.com/fletcher/${PN}.git"
 
 LICENSE="GPL-2 MIT"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-
-# USE flags
 IUSE="shortcuts perl-conversions latex xslt test"
 
 # basic depenedencies
