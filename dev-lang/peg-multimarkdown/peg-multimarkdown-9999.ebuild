@@ -11,7 +11,10 @@ inherit git-2 eutils
 DESCRIPTION="MMD is a superset of the Markdown syntax (more syntax features & output formats)"
 HOMEPAGE="http://http://fletcherpenney.net/multimarkdown"
 SRC_URI=""
+
+# eclass variables
 EGIT_REPO_URI="git://github.com/fletcher/${PN}.git"
+EPATCH_SOURCE="${FILESDIR}"
 
 LICENSE="GPL-2 MIT"
 SLOT="0"
@@ -50,7 +53,7 @@ src_prepare()
 {
 	if use xslt; then
 		einfo "XSLT support requires patching of some scripts (they must know where the XSLT templates are)"
-		epatch "${FILESDIR}/${PN}-gentoo-xslt.patch" || die "Patching of XSLT scripts for ${PN} failed!"
+		epatch "${PN}-gentoo-xslt.patch" || die "Patching of XSLT scripts for ${PN} failed!"
 	fi
 	# rename a file to avoid an error when testing
 	if use test && [ -f "MarkdownTest/MultiMarkdownTests/BibTex.text" ]; then
