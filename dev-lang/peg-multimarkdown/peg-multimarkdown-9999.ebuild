@@ -23,9 +23,6 @@ IUSE="shortcuts perl-conversions latex xslt test"
 # basic depenedencies
 DEPEND=""
 RDEPEND=""
-# RDEPEND=">=dev-libs/glib-2
-	# virtual/libintl"
-# PDEPEND="${RDEPEND}"
 
 # conditional dependencies
 DEPEND="${DEPEND}
@@ -34,10 +31,7 @@ RDEPEND="${RDEPEND}
 	perl-conversions? ( dev-lang/perl )
 	xslt? ( dev-libs/libxslt )
 	latex? ( dev-lang/peg-multimarkdown-latex-support )"
-# post depend for plugins
-# no idea why peg-multimarkdown-latex-support is is not included as git sub-module, but it requires a separate git clone thus a separate pkg
-# PDEPEND="${PDEPEND}
-	# latex? ( dev-lang/peg-multimarkdown-latex-support )"
+# peg-multimarkdown-latex-support is is not included as git sub-module, it requires a separate git clone thus a separate pkg
 if use test || use xslt || use perl-conversions ; then
 	# we also need the sub-modules, this triggers them in git-2.eclass
 	EGIT_HAS_SUBMODULES="Y"
@@ -56,9 +50,14 @@ XSLTSCRIPTS_LIST="mmd-xslt mmd2tex-xslt opml2html opml2mmd opml2tex"
 
 src_prepare()
 {
-	if [ use xslt ]; then
+	if use xslt; then
 		einfo "XSLT support requires patching of some scripts (they must know where the XSLT templates are)"
 		epatch "${FILESDIR}/${PN}-gentoo-xslt.patch" || die "Patching of XSLT scripts for ${PN} failed!"
+	fi
+	# rename a file to avoid an error when testing
+	if use test && [ -f "MarkdownTest/MultiMarkdownTests/BibTex.text" ]; then
+		mv "MarkdownTest/MultiMarkdownTests/BibTex.text" "MarkdownTest/MultiMarkdownTests/BibTeX.text" || \
+			ewarn "Renaming of file BibTex.text to BibTeX.text failed"
 	fi
 }
 
@@ -95,7 +94,7 @@ src_install()
 		einfo "Installing shortcuts for ${PN}"
 		exeinto ${DEST_DIR_EXE}
 		for file in ${SHORTCUTS_LIST}; do
-			einfo "Installing ${file} to ${DEST_DIR_EXE}/${file} ..."
+			# einfo "Installing ${file} to ${DEST_DIR_EXE}/${file} ..."
 			doexe scripts/${file} || ewarn "Installation of script ${file} failed!"
 		done
 		einfo "Done installing shortcuts for ${PN}"
@@ -107,8 +106,7 @@ src_install()
 		exeinto ${DEST_DIR_EXE}
 		for file in ${PERLSCRIPTS_LIST}; do
 			local file_path=`find Support/ -name "${file}"`
-			echo $file_path
-			einfo "Installing ${file} to ${DEST_DIR_EXE}/${file} ..."
+			# einfo "Installing ${file} to ${DEST_DIR_EXE}/${file} ..."
 			doexe "${file_path}" || die "Installation of script ${file} failed!"
 		done
 		einfo "Done installing perl-conversion scripts for ${PN}"
@@ -125,9 +123,8 @@ src_install()
 		einfo "Installing XSLT scripts for ${PN}"
 		exeinto ${DEST_DIR_EXE}
 		for file in ${XSLTSCRIPTS_LIST}; do
-			echo $file
 			local file_path=`find Support/ -name "${file}"`
-			einfo "Installing ${file} to ${DEST_DIR_EXE}/${file} ..."
+			# einfo "Installing ${file} to ${DEST_DIR_EXE}/${file} ..."
 			doexe ${file_path} || die "Installation of script ${file} failed!"
 		done
 		einfo "Done installing perl-conversion scripts for ${PN}"
@@ -138,11 +135,9 @@ pkg_postinst()
 {
 	einfo "The ${PN} was successfully installed. Type \"${PN} -h\" or \"${PN} file.txt\" to start using it."
 	use shortcuts && einfo "The following additional shortcuts were also installed: ${SHORTCUTS_LIST}."
+	use shortcuts && einfo "The shortcut \"mmd\" was not installed due to known file collision with sys-fs/mtools on file /usr/bin/mmd"
 	use perl-conversions && einfo "The following additional conversion shortcuts were also installed: ${PERLSCRIPTS_LIST}."
-	use shortcuts && einfo "The following additional XSLT conversion shortcuts were also installed: ${XSLTSCRIPTS_LIST}."
-	ewarn "This ebuild is in alpha state!"
-	ewarn "Use it at your own risk ..."
-	elog "May the moon shine upon you ..."
+	use xslt && einfo "The following additional XSLT conversion shortcuts were also installed: ${XSLTSCRIPTS_LIST}."
 }
 
 pkg_info()
