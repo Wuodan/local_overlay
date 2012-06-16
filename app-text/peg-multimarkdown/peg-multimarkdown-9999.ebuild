@@ -11,7 +11,6 @@ HOMEPAGE="http://http://fletcherpenney.net/multimarkdown"
 SRC_URI=""
 
 EGIT_REPO_URI="git://github.com/fletcher/${PN}.git"
-EPATCH_SOURCE="${FILESDIR}"
 
 LICENSE="|| ( GPL-2 MIT )"
 SLOT="0"
@@ -27,7 +26,8 @@ RDEPEND="${RDEPEND}
 	perl-conversions? ( dev-lang/perl )
 	xslt? ( dev-libs/libxslt )
 	latex? ( ${CATEGORY}/${PN}-latex-support )"
-# peg-multimarkdown-latex-support is is not included as git sub-module, it requires a separate git clone thus a separate pkg
+# peg-multimarkdown-latex-support is is not included as git sub-module
+# it requires a separate git clone thus a separate pkg
 if use test || use xslt || use perl-conversions ; then
 	EGIT_HAS_SUBMODULES="Y"
 fi
@@ -46,8 +46,9 @@ XSLTSCRIPTS_LIST="mmd-xslt mmd2tex-xslt opml2html opml2mmd opml2tex"
 src_prepare()
 {
 	if use xslt; then
-		einfo "XSLT support requires patching of some scripts (they must know where the XSLT templates are)"
-		epatch "${PN}-gentoo-xslt.patch" || die "Patching of XSLT scripts for ${PN} failed!"
+		epatch "${FILESDIR}/${P}-cflags.patch" || die "Patching of XSLT scripts for ${PN} failed!"
+		einfo "XSLT support requires patching of some scripts (path to XSLT templates)"
+		epatch "${FILESDIR}/${P}-xslt.patch" || die "Patching of XSLT scripts for ${PN} failed!"
 	fi
 	# rename a file to avoid an error when testing
 	if use test && [ -f "MarkdownTest/MultiMarkdownTests/BibTex.text" ]; then
@@ -60,8 +61,7 @@ src_test()
 {
 	einfo "Now running tests for package ${PN}"
 	einfo "It is considered \"normal\" for some tests to fail, but at least one should pass ..."
-	# the Makefile does not have a check-target, but let's leave it in here
-	for test_phase in check test mmd-test compat-test latex-test ; do
+	for test_phase in test mmd-test compat-test latex-test ; do
 		# only run the latex test with latex use flag
 		if [ "$test_phase" != "latex-test" ] || use latex ; then
 			if emake -j1 $test_phase -n &> /dev/null; then
@@ -78,7 +78,6 @@ src_test()
 
 src_install()
 {
-	# install main binary
 	insinto ${DEST_DIR_EXE}
 	einfo "Installing multimarkdown binary to ${DEST_DIR_EXE}/multimarkdown ..."
 	dobin multimarkdown || die "Install failed"

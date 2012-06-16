@@ -1,0 +1,68 @@
+--- Makefile.orig	2012-05-05 17:08:42.000000000 +0200
++++ Makefile	2012-06-16 23:23:16.722411097 +0200
+@@ -18,26 +18,27 @@ else
+ 	FINALNOTES=Build complete.
+ endif
+ 
+-CFLAGS ?= -Wall -O3 -include GLibFacade.h -I ./ -D MD_USE_GET_OPT=1 
++OFLAGS = $(CFLAGS)
++LDFLAGS += -include GLibFacade.h -I ./ -D MD_USE_GET_OPT=1 
+ ifeq ($(UNAME), SunOS)
+ 	CC = gcc
+ 	# Use of <stdbool.h> is valid only in a c99 compilation environment
+-	CFLAGS += --std=c99
++	OFLAGS += --std=c99
+ else
+-	CFLAGS += -ansi
++	OFLAGS += -ansi
+ endif
+ 
+ # make ARCH=ppc
+ # build for ppc architecture - Only works on machines with PPC compilation support installed
+ # probably only Snow Leopard machines with Xcode 3 installed
+ ifeq ($(ARCH), ppc)
+-	CFLAGS += -arch ppc
++	OFLAGS += -arch ppc
+ endif
+ 
+ # make ARCH=i386
+ # build for i386 architecture - useful with older machines or those running 10.4?
+ ifeq ($(ARCH), i386)
+-	CFLAGS += -arch i386
++	OFLAGS += -arch i386
+ endif
+ 
+ OBJS=markdown_parser.o markdown_output.o markdown_lib.o GLibFacade.o
+@@ -57,10 +58,10 @@ $(LEG): $(PEGDIR)
+ 	CC=gcc $(MAKE) -C $(PEGDIR)
+ 
+ %.o : %.c markdown_peg.h
+-	$(CC) -c $(CFLAGS) -o $@ $<
++	$(CC) -c $(OFLAGS) -o $@ $<
+ 
+ $(PROGRAM) : markdown.c $(OBJS)
+-	$(CC) $(CFLAGS) -o $@ $(OBJS) $<
++	$(CC) $(OFLAGS) $(LDFLAGS) -o $@ $(OBJS) $<
+ 	@echo "$(FINALNOTES)"
+ 
+ markdown_parser.c : markdown_parser.leg $(LEG) markdown_peg.h parsing_functions.c utility_functions.c
+--- peg-0.1.4/Makefile.orig	2012-05-05 17:08:42.000000000 +0200
++++ peg-0.1.4/Makefile	2012-06-16 23:35:31.821380189 +0200
+@@ -1,6 +1,4 @@
+-CFLAGS = -g -Wall $(OFLAGS) $(XFLAGS)
+-OFLAGS = -O3 -DNDEBUG
+-#OFLAGS = -pg
++CFLAGS += -DNDEBUG
+ 
+ OBJS = tree.o compile.o
+ 
+--- peg-0.1.4/examples/Makefile	2012-05-05 17:08:42.000000000 +0200
++++ peg-0.1.4/examples/Makefile	2012-06-16 23:38:32.184372611 +0200
+@@ -1,6 +1,6 @@
+ EXAMPLES = test rule accept wc dc dcv calc basic
+ 
+-CFLAGS = -g -O3
++CFLAGS += -g
+ 
+ DIFF = diff
+ TEE = cat >
