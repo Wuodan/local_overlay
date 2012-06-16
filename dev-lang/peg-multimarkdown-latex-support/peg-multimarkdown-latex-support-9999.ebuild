@@ -22,6 +22,7 @@ DEPEND="virtual/latex-base"
 
 # post-depend: if this is installed first, then peg-mmd can run some tests
 PDEPEND="${DEPEND} dev-lang/peg-multimarkdown"
+RDEPEND="${PDEPEND}"
 
 # custom variables
 LATEX_DIR="${ROOT}/usr/share/texmf/tex/latex"

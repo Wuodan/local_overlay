@@ -72,8 +72,8 @@ src_test()
 			if emake -j1 $test_phase -n &> /dev/null; then
 				einfo ">>> Test phase 2 [${test_phase}]: ${CATEGORY}/${PF}"
 				if ! emake -j1 $test_phase; then
-					hasq test $FEATURES && die "Make ${test_phase} failed. See above for details."
-					hasq test $FEATURES || eerror "Make ${test_phase} failed. See above for details."
+					has test $FEATURES && die "Make ${test_phase} failed. See above for details."
+					has test $FEATURES || eerror "Make ${test_phase} failed. See above for details."
 				fi
 			fi
 		fi
@@ -99,7 +99,7 @@ src_install()
 		done
 		einfo "Done installing shortcuts for ${PN}"
 	fi
-	
+
 	# install perl-conversion scripts
 	if use perl-conversions ; then
 		einfo "Installing perl-conversion scripts for ${PN}"
@@ -111,10 +111,10 @@ src_install()
 		done
 		einfo "Done installing perl-conversion scripts for ${PN}"
 	fi
-	
+
 	# install latex support
 	# nothing to do, it's all in the plugin pkg
-	
+
 	# install xslt support
 	if use xslt ; then
 		einfo "Installing XSLT templates for ${PN} to ${DEST_DIR_XSLT_TEMPL}"
@@ -155,5 +155,5 @@ pkg_postinst()
 
 pkg_info()
 {
-	${ROOT}${DEST_DIR_EXE}/multimarkdown -v
+	einfo "{ROOT}${DEST_DIR_EXE}/multimarkdown -v"
 }
