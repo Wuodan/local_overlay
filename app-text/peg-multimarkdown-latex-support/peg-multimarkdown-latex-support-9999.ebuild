@@ -18,7 +18,7 @@ IUSE=""
 # basic depenedencies
 DEPEND="virtual/latex-base"
 # post-depend: if this is installed first, then peg-mmd can run some tests
-PDEPEND="${DEPEND} dev-lang/peg-multimarkdown"
+PDEPEND="${DEPEND} ${CATEGORY}/peg-multimarkdown"
 RDEPEND="${PDEPEND}"
 
 # custom variables

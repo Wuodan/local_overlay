@@ -31,7 +31,7 @@ DEPEND="${DEPEND}
 RDEPEND="${RDEPEND}
 	perl-conversions? ( dev-lang/perl )
 	xslt? ( dev-libs/libxslt )
-	latex? ( dev-lang/peg-multimarkdown-latex-support )"
+	latex? ( ${CATEGORY}/${PN}-latex-support )"
 # peg-multimarkdown-latex-support is is not included as git sub-module, it requires a separate git clone thus a separate pkg
 if use test || use xslt || use perl-conversions ; then
 	# we also need the sub-modules, this triggers them in git-2.eclass
