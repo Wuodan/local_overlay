@@ -2,17 +2,14 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-# EAPI 2 needed to run src_prepare
 EAPI=2
 
-# project is hosted on github.com, so git-2 is needed (git is deprecated)
 inherit git-2 eutils
 
 DESCRIPTION="MMD is a superset of the Markdown syntax (more syntax features & output formats)"
 HOMEPAGE="http://http://fletcherpenney.net/multimarkdown"
 SRC_URI=""
 
-# eclass variables
 EGIT_REPO_URI="git://github.com/fletcher/${PN}.git"
 EPATCH_SOURCE="${FILESDIR}"
 
@@ -21,11 +18,9 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE="shortcuts perl-conversions latex xslt test"
 
-# basic depenedencies
 DEPEND=""
 RDEPEND=""
 
-# conditional dependencies
 DEPEND="${DEPEND}
 	test? ( dev-lang/perl app-text/htmltidy )"
 RDEPEND="${RDEPEND}
@@ -34,7 +29,6 @@ RDEPEND="${RDEPEND}
 	latex? ( ${CATEGORY}/${PN}-latex-support )"
 # peg-multimarkdown-latex-support is is not included as git sub-module, it requires a separate git clone thus a separate pkg
 if use test || use xslt || use perl-conversions ; then
-	# we also need the sub-modules, this triggers them in git-2.eclass
 	EGIT_HAS_SUBMODULES="Y"
 fi
 
@@ -57,8 +51,8 @@ src_prepare()
 	fi
 	# rename a file to avoid an error when testing
 	if use test && [ -f "MarkdownTest/MultiMarkdownTests/BibTex.text" ]; then
-		mv "MarkdownTest/MultiMarkdownTests/BibTex.text" "MarkdownTest/MultiMarkdownTests/BibTeX.text" || \
-			ewarn "Renaming of file BibTex.text to BibTeX.text failed"
+		einfo "Renaming file BibTex.text to BibTeX.text ..."
+		mv "MarkdownTest/MultiMarkdownTests/BibTex.text" "MarkdownTest/MultiMarkdownTests/BibTeX.text"
 	fi
 }
 
@@ -98,7 +92,6 @@ src_install()
 			# einfo "Installing ${file} to ${DEST_DIR_EXE}/${file} ..."
 			doexe scripts/${file} || ewarn "Installation of script ${file} failed!"
 		done
-		einfo "Done installing shortcuts for ${PN}"
 	fi
 
 	# install perl-conversion scripts
@@ -110,7 +103,6 @@ src_install()
 			# einfo "Installing ${file} to ${DEST_DIR_EXE}/${file} ..."
 			doexe "${file_path}" || die "Installation of script ${file} failed!"
 		done
-		einfo "Done installing perl-conversion scripts for ${PN}"
 	fi
 
 	# install latex support
@@ -128,30 +120,29 @@ src_install()
 			# einfo "Installing ${file} to ${DEST_DIR_EXE}/${file} ..."
 			doexe ${file_path} || die "Installation of script ${file} failed!"
 		done
-		einfo "Done installing perl-conversion scripts for ${PN}"
 	fi
 }
 
 pkg_postinst()
 {
-	einfo ""
-	einfo "*** ${PN} was successfully installed. ***"
-	einfo "Type \"${PN} -h\" or \"${PN} file.txt\" to start using it."
+	elog ""
+	elog "*** ${PN} was successfully installed. ***"
+	elog "Type \"${PN} -h\" or \"${PN} file.txt\" to start using it."
 	if use shortcuts; then
-		einfo "The following additional shortcuts were also installed:"
-		einfo "${SHORTCUTS_LIST}."
-		einfo "The shortcut \"mmd\" was not installed due to known file"
-		einfo "collision with sys-fs/mtools on file /usr/bin/mmd"
+		elog "The following additional shortcuts were also installed:"
+		elog "${SHORTCUTS_LIST}."
+		elog "The shortcut \"mmd\" was not installed due to known file"
+		elog "collision with sys-fs/mtools on file /usr/bin/mmd"
 	fi
 	if use perl-conversions; then
-		einfo "The following additional conversion shortcuts were also installed:"
-		einfo "${PERLSCRIPTS_LIST}"
+		elog "The following additional conversion shortcuts were also installed:"
+		elog "${PERLSCRIPTS_LIST}"
 	fi
 	if use xslt; then
-		einfo "The following additional XSLT conversion shortcuts were also installed:"
-		einfo "${XSLTSCRIPTS_LIST}."
+		elog "The following additional XSLT conversion shortcuts were also installed:"
+		elog "${XSLTSCRIPTS_LIST}."
 	fi
-	einfo ""
+	elog ""
 }
 
 pkg_info()
