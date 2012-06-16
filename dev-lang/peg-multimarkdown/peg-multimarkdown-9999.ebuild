@@ -15,7 +15,7 @@ SRC_URI=""
 
 LICENSE="GPL-2 MIT"
 SLOT="0"
-KEYWORDS="~amd64"
+KEYWORDS="~amd64 ~x86"
 
 # USE flags
 IUSE="shortcuts perl-conversions latex xslt test"
