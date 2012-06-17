@@ -46,18 +46,19 @@
  	@echo "$(FINALNOTES)"
  
  markdown_parser.c : markdown_parser.leg $(LEG) markdown_peg.h parsing_functions.c utility_functions.c
---- peg-0.1.4/Makefile.orig	2012-05-05 17:08:42.000000000 +0200
-+++ peg-0.1.4/Makefile	2012-06-16 23:35:31.821380189 +0200
-@@ -1,6 +1,4 @@
+--- peg-0.1.4/Makefile	2012-05-05 17:08:42.000000000 +0200
++++ peg-0.1.4/Makefile	2012-06-17 01:16:28.569125479 +0200
+@@ -1,5 +1,6 @@
 -CFLAGS = -g -Wall $(OFLAGS) $(XFLAGS)
 -OFLAGS = -O3 -DNDEBUG
--#OFLAGS = -pg
++#CFLAGS = -g -Wall $(OFLAGS) $(XFLAGS)
++#OFLAGS = -O3 -DNDEBUG
 +CFLAGS += -DNDEBUG
+ #OFLAGS = -pg
  
  OBJS = tree.o compile.o
- 
 --- peg-0.1.4/examples/Makefile	2012-05-05 17:08:42.000000000 +0200
-+++ peg-0.1.4/examples/Makefile	2012-06-16 23:38:32.184372611 +0200
++++ peg-0.1.4/examples/Makefile	2012-06-17 01:16:44.985124773 +0200
 @@ -1,6 +1,6 @@
  EXAMPLES = test rule accept wc dc dcv calc basic
  

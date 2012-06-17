@@ -31,9 +31,11 @@ DEST_DIR_XSLT_TEMPL="/usr/share/${PN}/XSLT/"
 SHORTCUTS_LIST="mmd2tex mmd2opml mmd2odf"
 
 src_prepare() {
+	# ./Makefile patches ./peg-0.1.4/Makefile
+	# this does not work if the Makefile was already patched
+	# so this step from Makefile is done here
 	epatch "${FILESDIR}/${P}-cflags.patch"
 }
-
 
 src_install()
 {
