@@ -34,6 +34,11 @@ src_prepare() {
 	# ./Makefile patches ./peg-0.1.4/Makefile
 	# this does not work if the Makefile was already patched
 	# so this step from Makefile is done here
+	# (easier then patching .patch file)
+	cp -r peg-0.1.4 peg
+	epatch -p1 peg-memory-fix.patch
+	epatch -p1 peg-exe-ext.patch
+	# now patch cflags
 	epatch "${FILESDIR}/${P}-cflags.patch"
 }
 
@@ -68,5 +73,5 @@ pkg_postinst()
 
 pkg_info()
 {
-	einfo "{ROOT}${DEST_DIR_EXE}/multimarkdown -v"
+	einfo "`${ROOT}${DEST_DIR_EXE}/multimarkdown -v`"
 }

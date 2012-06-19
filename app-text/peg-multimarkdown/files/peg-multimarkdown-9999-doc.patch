@@ -1,0 +1,30 @@
+--- Makefile	2012-06-19 18:36:29.122777560 +0200
++++ Makefile	2012-06-19 18:38:24.910775119 +0200
+@@ -178,19 +178,25 @@
+ 	/usr/local/bin/platypus -D -a 'MMD to OPML' -o 'Text Window' -p '/bin/sh' -V '3.0'  -I 'net.fletcherpenney.MMD2OPML' -X '*' -T '****|fold'  -N 'PATH=/usr/local/bin'  -c 'scripts/mmd2opml' 'drag/MMD2OPML.app'; \
+ 	/usr/local/bin/platypus -D -a 'MMD to ODF' -o 'Text Window' -p '/bin/sh' -V '3.0'  -I 'net.fletcherpenney.MMD2ODF' -X '*' -T '****|fold'  -N 'PATH=/usr/local/bin'  -c 'scripts/mmd2odf' 'drag/MMD2ODF.app'; 
+ 
+-# Create HTML and PDF (if latex installed) documentation
++# Create HTML documentation
+ docs: $(PROGRAM)
+ 	cd documentation; \
+ 	../Support/Utilities/mmd_merge.pl index.txt > manual.txt; \
+ 	mkdir -p ../manual; \
+ 	../multimarkdown manual.txt > ../manual/index.html; \
++	rm ../documentation/manual.t*;
++
++# Create PDF documentation (requires latex, etc.)
++docs-latex: $(PROGRAM)
++	cd documentation; \
++	../Support/Utilities/mmd_merge.pl index.txt > manual.txt; \
++	mkdir -p ../manual; \
+ 	../multimarkdown -b -t latex manual.txt; \
+ 	latexmk -pdf manual.tex; \
+ 	latexmk -c manual.tex; \
+ 	mv manual.pdf ../manual/mmd-manual.pdf; \
+ 	rm ../documentation/manual.t*;
+ 
+-
+ # For me to push updated documentation to my github site
+ docs-live: docs
+ 	cd manual; git add mmd-manual.pdf index.html; \

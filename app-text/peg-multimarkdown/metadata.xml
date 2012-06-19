@@ -14,17 +14,15 @@
 	</longdescription>
 	<use>
 		<!-- flags test and latex are general use flags, we can use that description there -->
-		<flag name="shortcuts">
-			Adds a few utility scripts in the bin directory.
-		</flag>
-		<flag name="perl-conversions">
-			Adds optional perl-scripts for conversions to other formats (RTF, XHTML, LaTex, OPML, ODF) and MMD convenience scripts. The latex flag is recommended for better LaTex support. Requires <pkg>dev-lang/perl</pkg>. ;-)
-		</flag>
-		<flag name="latex">
-			Adds optional default template files that can be used to create certain types of documents using LaTeX (typesetting package).
-		</flag>
-		<flag name="xslt">
-			Adds optional support for XSLT including utility scripts. Requires <pkg>dev-libs/libxslt</pkg>.
-		</flag>
+		<flag name="shortcuts">Adds a few utility scripts in the bin directory. </flag>
+		<!--
+			 TODO:
+			 Test if the latex flag should be recommended for better LaTex support with the perl-conversions flag.
+			 latex flag is necessary to make docs in peg-mmd, so the created latex fiels might relly on the latex templates ...
+		-->
+		<flag name="perl-conversions">Adds perl-scripts for conversions to other formats (XHTML, LaTex, OPML, ODF) and MMD convenience scripts.</flag>
+		<flag name="latex">Adds default template files that can be used to create certain types of documents using LaTeX (typesetting package).</flag>
+		<flag name="xslt">Adds support for XSLT including utility scripts.</flag>
+		<flag name="doc">Adds HTML documentation. If used with latex flag, it also creates a more convenient PDF documentation.</flag>
 	</use>
 </pkgmetadata>

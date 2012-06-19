@@ -2,8 +2,8 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-EAPI=0
-inherit git-2
+EAPI=2
+inherit latex-package git-2
 
 DESCRIPTION="Default templates to create certain types of LaTex documents with MultiMarkdown"
 HOMEPAGE="http://http://fletcherpenney.net/multimarkdown"
@@ -16,32 +16,22 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
 
-# basic depenedencies
-DEPEND="virtual/latex-base"
+# These are the dependencies to create the peg-multimarkdown docu.
+# More might be needed, please report is something is missing
+DEPEND="
+	virtual/latex-base
+	dev-texlive/texlive-latexextra
+	dev-tex/glossaries
+	dev-tex/xcolor
+"
 # post-depend: if this is installed first, then peg-mmd can run some tests
-PDEPEND="${DEPEND} ${CATEGORY}/peg-multimarkdown"
+# some files are also needed later to create docu
+PDEPEND="${DEPEND} ${CATEGORY}/peg-multimarkdown[latex]"
 RDEPEND="${PDEPEND}"
 
-# custom variables
-LATEX_DIR="${ROOT}/usr/share/texmf/tex/latex"
-DESTINATION_DIR="/usr/share/texmf/tex/latex/mmd"
-
-pkg_setup()
-{
-	# find latex folder or fail
-	[ -d "${LATEX_DIR}" ] || die "Package ${PN} cannot be installed. Missing LaTex folder in ${LATEX_DIR}"
-}
 src_install()
 {
 	# install latex support
-	insinto ${DESTINATION_DIR}
-	einfo "Installing default templates for LaTeX support to ${DESTINATION_DIR}/ ..."
-	doins ./* || die "Installation of ${PN} failed!"
-	einfo "Done installing latex templates by ${PN}"
-}
-
-pkg_info()
-{
-	einfo "Package ${PN} installed the following files to ${DESTINATION_DIR} :"
-	einfo `ls ${DESTINATION_DIR}`
+	insinto ${TEXMF}/tex/latex/${PN}
+	doins * || die "Installation of $PN failed"
 }

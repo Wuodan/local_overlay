@@ -43,7 +43,7 @@ src_prepare() {
 	# things with style ebuilds.
 	epatch "${FILESDIR}/gentoo_style_location-1.1.x.patch"
 	# Add thunar, chromium and epiphany support
-	epatch "${FILESDIR}/gentoo_tutorial_addon-0.2.patch"
+	epatch "${FILESDIR}/gentoo_tutorial_addon-0.3.patch"
 	eprefixify util/fluxbox-generate_menu.in
 
 	# Add in the Gentoo -r number to fluxbox -version output.

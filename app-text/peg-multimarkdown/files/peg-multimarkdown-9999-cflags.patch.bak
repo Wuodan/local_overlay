@@ -1,6 +1,6 @@
---- Makefile.orig	2012-01-23 22:07:40.000000000 +0100
-+++ Makefile	2012-04-21 16:33:29.194555178 +0200
-@@ -18,26 +18,27 @@
+--- Makefile.orig	2012-05-05 17:08:42.000000000 +0200
++++ Makefile	2012-06-16 23:23:16.722411097 +0200
+@@ -18,26 +18,27 @@ else
  	FINALNOTES=Build complete.
  endif
  
@@ -33,7 +33,7 @@
  endif
  
  OBJS=markdown_parser.o markdown_output.o markdown_lib.o GLibFacade.o
-@@ -53,10 +54,10 @@
+@@ -57,10 +58,10 @@ $(LEG): $(PEGDIR)
  	CC=gcc $(MAKE) -C $(PEGDIR)
  
  %.o : %.c markdown_peg.h
@@ -46,3 +46,24 @@
  	@echo "$(FINALNOTES)"
  
  markdown_parser.c : markdown_parser.leg $(LEG) markdown_peg.h parsing_functions.c utility_functions.c
+--- peg-0.1.4/Makefile	2012-05-05 17:08:42.000000000 +0200
++++ peg-0.1.4/Makefile	2012-06-17 01:16:28.569125479 +0200
+@@ -1,5 +1,6 @@
+-CFLAGS = -g -Wall $(OFLAGS) $(XFLAGS)
+-OFLAGS = -O3 -DNDEBUG
++#CFLAGS = -g -Wall $(OFLAGS) $(XFLAGS)
++#OFLAGS = -O3 -DNDEBUG
++CFLAGS += -DNDEBUG
+ #OFLAGS = -pg
+ 
+ OBJS = tree.o compile.o
+--- peg-0.1.4/examples/Makefile	2012-05-05 17:08:42.000000000 +0200
++++ peg-0.1.4/examples/Makefile	2012-06-17 01:16:44.985124773 +0200
+@@ -1,6 +1,6 @@
+ EXAMPLES = test rule accept wc dc dcv calc basic
+ 
+-CFLAGS = -g -O3
++CFLAGS += -g
+ 
+ DIFF = diff
+ TEE = cat >

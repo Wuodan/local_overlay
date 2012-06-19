@@ -1,0 +1,57 @@
+diff -urpN original/fluxbox-9999/util/fluxbox-generate_menu.in work/fluxbox-9999/util/fluxbox-generate_menu.in
+--- util/fluxbox-generate_menu.in	2012-06-19 02:13:06.451258883 +0200
++++ util/fluxbox-generate_menu.in	2012-06-19 02:18:32.077245183 +0200
+@@ -1494,7 +1494,7 @@ if find_it_options $MY_TERM; then
+ else
+     [ -n "$MY_TERM" ] && echo "Warning: you chose an invalid term." >&2
+     #The precise order is up for debate.
+-    for term in Eterm urxvt urxvtc aterm mrxvt rxvt wterm konsole gnome-terminal xterm; do
++    for term in Eterm urxvtc urxvt aterm mrxvt rxvt wterm konsole gnome-terminal xterm; do
+         if find_it_options $term; then
+             DEFAULT_TERM=$term
+             break
+@@ -1522,7 +1522,7 @@ if find_it_options $MY_BROWSER; then
+ else
+     [ -n "$MY_BROWSER" ] && echo "Warning: you chose an invalid browser." >&2
+     #The precise order is up for debate.
+-    for browser in firefox mozilla-firefox mozilla-firebird MozillaFirebird opera skipstone mozilla seamonkey galeon konqueror dillo netscape w3m amaya links lynx; do
++    for browser in firefox mozilla-firefox mozilla-firebird MozillaFirebird opera skipstone mozilla chromium epiphany seamonkey galeon konqueror dillo netscape w3m amaya links lynx; do
+         if find_it_options $browser; then
+             DEFAULT_BROWSER=$browser
+             break
+@@ -1581,7 +1581,7 @@ append "[exec] (${DEFAULT_TERMNAME}) {${
+ 
+ case "$DEFAULT_BROWSERNAME" in
+     links|w3m|lynx)  append "[exec] (${DEFAULT_BROWSERNAME}) {${DEFAULT_TERM} -e ${DEFAULT_BROWSER} ${HOMEPAGE}}" ;;
+-    firefox|firebird|mozilla|seamonkey|phoenix|galeon|dillo|netscape|amaya) append "[exec] (${DEFAULT_BROWSERNAME}) {${DEFAULT_BROWSER}}" ;;
++    chromium|epiphany|firefox|firebird|mozilla|seamonkey|phoenix|galeon|dillo|netscape|amaya) append "[exec] (${DEFAULT_BROWSERNAME}) {${DEFAULT_BROWSER}}" ;;
+     konqueror) append "[exec] (konqueror) {kfmclient openProfile webbrowsing}" ;;
+     opera) append "[exec] (opera) {env QT_XFT=true opera}" ;;
+     MozillaFirebird) append "[exec] (firebird) {MozillaFirebird}" ;;
+@@ -1600,7 +1600,7 @@ append_menu_end
+ 
+ append_submenu "${NETMENU}"
+     append_submenu "${BROWSERMENU}"
+-        normal_find firefox mozilla-firefox MozillaFirefox galeon mozilla seamonkey dillo netscape vncviewer
++        normal_find firefox mozilla-firefox MozillaFirefox galeon mozilla chromium epiphany seamonkey dillo netscape vncviewer
+         find_it links       append "[exec]   (links-graphic) {links -driver x ${HOMEPAGE}}"
+         find_it opera       append "[exec]   (opera) {env QT_XFT=true opera}"
+         find_it konqueror   append "[exec]   (konqueror) {kfmclient openProfile webbrowsing}"
+@@ -1660,7 +1660,7 @@ append_menu_end
+ 
+ append_submenu "${EDITORMENU}"
+     normal_find gvim bluefish nedit gedit xedit kword kwrite kate anjuta \
+-        wings xemacs emacs kvim cream evim scite Ted
++        wings xemacs emacs kvim cream evim scite Ted eclipse
+     cli_find nano vim vi zile jed joe
+     find_it     emacs  append "[exec]   (emacs-nw) {${DEFAULT_TERM} -e emacs -nw}"
+     find_it     xemacs append "[exec]   (xemacs-nw) {${DEFAULT_TERM} -e xemacs -nw}"
+@@ -1676,7 +1676,7 @@ append_menu_end
+ 
+ append_submenu "${FILEUTILSMENU}"
+     find_it     konqueror append "[exec] (konqueror) {kfmclient openProfile filemanagement}"
+-    normal_find gentoo krusader kcommander linuxcmd rox tuxcmd krename xfe xplore worker endeavour2 evidence
++    normal_find gentoo thunar krusader kcommander linuxcmd rox tuxcmd krename xfe xplore worker endeavour2 evidence
+     find_it     nautilus append "[exec] (nautilus) {nautilus --no-desktop --browser}"
+     cli_find mc
+ append_menu_end

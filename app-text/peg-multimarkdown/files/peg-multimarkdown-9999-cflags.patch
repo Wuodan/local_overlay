@@ -1,12 +1,12 @@
---- Makefile.orig	2012-05-05 17:08:42.000000000 +0200
-+++ Makefile	2012-06-16 23:23:16.722411097 +0200
+--- Makefile	2012-05-05 17:08:42.000000000 +0200
++++ Makefile	2012-06-17 16:59:29.289745982 +0200
 @@ -18,26 +18,27 @@ else
  	FINALNOTES=Build complete.
  endif
  
 -CFLAGS ?= -Wall -O3 -include GLibFacade.h -I ./ -D MD_USE_GET_OPT=1 
 +OFLAGS = $(CFLAGS)
-+LDFLAGS += -include GLibFacade.h -I ./ -D MD_USE_GET_OPT=1 
++LDFLAGS += -include GLibFacade.h -I ./ -D MD_USE_GET_OPT=1
  ifeq ($(UNAME), SunOS)
  	CC = gcc
  	# Use of <stdbool.h> is valid only in a c99 compilation environment
@@ -33,7 +33,18 @@
  endif
  
  OBJS=markdown_parser.o markdown_output.o markdown_lib.o GLibFacade.o
-@@ -57,10 +58,10 @@ $(LEG): $(PEGDIR)
+@@ -49,18 +50,18 @@ PKG_CONFIG = pkg-config
+ ALL : $(PROGRAM)
+ 
+ $(PEGDIR):
+-	cp -r $(PEGDIR_ORIG) $(PEGDIR) ; \
+-	patch -p1 < peg-memory-fix.patch ; \
+-	patch -p1 < peg-exe-ext.patch
++	# cp -r $(PEGDIR_ORIG) $(PEGDIR) ; \
++	# patch -p1 < peg-memory-fix.patch ; \
++	# patch -p1 < peg-exe-ext.patch
+ 
+ $(LEG): $(PEGDIR)
  	CC=gcc $(MAKE) -C $(PEGDIR)
  
  %.o : %.c markdown_peg.h
@@ -46,19 +57,43 @@
  	@echo "$(FINALNOTES)"
  
  markdown_parser.c : markdown_parser.leg $(LEG) markdown_peg.h parsing_functions.c utility_functions.c
---- peg-0.1.4/Makefile	2012-05-05 17:08:42.000000000 +0200
-+++ peg-0.1.4/Makefile	2012-06-17 01:16:28.569125479 +0200
+--- peg/Makefile	2012-06-17 17:07:40.089725367 +0200
++++ peg/Makefile	2012-06-17 17:00:54.691742397 +0200
 @@ -1,5 +1,6 @@
 -CFLAGS = -g -Wall $(OFLAGS) $(XFLAGS)
 -OFLAGS = -O3 -DNDEBUG
-+#CFLAGS = -g -Wall $(OFLAGS) $(XFLAGS)
-+#OFLAGS = -O3 -DNDEBUG
++# CFLAGS = -g -Wall $(OFLAGS) $(XFLAGS)
++# OFLAGS = -O3 -DNDEBUG
++CFLAGS += -DNDEBUG
+ #OFLAGS = -pg
+ 
+ OBJS = tree.o compile.o
+--- peg/examples/Makefile	2012-06-17 17:07:40.089725367 +0200
++++ peg/examples/Makefile	2012-06-17 17:02:10.977739219 +0200
+@@ -1,6 +1,6 @@
+ EXAMPLES = test rule accept wc dc dcv calc basic
+ 
+-CFLAGS = -g -O3
++CFLAGS += -g
+ 
+ DIFF = diff
+ TEE = cat >
+--- peg-0.1.4/Makefile	2012-06-17 17:07:40.093725369 +0200
++++ peg-0.1.4/Makefile	2012-06-17 17:01:27.767741069 +0200
+@@ -1,8 +1,9 @@
+ PEG = peg$(X)
+ LEG = leg$(X)
+ 
+-CFLAGS = -g -Wall $(OFLAGS) $(XFLAGS)
+-OFLAGS = -O3 -DNDEBUG
++# CFLAGS = -g -Wall $(OFLAGS) $(XFLAGS)
++# OFLAGS = -O3 -DNDEBUG
 +CFLAGS += -DNDEBUG
  #OFLAGS = -pg
  
  OBJS = tree.o compile.o
 --- peg-0.1.4/examples/Makefile	2012-05-05 17:08:42.000000000 +0200
-+++ peg-0.1.4/examples/Makefile	2012-06-17 01:16:44.985124773 +0200
++++ peg-0.1.4/examples/Makefile	2012-06-17 17:02:27.055738544 +0200
 @@ -1,6 +1,6 @@
  EXAMPLES = test rule accept wc dc dcv calc basic
  
