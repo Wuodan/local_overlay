@@ -17,10 +17,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE="shortcuts doc perl-conversions latex xslt test"
 
-DEPEND=""
-RDEPEND=""
-
-DEPEND="${DEPEND}
+DEPEND="
 	doc? (
 		dev-lang/perl
 		latex? (
@@ -31,7 +28,7 @@ DEPEND="${DEPEND}
 		dev-lang/perl
 		app-text/htmltidy
 	)"
-RDEPEND="${RDEPEND}
+RDEPEND="
 	perl-conversions? ( dev-lang/perl )
 	xslt? ( dev-libs/libxslt )
 	latex? ( ${CATEGORY}/${PN}-latex-support )

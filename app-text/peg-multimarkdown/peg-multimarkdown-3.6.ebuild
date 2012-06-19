@@ -16,15 +16,12 @@ KEYWORDS="~amd64 ~x86"
 IUSE="shortcuts latex"
 
 DEPEND=""
-RDEPEND=""
-
-DEPEND="${DEPEND}"
-RDEPEND="${RDEPEND}
-	latex? ( ${CATEGORY}/${PN}-latex-support )"
+RDEPEND="latex? ( ${CATEGORY}/${PN}-latex-support )"
 
 # custom variables
 DEST_DIR_EXE="/usr/bin"
 DEST_DIR_XSLT_TEMPL="/usr/share/${PN}/XSLT/"
+
 # known file collision with sys-fs/mtools on file /usr/bin/mmd
 # this is not fatal, the script is only a simple shortcut, so we just skip the
 # file ... mmd2all  mmd2pdf are also excluded (todo re-test them)
@@ -52,7 +49,8 @@ src_install()
 		einfo "Installing shortcuts for ${PN}"
 		exeinto ${DEST_DIR_EXE}
 		for file in ${SHORTCUTS_LIST}; do
-			doexe scripts/${file} || ewarn "Installation of script ${file} failed!"
+			# einfo "Installing ${file} to ${DEST_DIR_EXE}/${file} ..."
+			doexe scripts/${file} || die "Installation of script ${file} failed!"
 		done
 	fi
 }
