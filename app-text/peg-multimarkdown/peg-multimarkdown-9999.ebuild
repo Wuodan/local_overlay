@@ -174,7 +174,7 @@ pkg_postinst()
 {
 	elog ""
 	elog "*** ${PN} was successfully installed. ***"
-	elog "Type \"${PN} -h\" or \"${PN} file.txt\" to start using it."
+	elog "Type \"multimarkdown -h\" or \"multimarkdown file.txt\" to start using it."
 	if use shortcuts; then
 		elog "The following additional shortcuts were also installed:"
 		elog "${SHORTCUTS_LIST}."
