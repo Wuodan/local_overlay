@@ -27,7 +27,7 @@ DEPEND="
 # post-depend: if this is installed first, then peg-mmd can run some tests
 # some files are also needed later to create docu
 PDEPEND="${DEPEND} ${CATEGORY}/peg-multimarkdown[latex]"
-RDEPEND="${PDEPEND}"
+RDEPEND=""
 
 src_install()
 {
