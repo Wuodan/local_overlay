@@ -191,6 +191,14 @@ pkg_postinst()
 		elog "The following additional XSLT conversion shortcuts were also installed:"
 		elog "${XSLTSCRIPTS_LIST}."
 	fi
+	if use doc; then
+		elog "The html documentation was installed, normally it goes to:"
+		elog "/usr/share/doc/${PF}/html/"
+		if use latex; then
+			elog "The pdf documentation was also installed, normally it goes to:"
+			elog "/usr/share/doc/${PF}/"
+		fi
+	fi
 	elog ""
 }
 
