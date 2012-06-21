@@ -50,7 +50,10 @@ SHORTCUTS_LIST="mmd2tex mmd2opml mmd2odf"
 
 # mmd2RTF.pl : not included. RTF support is not official
 # and would use "Apples textutil package" ...
-PERLSCRIPTS_LIST="mmd2XHTML.pl mmd2LaTeX.pl mmd2OPML.pl mmd2ODF.pl table_cleanup.pl mmd_merge.pl"
+# MMD-Support/Utilities/{ table_cleanup.pl mmd_merge.pl}
+# also not added. Seem to be internal scripts, some tests for mmd_merge.pl
+# failed.
+PERLSCRIPTS_LIST="mmd2XHTML.pl mmd2LaTeX.pl mmd2OPML.pl mmd2ODF.pl"
 
 # prep_tufte.sh is not included, it would require perl and seems old
 XSLTSCRIPTS_LIST="mmd-xslt mmd2tex-xslt opml2html opml2mmd opml2tex"
