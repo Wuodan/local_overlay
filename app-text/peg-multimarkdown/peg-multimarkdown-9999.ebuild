@@ -107,7 +107,6 @@ src_test()
 				einfo ">>> Test phase 2 [${test_phase}]: ${CATEGORY}/${PF}"
 				if ! emake -j1 $test_phase; then
 					has test $FEATURES && die "Make ${test_phase} failed. See above for details."
-					has test $FEATURES || eerror "Make ${test_phase} failed. See above for details."
 				fi
 			fi
 		fi
