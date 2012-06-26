@@ -20,14 +20,15 @@ IUSE=""
 # More might be needed, please report is something is missing
 DEPEND="
 	virtual/latex-base
-	dev-texlive/texlive-latexextra
-	dev-tex/glossaries
-	dev-tex/xcolor
 "
 # post-depend: if this is installed first, then peg-mmd can run some tests
 # some files are also needed later to create docu
 PDEPEND="${DEPEND} ${CATEGORY}/peg-multimarkdown[latex]"
-RDEPEND="${PDEPEND}"
+RDEPEND="
+	dev-texlive/texlive-latexextra
+	dev-tex/glossaries
+	dev-tex/xcolor
+"
 
 src_install()
 {
