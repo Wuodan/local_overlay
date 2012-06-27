@@ -58,6 +58,14 @@ PERLSCRIPTS_LIST="mmd2XHTML.pl mmd2LaTeX.pl mmd2OPML.pl mmd2ODF.pl"
 # prep_tufte.sh is not included, it would require perl and seems old
 XSLTSCRIPTS_LIST="mmd-xslt mmd2tex-xslt opml2html opml2mmd opml2tex"
 
+pkg_setup()
+{
+	# detect FEATURES with "nodoc" as this will prevent doc from being installed
+	if use doc && has nodoc $FEATURES; then
+		die "FEATURES contains \"nodoc\" thus the \"doc\" flag cannot be used"
+	fi
+}
+
 src_prepare()
 {	# ./Makefile patches ./peg-0.1.4/Makefile
 	# this does not work if the Makefile was already patched
