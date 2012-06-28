@@ -7,8 +7,8 @@ EAPI=2
 inherit eutils vcs-snapshot
 
 DESCRIPTION="MMD is a superset of the Markdown syntax (more syntax features & output formats)"
-HOMEPAGE="http://http://fletcherpenney.net/multimarkdown"
-SRC_URI="https://github.com/fletcher/${PN}/tarball/${PV} -> ${P}.tar.gz"
+HOMEPAGE="http://fletcherpenney.net/multimarkdown"
+SRC_URI="http://github.com/fletcher/${PN}/tarball/${PV} -> ${P}.tar.gz"
 
 LICENSE="|| ( GPL-2 MIT )"
 SLOT="0"

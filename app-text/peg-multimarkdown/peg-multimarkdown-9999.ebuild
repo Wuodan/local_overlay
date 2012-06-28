@@ -7,7 +7,7 @@ EAPI=2
 inherit git-2 eutils
 
 DESCRIPTION="MMD is a superset of the Markdown syntax (more syntax features & output formats)"
-HOMEPAGE="http://http://fletcherpenney.net/multimarkdown"
+HOMEPAGE="http://fletcherpenney.net/multimarkdown"
 SRC_URI=""
 
 EGIT_REPO_URI="git://github.com/fletcher/${PN}.git"
