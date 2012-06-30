@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<herd>virtualization</herd>
+	<maintainer>
+		<email>cardoe@gentoo.org</email>
+		<name>Doug Goldstein</name>
+	</maintainer>
+	<use>
+		<flag name='debug-serial-port'>Send debugging information to serial port. Base port is 0x3f8.</flag>
+		<flag name='thread-optionroms'>Allow hardware init to run in parallel with optionrom execution. This can reduce boot time, but can cause some timing variations during option ROM code execution.  It is not known if all option ROMs will behave properly with this option.</flag>
+	</use>
+</pkgmetadata>
+
