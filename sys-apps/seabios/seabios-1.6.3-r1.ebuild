@@ -50,8 +50,6 @@ src_prepare() {
 
 src_configure() {
 	if use debug-serial-port || use thread-optionroms; then
-		# todo: get rid of the following error message when using multiple jobs
-		# jobserver unavailable: using -j1.  Add `+' to parent make rule.
 		emake defconfig || die "Creating default config for ${PN} failed"
 		use debug-serial-port && \
 			sed 's/^# CONFIG_DEBUG_SERIAL is not set$/CONFIG_DEBUG_SERIAL=y\nCONFIG_DEBUG_SERIAL_PORT=0x3f8/' \
