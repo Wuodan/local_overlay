@@ -1,18 +1,18 @@
 # Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/sys-devel/llvm/llvm-3.0-r2.ebuild,v 1.5 2012/06/04 20:23:35 mgorny Exp $
+# $Header: /var/cvsroot/gentoo-x86/sys-devel/llvm/llvm-3.1.ebuild,v 1.6 2012/06/14 16:22:07 voyageur Exp $
 
-EAPI="3"
+EAPI="4"
 PYTHON_DEPEND="2"
-inherit eutils flag-o-matic multilib toolchain-funcs python
+inherit eutils flag-o-matic multilib toolchain-funcs python pax-utils
 
 DESCRIPTION="Low Level Virtual Machine"
 HOMEPAGE="http://llvm.org/"
-SRC_URI="http://llvm.org/releases/${PV}/${P}.tar.gz"
+SRC_URI="http://llvm.org/releases/${PV}/${P}.src.tar.gz"
 
 LICENSE="UoI-NCSA"
 SLOT="0"
-KEYWORDS="~amd64 ~ppc ~x86 ~x86-fbsd ~amd64-linux ~x86-linux ~ppc-macos"
+KEYWORDS="~amd64"
 IUSE="debug gold +libffi multitarget ocaml test udis86 vim-syntax"
 
 DEPEND="dev-lang/perl
@@ -79,24 +79,25 @@ src_prepare() {
 		-e 's,^PROJ_etcdir.*,PROJ_etcdir := '"${EPREFIX}"'/etc/llvm,' \
 		-e 's,^PROJ_libdir.*,PROJ_libdir := $(PROJ_prefix)/'$(get_libdir)/${PN}, \
 		-i Makefile.config.in || die "Makefile.config sed failed"
-	sed -e 's,$ABS_RUN_DIR/lib,'"${EPREFIX}"/usr/$(get_libdir)/${PN}, \
-		-i tools/llvm-config/llvm-config.in.in || die "llvm-config sed failed"
+	sed -e "/ActiveLibDir = ActivePrefix/s/lib/$(get_libdir)\/${PN}/" \
+		-i tools/llvm-config/llvm-config.cpp || die "llvm-config sed failed"
 
 	einfo "Fixing rpath and CFLAGS"
 	sed -e 's,\$(RPATH) -Wl\,\$(\(ToolDir\|LibDir\)),$(RPATH) -Wl\,'"${EPREFIX}"/usr/$(get_libdir)/${PN}, \
 		-e '/OmitFramePointer/s/-fomit-frame-pointer//' \
 		-i Makefile.rules || die "rpath sed failed"
+	if use gold; then
+		sed -e 's,\$(SharedLibDir),'"${EPREFIX}"/usr/$(get_libdir)/${PN}, \
+			-i tools/gold/Makefile || die "gold rpath sed failed"
+	fi
 
 	# Specify python version
 	python_convert_shebangs -r 2 test/Scripts
 
 	epatch "${FILESDIR}"/${PN}-2.6-commandguide-nops.patch
 	epatch "${FILESDIR}"/${PN}-2.9-nodoctargz.patch
-	epatch "${FILESDIR}"/${P}-ocaml_install.patch
-	epatch "${FILESDIR}"/${P}-PPC_macro.patch
-	epatch "${FILESDIR}"/${P}-PPCCompilationCallbackC_static.patch
-	epatch "${FILESDIR}"/${P}-gold_LTO_link.patch
-	epatch "${FILESDIR}"/${P}-set_soname.patch
+	epatch "${FILESDIR}"/${PN}-3.0-PPC_macro.patch
+	epatch "${FILESDIR}"/${P}-ivybridge_support.patch
 
 	# User patches
 	epatch_user
@@ -136,15 +137,20 @@ src_configure() {
 		append-cppflags "$(pkg-config --cflags libffi)"
 	fi
 	CONF_FLAGS="${CONF_FLAGS} $(use_enable libffi)"
-	econf ${CONF_FLAGS} || die "econf failed"
+	econf ${CONF_FLAGS}
 }
 
 src_compile() {
-	emake VERBOSE=1 KEEP_SYMBOLS=1 REQUIRES_RTTI=1 || die "emake failed"
+	emake VERBOSE=1 KEEP_SYMBOLS=1 REQUIRES_RTTI=1
+
+	pax-mark m Release/bin/lli
+	if use test; then
+		pax-mark m unittests/ExecutionEngine/JIT/Release/JITTests
+	fi
 }
 
 src_install() {
-	emake KEEP_SYMBOLS=1 DESTDIR="${D}" install || die "install failed"
+	emake KEEP_SYMBOLS=1 DESTDIR="${D}" install
 
 	if use vim-syntax; then
 		insinto /usr/share/vim/vimfiles/syntax

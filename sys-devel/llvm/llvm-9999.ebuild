@@ -1,21 +1,23 @@
 # Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/sys-devel/llvm/llvm-3.1.ebuild,v 1.6 2012/06/14 16:22:07 voyageur Exp $
+# $Header: /var/cvsroot/gentoo-x86/sys-devel/llvm/llvm-9999.ebuild,v 1.33 2012/06/08 13:18:25 mgorny Exp $
 
 EAPI="4"
 PYTHON_DEPEND="2"
-inherit eutils flag-o-matic multilib toolchain-funcs python
+inherit subversion eutils flag-o-matic multilib toolchain-funcs python pax-utils
 
 DESCRIPTION="Low Level Virtual Machine"
 HOMEPAGE="http://llvm.org/"
-SRC_URI="http://llvm.org/releases/${PV}/${P}.src.tar.gz"
+SRC_URI=""
+ESVN_REPO_URI="http://llvm.org/svn/llvm-project/llvm/trunk"
 
 LICENSE="UoI-NCSA"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~ppc ~x86 ~amd64-fbsd ~x86-fbsd ~amd64-linux ~x86-linux ~ppc-macos ~x64-macos"
+KEYWORDS=""
 IUSE="debug gold +libffi multitarget ocaml test udis86 vim-syntax"
 
 DEPEND="dev-lang/perl
+	dev-python/docutils
 	>=sys-devel/make-3.79
 	>=sys-devel/flex-2.5.4
 	>=sys-devel/bison-1.875d
@@ -30,8 +32,6 @@ DEPEND="dev-lang/perl
 RDEPEND="dev-lang/perl
 	libffi? ( virtual/libffi )
 	vim-syntax? ( || ( app-editors/vim app-editors/gvim ) )"
-
-S=${WORKDIR}/${P}.src
 
 pkg_setup() {
 	# Required for test and build
@@ -94,10 +94,8 @@ src_prepare() {
 	# Specify python version
 	python_convert_shebangs -r 2 test/Scripts
 
-	epatch "${FILESDIR}"/${PN}-2.6-commandguide-nops.patch
-	epatch "${FILESDIR}"/${PN}-2.9-nodoctargz.patch
+	epatch "${FILESDIR}"/${PN}-3.2-nodoctargz.patch
 	epatch "${FILESDIR}"/${PN}-3.0-PPC_macro.patch
-	epatch "${FILESDIR}"/${P}-ivybridge_support.patch
 
 	# User patches
 	epatch_user
@@ -113,7 +111,7 @@ src_configure() {
 	if use multitarget; then
 		CONF_FLAGS="${CONF_FLAGS} --enable-targets=all"
 	else
-		CONF_FLAGS="${CONF_FLAGS} --enable-targets=host-only"
+		CONF_FLAGS="${CONF_FLAGS} --enable-targets=host,cpp"
 	fi
 
 	if use amd64; then
@@ -141,7 +139,22 @@ src_configure() {
 }
 
 src_compile() {
+	# generate the manpages
+#	cd docs/CommandGuide || die
+#	local infiles=( *.rst )
+#
+#	cat > Makefile <<EOF || die
+#%.1: %.rst
+#	rst2man.py \$< > \$@
+#EOF
+#	emake ${infiles[@]/.rst/.1}
+
 	emake VERBOSE=1 KEEP_SYMBOLS=1 REQUIRES_RTTI=1
+
+	pax-mark m Release/bin/lli
+	if use test; then
+		pax-mark m unittests/ExecutionEngine/JIT/Release/JITTests
+	fi
 }
 
 src_install() {
@@ -154,9 +167,11 @@ src_install() {
 
 	# Fix install_names on Darwin.  The build system is too complicated
 	# to just fix this, so we correct it post-install
-	local lib= f= odylib=
+	local lib= f= odylib= libpv=${PV}
 	if [[ ${CHOST} == *-darwin* ]] ; then
-		for lib in lib{EnhancedDisassembly,LLVM-${PV},LTO,profile_rt}.dylib {BugpointPasses,LLVMHello}.dylib ; do
+		eval $(grep PACKAGE_VERSION= configure)
+		[[ -n ${PACKAGE_VERSION} ]] && libpv=${PACKAGE_VERSION}
+		for lib in lib{EnhancedDisassembly,LLVM-${libpv},LTO,profile_rt}.dylib {BugpointPasses,LLVMHello}.dylib ; do
 			# libEnhancedDisassembly is Darwin10 only, so non-fatal
 			[[ -f ${ED}/usr/lib/${PN}/${lib} ]] || continue
 			ebegin "fixing install_name of $lib"
@@ -166,13 +181,15 @@ src_install() {
 			eend $?
 		done
 		for f in "${ED}"/usr/bin/* "${ED}"/usr/lib/${PN}/libLTO.dylib ; do
-			odylib=$(scanmacho -BF'%n#f' "${f}" | tr ',' '\n' | grep libLLVM-${PV}.dylib)
+			odylib=$(scanmacho -BF'%n#f' "${f}" | tr ',' '\n' | grep libLLVM-${libpv}.dylib)
 			ebegin "fixing install_name reference to ${odylib} of ${f##*/}"
 			install_name_tool \
 				-change "${odylib}" \
-					"${EPREFIX}"/usr/lib/${PN}/libLLVM-${PV}.dylib \
+					"${EPREFIX}"/usr/lib/${PN}/libLLVM-${libpv}.dylib \
 				"${f}"
 			eend $?
 		done
 	fi
+#
+#	doman docs/CommandGuide/*.1
 }

@@ -1,20 +1,19 @@
-# Copyright 1999-2011 Gentoo Foundation
+# Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/sys-devel/llvm/llvm-2.8-r2.ebuild,v 1.8 2011/11/24 08:56:51 grobian Exp $
+# $Header: /var/cvsroot/gentoo-x86/sys-devel/llvm/llvm-3.0-r2.ebuild,v 1.5 2012/06/04 20:23:35 mgorny Exp $
 
 EAPI="3"
-inherit eutils multilib pax-utils toolchain-funcs
+PYTHON_DEPEND="2"
+inherit eutils flag-o-matic multilib toolchain-funcs python pax-utils
 
 DESCRIPTION="Low Level Virtual Machine"
 HOMEPAGE="http://llvm.org/"
-# Upstream silently re-released the tarball...
-# drop the -> in 2.9
-SRC_URI="http://llvm.org/releases/${PV}/${P}.tgz -> ${P}-r1.tgz"
+SRC_URI="http://llvm.org/releases/${PV}/${P}.tar.gz"
 
 LICENSE="UoI-NCSA"
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE="debug +libffi llvm-gcc multitarget ocaml test udis86"
+IUSE="debug gold +libffi multitarget ocaml test udis86 vim-syntax"
 
 DEPEND="dev-lang/perl
 	>=sys-devel/make-3.79
@@ -22,15 +21,23 @@ DEPEND="dev-lang/perl
 	>=sys-devel/bison-1.875d
 	|| ( >=sys-devel/gcc-3.0 >=sys-devel/gcc-apple-4.2.1 )
 	|| ( >=sys-devel/binutils-2.18 >=sys-devel/binutils-apple-3.2.3 )
-	libffi? ( virtual/libffi )
+	gold? ( >=sys-devel/binutils-2.22[cxx] )
+	libffi? ( virtual/pkgconfig
+		virtual/libffi )
 	ocaml? ( dev-lang/ocaml )
 	udis86? ( amd64? ( dev-libs/udis86[pic] )
 		!amd64? ( dev-libs/udis86 ) )"
-RDEPEND="dev-lang/perl"
+RDEPEND="dev-lang/perl
+	libffi? ( virtual/libffi )
+	vim-syntax? ( || ( app-editors/vim app-editors/gvim ) )"
 
-S=${WORKDIR}/${PN}-${PV/_pre*}
+S=${WORKDIR}/${P}.src
 
 pkg_setup() {
+	# Required for test and build
+	python_set_active_version 2
+	python_pkg_setup
+
 	# need to check if the active compiler is ok
 
 	broken_gcc=" 3.2.2 3.2.3 3.3.2 4.1.1 "
@@ -80,27 +87,27 @@ src_prepare() {
 		-e '/OmitFramePointer/s/-fomit-frame-pointer//' \
 		-i Makefile.rules || die "rpath sed failed"
 
-	epatch "${FILESDIR}"/${PN}-2.7-nodoctargz.patch
+	# Specify python version
+	python_convert_shebangs -r 2 test/Scripts
+
 	epatch "${FILESDIR}"/${PN}-2.6-commandguide-nops.patch
-	epatch "${FILESDIR}"/${PN}-2.8-darwin8.patch
-	# Upstream backport, r117774
-	epatch "${FILESDIR}"/${P}-alignof.patch
+	epatch "${FILESDIR}"/${PN}-2.9-nodoctargz.patch
+	epatch "${FILESDIR}"/${P}-ocaml_install.patch
+	epatch "${FILESDIR}"/${P}-PPC_macro.patch
+	epatch "${FILESDIR}"/${P}-PPCCompilationCallbackC_static.patch
+	epatch "${FILESDIR}"/${P}-gold_LTO_link.patch
+	epatch "${FILESDIR}"/${P}-set_soname.patch
+
+	# User patches
+	epatch_user
 }
 
 src_configure() {
-	local CONF_FLAGS="--enable-shared"
-
-	if use debug; then
-		CONF_FLAGS="${CONF_FLAGS} --disable-optimized"
-		einfo "Note: Compiling LLVM in debug mode will create huge and slow binaries"
-		# ...and you probably shouldn't use tmpfs, unless it can hold 900MB
-	else
-		CONF_FLAGS="${CONF_FLAGS} \
-			--enable-optimized \
-			--with-optimize-option= \
-			--disable-assertions \
-			--disable-expensive-checks"
-	fi
+	local CONF_FLAGS="--enable-shared
+		--with-optimize-option=
+		$(use_enable !debug optimized)
+		$(use_enable debug assertions)
+		$(use_enable debug expensive-checks)"
 
 	if use multitarget; then
 		CONF_FLAGS="${CONF_FLAGS} --enable-targets=all"
@@ -112,32 +119,9 @@ src_configure() {
 		CONF_FLAGS="${CONF_FLAGS} --enable-pic"
 	fi
 
-	# things would be built differently depending on whether llvm-gcc is
-	# used or not.
-	local LLVM_GCC_DIR=/dev/null
-	local LLVM_GCC_DRIVER=nope ; local LLVM_GPP_DRIVER=nope
-	if use llvm-gcc ; then
-		if has_version sys-devel/llvm-gcc; then
-			LLVM_GCC_DIR=$(ls -d ${EROOT}/usr/$(get_libdir)/llvm-gcc* 2> /dev/null)
-			LLVM_GCC_DRIVER=$(find ${LLVM_GCC_DIR} -name 'llvm*-gcc' 2> /dev/null)
-			if [[ -z ${LLVM_GCC_DRIVER} ]] ; then
-				die "failed to find installed llvm-gcc, LLVM_GCC_DIR=${LLVM_GCC_DIR}"
-			fi
-			einfo "Using $LLVM_GCC_DRIVER"
-			LLVM_GPP_DRIVER=${LLVM_GCC_DRIVER/%-gcc/-g++}
-		else
-			eerror "llvm-gcc USE flag enabled, but sys-devel/llvm-gcc was not found"
-			eerror "Building with standard gcc, re-merge this package after installing"
-			eerror "llvm-gcc to build with it"
-			eerror "This is normal behavior on first LLVM merge"
-		fi
+	if use gold; then
+		CONF_FLAGS="${CONF_FLAGS} --with-binutils-include=${EPREFIX}/usr/include/"
 	fi
-
-	CONF_FLAGS="${CONF_FLAGS} \
-		--with-llvmgccdir=${LLVM_GCC_DIR} \
-		--with-llvmgcc=${LLVM_GCC_DRIVER} \
-		--with-llvmgxx=${LLVM_GPP_DRIVER}"
-
 	if use ocaml; then
 		CONF_FLAGS="${CONF_FLAGS} --enable-bindings=ocaml"
 	else
@@ -146,6 +130,10 @@ src_configure() {
 
 	if use udis86; then
 		CONF_FLAGS="${CONF_FLAGS} --with-udis86"
+	fi
+
+	if use libffi; then
+		append-cppflags "$(pkg-config --cflags libffi)"
 	fi
 	CONF_FLAGS="${CONF_FLAGS} $(use_enable libffi)"
 	econf ${CONF_FLAGS} || die "econf failed"
@@ -163,11 +151,16 @@ src_compile() {
 src_install() {
 	emake KEEP_SYMBOLS=1 DESTDIR="${D}" install || die "install failed"
 
+	if use vim-syntax; then
+		insinto /usr/share/vim/vimfiles/syntax
+		doins utils/vim/*.vim
+	fi
+
 	# Fix install_names on Darwin.  The build system is too complicated
 	# to just fix this, so we correct it post-install
 	local lib= f= odylib=
 	if [[ ${CHOST} == *-darwin* ]] ; then
-		for lib in lib{EnhancedDisassembly,LLVM-${PV},BugpointPasses,LLVMHello,LTO,profile_rt}.dylib ; do
+		for lib in lib{EnhancedDisassembly,LLVM-${PV},LTO,profile_rt}.dylib {BugpointPasses,LLVMHello}.dylib ; do
 			# libEnhancedDisassembly is Darwin10 only, so non-fatal
 			[[ -f ${ED}/usr/lib/${PN}/${lib} ]] || continue
 			ebegin "fixing install_name of $lib"

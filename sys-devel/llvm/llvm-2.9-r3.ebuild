@@ -3,7 +3,7 @@
 # $Header: /var/cvsroot/gentoo-x86/sys-devel/llvm/llvm-2.9-r2.ebuild,v 1.8 2012/05/04 07:24:15 jdhore Exp $
 
 EAPI="3"
-inherit eutils flag-o-matic multilib pax-utils toolchain-funcs
+inherit eutils flag-o-matic multilib toolchain-funcs pax-utils
 
 DESCRIPTION="Low Level Virtual Machine"
 HOMEPAGE="http://llvm.org/"
