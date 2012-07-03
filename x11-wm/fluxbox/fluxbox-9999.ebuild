@@ -3,7 +3,7 @@
 # $Header: /var/cvsroot/gentoo-x86/x11-wm/fluxbox/fluxbox-9999.ebuild,v 1.10 2011/11/29 14:08:31 lack Exp $
 
 EAPI=4
-inherit eutils git-2 prefix
+inherit eutils git-2 prefix flag-o-matic toolchain-funcs
 
 IUSE="nls xinerama bidi +truetype +imlib +slit +toolbar vim-syntax"
 
@@ -21,7 +21,10 @@ RDEPEND="x11-libs/libXpm
 	|| ( x11-misc/gkmessage x11-apps/xmessage )
 	xinerama? ( x11-libs/libXinerama )
 	truetype? ( media-libs/freetype )
-	bidi? ( dev-libs/fribidi )
+	bidi? (
+		dev-libs/fribidi
+		virtual/pkgconfig
+	)
 	imlib? ( >=media-libs/imlib2-1.2.0[X] )
 	vim-syntax? ( app-vim/fluxbox-syntax )
 	!!<x11-themes/fluxbox-styles-fluxmod-20040809-r1
@@ -58,6 +61,10 @@ src_prepare() {
 }
 
 src_configure() {
+	if use bidi; then
+		append-cppflags "$($(tc-getPKG_CONFIG) --cflags fribidi)" || \
+			die "Configuring bidi failed"
+	fi
 	econf \
 		--disable-dependency-tracking \
 		$(use_enable nls) \
