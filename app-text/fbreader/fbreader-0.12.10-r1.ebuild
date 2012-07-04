@@ -16,18 +16,15 @@ KEYWORDS="amd64 ~ppc x86"
 
 IUSE="debug gtk +qt4"
 RDEPEND="
-	dev-libs/expat
-	dev-libs/liblinebreak
-	net-misc/curl
-	dev-libs/fribidi
 	app-arch/bzip2
 	dev-db/sqlite
+	dev-libs/expat
+	dev-libs/fribidi
+	dev-libs/liblinebreak
+	net-misc/curl
+	virtual/jpeg
 	qt4? ( x11-libs/qt-gui:4 )
-	gtk? (
-		>=x11-libs/gtk+-2.4:2
-		virtual/jpeg
-	)
-	"
+	gtk? ( >=x11-libs/gtk+-2.4:2 )"
 DEPEND="${RDEPEND}
 	virtual/pkgconfig
 "
