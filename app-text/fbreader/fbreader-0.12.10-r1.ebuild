@@ -23,8 +23,8 @@ RDEPEND="
 	dev-libs/liblinebreak
 	net-misc/curl
 	virtual/jpeg
-	qt4? ( x11-libs/qt-gui:4 )
-	gtk? ( >=x11-libs/gtk+-2.4:2 )"
+	gtk? ( >=x11-libs/gtk+-2.4:2 )
+	qt4? ( x11-libs/qt-gui:4 )"
 DEPEND="${RDEPEND}
 	virtual/pkgconfig
 "
