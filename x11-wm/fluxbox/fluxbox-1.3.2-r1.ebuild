@@ -35,7 +35,7 @@ DEPEND="nls? ( sys-devel/gettext )
 
 SLOT="0"
 LICENSE="MIT"
-KEYWORDS="~amd64 ~x86"
+KEYWORDS="alpha amd64 arm hppa ia64 ~mips ppc ppc64 sparc x86 ~x86-fbsd ~x86-interix ~amd64-linux ~x86-linux"
 
 src_prepare() {
 	# We need to be able to include directories rather than just plain
