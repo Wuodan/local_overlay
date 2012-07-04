@@ -3,7 +3,7 @@
 # $Header: /var/cvsroot/gentoo-x86/x11-wm/fluxbox/fluxbox-1.3.2.ebuild,v 1.8 2012/05/28 15:48:00 armin76 Exp $
 
 EAPI=4
-inherit eutils prefix
+inherit eutils prefix flag-o-matic toolchain-funcs
 
 IUSE="nls xinerama bidi +truetype +imlib +slit +toolbar vim-syntax"
 
@@ -20,7 +20,10 @@ RDEPEND="x11-libs/libXpm
 	|| ( x11-misc/gkmessage x11-apps/xmessage )
 	xinerama? ( x11-libs/libXinerama )
 	truetype? ( media-libs/freetype )
-	bidi? ( dev-libs/fribidi )
+	bidi? (
+		dev-libs/fribidi
+		virtual/pkgconfig
+	)
 	imlib? ( >=media-libs/imlib2-1.2.0[X] )
 	vim-syntax? ( app-vim/fluxbox-syntax )
 	!!<x11-themes/fluxbox-styles-fluxmod-20040809-r1
@@ -32,15 +35,13 @@ DEPEND="nls? ( sys-devel/gettext )
 
 SLOT="0"
 LICENSE="MIT"
-KEYWORDS="alpha amd64 arm hppa ia64 ~mips ppc ppc64 sparc x86 ~x86-fbsd ~x86-interix ~amd64-linux ~x86-linux"
+KEYWORDS="~amd64"
 
 src_prepare() {
 	# We need to be able to include directories rather than just plain
 	# files in menu [include] items. This patch will allow us to do clever
 	# things with style ebuilds.
 	epatch "${FILESDIR}/gentoo_style_location-1.1.x.patch"
-	# Add thunar, chromium and epiphany support
-	epatch "${FILESDIR}/gentoo_tutorial_addon-0.2.patch"
 	eprefixify util/fluxbox-generate_menu.in
 
 	epatch "${FILESDIR}"/osx-has-otool.patch
@@ -57,6 +58,10 @@ src_prepare() {
 }
 
 src_configure() {
+	if use bidi; then
+		append-cppflags "$($(tc-getPKG_CONFIG) --cflags fribidi)" || \
+			die "Configuring bidi failed"
+	fi
 	econf \
 		$(use_enable nls) \
 		$(use_enable xinerama) \
