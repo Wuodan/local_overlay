@@ -4,7 +4,7 @@
 
 EAPI=4
 
-inherit eutils multilib
+inherit eutils multilib toolchain-funcs
 
 DESCRIPTION="E-Book Reader. Supports many e-book formats."
 HOMEPAGE="http://www.fbreader.org/"
@@ -21,8 +21,11 @@ RDEPEND="
 	dev-libs/expat
 	dev-libs/fribidi
 	dev-libs/liblinebreak
-	net-misc/curl
-	gtk? ( >=x11-libs/gtk+-2.4:2 )
+	net-misc/curl[threads]
+	gtk? (
+		x11-libs/gdk-pixbuf[jpeg]
+		>=x11-libs/gtk+-2.4:2
+	)
 	qt4? ( x11-libs/qt-gui:4 )"
 DEPEND="${RDEPEND}
 	virtual/pkgconfig
@@ -37,8 +40,12 @@ src_prepare() {
 	sed -i "s:^Name=E-book reader:Name=FBReader:" fbreader/desktop/desktop || die "sed failed"
 	sed -i "s:^Name\[ru\]=.*$:Name\[ru\]=FBReader:" fbreader/desktop/desktop || die "sed failed"
 	sed -i "s:^Icon=FBReader.png:Icon=FBReader:" fbreader/desktop/desktop || die "sed failed"
-	sed -i "s:^\(	CFLAGS +=\) -O3\$:\1 ${CXXFLAGS} `pkg-config --cflags fribidi`:" makefiles/config.mk || die "sed failed"
-	sed -i "s:^\(	LDFLAGS +=\) -s\$:\1 ${LDFLAGS}:" makefiles/config.mk || die "sed failed"
+
+	# patch CFFLAGS for fribidi
+	sed -i "s:^\(\\s\+CFLAGS +=\) \(-O3\|-O0 -g\)\$:\1 ${CXXFLAGS} `$(tc-getPKG_CONFIG) --cflags fribidi`:" \
+		makefiles/config.mk || die "sed failed"
+	# patch LDFLAGS
+	sed -i "s:^\(\\s\+LDFLAGS +=\) -\(s\|pg\)\$:\1 ${LDFLAGS}:" makefiles/config.mk || die "sed failed"
 
 	echo "TARGET_ARCH = desktop" > makefiles/target.mk
 	echo "LIBDIR = /usr/$(get_libdir)" >> makefiles/target.mk
