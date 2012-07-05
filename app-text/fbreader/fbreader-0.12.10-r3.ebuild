@@ -43,7 +43,7 @@ src_prepare() {
 
 	# patch CFFLAGS for fribidi
 	if ! use debug; then
-		sed -i "s:^\(\\s\+CFLAGS +=\) -O3\$:\1 ${CXXFLAGS} `pkg-config --cflags fribidi`:" \
+		sed -i "s:^\(\\s\+CFLAGS +=\) -O3\$:\1 ${CXXFLAGS} `$(tc-getPKG_CONFIG) --cflags fribidi`:" \
 			makefiles/config.mk || die "sed failed"
 		# patch LDFLAGS
 		sed -i "s:^\(\\s\+LDFLAGS +=\) -\(s\|pg\)\$:\1 ${LDFLAGS}:" makefiles/config.mk || die "sed failed"
@@ -51,7 +51,7 @@ src_prepare() {
 		# preserve -O0 -g for target-status "debug"
 		filter-flags -O* -g
 		append-cxxflags -O0 -g
-		sed -i "s:^\(\\s\+CFLAGS +=\) -O0 -g\$:\1 ${CXXFLAGS} `pkg-config --cflags fribidi`:" \
+		sed -i "s:^\(\\s\+CFLAGS +=\) -O0 -g\$:\1 ${CXXFLAGS} `$(tc-getPKG_CONFIG) --cflags fribidi`:" \
 			makefiles/config.mk || die "sed failed"
 	fi
 
