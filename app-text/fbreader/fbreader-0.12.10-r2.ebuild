@@ -4,7 +4,7 @@
 
 EAPI=4
 
-inherit eutils multilib
+inherit eutils multilib toolchain-funcs flag-o-matic
 
 DESCRIPTION="E-Book Reader. Supports many e-book formats."
 HOMEPAGE="http://www.fbreader.org/"
@@ -37,8 +37,20 @@ src_prepare() {
 	sed -i "s:^Name=E-book reader:Name=FBReader:" fbreader/desktop/desktop || die "sed failed"
 	sed -i "s:^Name\[ru\]=.*$:Name\[ru\]=FBReader:" fbreader/desktop/desktop || die "sed failed"
 	sed -i "s:^Icon=FBReader.png:Icon=FBReader:" fbreader/desktop/desktop || die "sed failed"
-	sed -i "s:^\(	CFLAGS +=\) -O3\$:\1 ${CXXFLAGS} `pkg-config --cflags fribidi`:" makefiles/config.mk || die "sed failed"
-	sed -i "s:^\(	LDFLAGS +=\) -s\$:\1 ${LDFLAGS}:" makefiles/config.mk || die "sed failed"
+
+	# patch CFFLAGS for fribidi
+	if ! use debug; then
+		sed -i "s:^\(\\s\+CFLAGS +=\) -O3\$:\1 ${CXXFLAGS} `pkg-config --cflags fribidi`:" \
+			makefiles/config.mk || die "sed failed"
+		# patch LDFLAGS
+		sed -i "s:^\(\\s\+LDFLAGS +=\) -\(s\|pg\)\$:\1 ${LDFLAGS}:" makefiles/config.mk || die "sed failed"
+	else
+		# preserve -O0 -g for target-status "debug"
+		filter-flags -O* -g
+		append-cxxflags -O0 -g
+		sed -i "s:^\(\\s\+CFLAGS +=\) -O0 -g\$:\1 ${CXXFLAGS} `pkg-config --cflags fribidi`:" \
+			makefiles/config.mk || die "sed failed"
+	fi
 
 	echo "TARGET_ARCH = desktop" > makefiles/target.mk
 	echo "LIBDIR = /usr/$(get_libdir)" >> makefiles/target.mk
