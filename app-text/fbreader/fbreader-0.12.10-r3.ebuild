@@ -23,8 +23,8 @@ RDEPEND="
 	dev-libs/liblinebreak
 	net-misc/curl[threads]
 	gtk? (
-		>=x11-libs/gtk+-2.4:2
 		x11-libs/gdk-pixbuf[jpeg]
+		>=x11-libs/gtk+-2.4:2
 	)
 	qt4? ( x11-libs/qt-gui:4 )"
 DEPEND="${RDEPEND}
