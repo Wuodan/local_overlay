@@ -22,6 +22,7 @@ RDEPEND="
 	dev-libs/fribidi
 	dev-libs/liblinebreak
 	net-misc/curl
+	virtual/jpeg
 	gtk? ( >=x11-libs/gtk+-2.4:2 )
 	qt4? ( x11-libs/qt-gui:4 )"
 DEPEND="${RDEPEND}
