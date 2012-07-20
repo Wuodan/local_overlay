@@ -26,19 +26,20 @@ APACHE2_MOD_DEFINE="WSGI"
 DOCFILES="README"
 
 need_apache2
+S="${WORKDIR}/${PN}"
 
 src_configure() {
-	cd "${S}/${PN}" || die "cd failed"
+	cd "${S}/${PN}"
 	econf --with-apxs=${APXS}
 }
 
 src_compile() {
-	cd "${S}/${PN}" || die "cd failed"
+	cd "${S}/${PN}"
 	default
 }
 
 src_install()
 {
-	cd "${S}/${PN}" || die "cd failed"
+	cd "${S}/${PN}"
 	emake DESTDIR="${D}" install || die "Install failed"
 }
