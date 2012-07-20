@@ -12,8 +12,7 @@ MUTT_P="mutt-${MUTT_PV}"
 PATCHSET_REV="-r13"
 
 DESCRIPTION="A forx of mutt, the small but very powerful text-based mail client"
-HOMEPAGE="https://github.com/karelzak/mutt-kz/"
-# SRC_URI="ftp://ftp.mutt.org/mutt/devel/${P}.tar.gz
+HOMEPAGE="https://github.com/karelzak/mutt-kz/wiki/"
 SRC_URI="mirror://gentoo/${MUTT_P}-gentoo-patches${PATCHSET_REV}.tar.bz2
 	http://dev.gentoo.org/~grobian/distfiles/${MUTT_P}-gentoo-patches${PATCHSET_REV}.tar.bz2"
 EGIT_REPO_URI="git://github.com/karelzak/${PN}.git"
@@ -21,7 +20,7 @@ EGIT_REPO_URI="git://github.com/karelzak/${PN}.git"
 IUSE="berkdb crypt debug doc gdbm gnutls gpg idn imap notmuch mbox nls pop qdbm sasl selinux sidebar smime smtp ssl tokyocabinet"
 SLOT="0"
 LICENSE="GPL-2"
-KEYWORDS="~amd64"
+KEYWORDS="~amd64 ~x86"
 RDEPEND="
 	app-misc/mime-types
 	!mail-client/mutt
