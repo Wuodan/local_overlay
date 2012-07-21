@@ -20,7 +20,6 @@ KEYWORDS="~amd64 ~ppc -sparc ~x86"
 # sqlite not supported in ulogd-2 yet
 IUSE="doc mysql postgres pcap" # sqlite
 
-# net-libs/libmnl
 RDEPEND="net-firewall/iptables
 	>=net-libs/libnetfilter_conntrack-0.0.95
 	>=net-libs/libnetfilter_log-1.0
