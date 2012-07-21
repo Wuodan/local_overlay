@@ -14,8 +14,8 @@ HOMEPAGE="http://netfilter.org/projects/ulogd/index.html"
 SRC_URI="http://ftp.netfilter.org/pub/${PN}/${MY_P}.tar.bz2"
 
 LICENSE="GPL-2"
-#  ~ia64 removed because of net-libs/libmnl
 SLOT="0"
+#  ~ia64 removed because of net-libs/libmnl
 KEYWORDS="~amd64 ~ppc -sparc ~x86"
 # sqlite not supported in ulogd-2 yet
 IUSE="doc mysql postgres pcap" # sqlite
