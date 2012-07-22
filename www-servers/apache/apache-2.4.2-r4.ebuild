@@ -22,14 +22,14 @@ IUSE_MPMS_THREAD="event worker"
 # authn_core: functionality provided by authn_alias in previous versions
 # authz_core: ? 
 # cache_disk: replacement for mem_cache
-# socache_shmcb: ? 
+# socache_shmcb: shared object cache provider. Seems to be popular (not SSL dependent).
 # unixd: fixes startup error: Invalid command 'User'
 IUSE_MODULES="access_compat actions alias asis auth_basic auth_digest authn_alias authn_anon
 authn_core authn_dbd authn_dbm authn_file authz_core authz_dbm
-authz_groupfile authz_host authz_owner authz_user autoindex cache cern_meta
-charset_lite cgi cgid dav dav_fs dav_lock dbd deflate dir disk_cache dumpio
+authz_groupfile authz_host authz_owner authz_user autoindex cache cache_disk cern_meta
+charset_lite cgi cgid dav dav_fs dav_lock dbd deflate dir dumpio
 env expires ext_filter file_cache filter headers ident imagemap include info
-log_config log_forensic logio cache_disk mime mime_magic negotiation proxy
+log_config log_forensic logio mime mime_magic negotiation proxy
 proxy_ajp proxy_balancer proxy_connect proxy_ftp proxy_http proxy_scgi rewrite
 reqtimeout setenvif speling socache_shmcb status substitute unique_id userdir usertrack
 unixd version vhost_alias"
@@ -44,7 +44,7 @@ MODULE_DEPENDS="
 	dav_fs:dav
 	dav_lock:dav
 	deflate:filter
-	disk_cache:cache
+	cache_disk:cache
 	ext_filter:filter
 	file_cache:cache
 	log_forensic:log_config
@@ -65,21 +65,19 @@ MODULE_DEFINES="
 	auth_digest:AUTH_DIGEST
 	authnz_ldap:AUTHNZ_LDAP
 	cache:CACHE
+	cache_disk:CACHE
 	dav:DAV
 	dav_fs:DAV
 	dav_lock:DAV
-	disk_cache:CACHE
 	file_cache:CACHE
 	info:INFO
 	ldap:LDAP
-	cache_disk:CACHE
 	proxy:PROXY
 	proxy_ajp:PROXY
 	proxy_balancer:PROXY
 	proxy_connect:PROXY
 	proxy_ftp:PROXY
 	proxy_http:PROXY
-	socache_shmcb:SSL
 	ssl:SSL
 	status:STATUS
 	suexec:SUEXEC
@@ -87,7 +85,6 @@ MODULE_DEFINES="
 "
 
 # critical modules for the default config
-tocheck: access_compat socache_shmcb
 MODULE_CRITICAL="
 	authn_core
 	authz_core
@@ -122,8 +119,8 @@ RDEPEND="${RDEPEND}
 src_prepare() {
 	# the following patch can be removed once it is included in
 	# GENTOO_PATCHNAME="gentoo-apache-2.4.1" ...
-	if [ -f "${FILESDIR}/${GENTOO_PATCHNAME}-${GENTOO_DEVELOPER}-${GENTOO_PATCHSTAMP}.patch" ]; then
-		epatch "${FILESDIR}/${GENTOO_PATCHNAME}-${GENTOO_DEVELOPER}-${GENTOO_PATCHSTAMP}.patch" \
+	if [ -f "${FILESDIR}/${GENTOO_PATCHNAME}-${GENTOO_DEVELOPER}-${GENTOO_PATCHSTAMP}-${PVR}.patch" ]; then
+		epatch "${FILESDIR}/${GENTOO_PATCHNAME}-${GENTOO_DEVELOPER}-${GENTOO_PATCHSTAMP}-${PVR}.patch" \
 			|| die "epatch failed"
 	fi
 	apache-2_src_prepare
