@@ -13,15 +13,26 @@ GENTOO_PATCHNAME="gentoo-apache-2.4.1"
 IUSE_MPMS_FORK="itk peruser prefork"
 IUSE_MPMS_THREAD="event worker"
 
-IUSE_MODULES="actions alias asis auth_basic auth_digest authn_alias authn_anon
-authn_dbd authn_dbm authn_default authn_file authz_dbm authz_default
-authz_groupfile authz_host authz_owner authz_user autoindex cache cern_meta
-charset_lite cgi cgid dav dav_fs dav_lock dbd deflate dir disk_cache dumpio
+# << obsolete modules:
+# authn_default authz_default mem_cache 
+# mem_cache is replaced by cache_disk
+# >> added modules for reason:
+# compat: compatibility with 2.2 access control (remove from critical when config is fixed)
+# authz_host: new module for access control
+# authn_core: functionality provided by authn_alias in previous versions
+# authz_core: ? 
+# cache_disk: replacement for mem_cache
+# socache_shmcb: shared object cache provider. Seems to be popular (SSL dependent in config).
+# unixd: fixes startup error: Invalid command 'User'
+IUSE_MODULES="access_compat actions alias asis auth_basic auth_digest authn_alias authn_anon
+authn_core authn_dbd authn_dbm authn_file authz_core authz_dbm
+authz_groupfile authz_host authz_owner authz_user autoindex cache cache_disk cern_meta
+charset_lite cgi cgid dav dav_fs dav_lock dbd deflate dir dumpio
 env expires ext_filter file_cache filter headers ident imagemap include info
-log_config log_forensic logio mem_cache mime mime_magic negotiation proxy
+log_config log_forensic logio mime mime_magic negotiation proxy
 proxy_ajp proxy_balancer proxy_connect proxy_ftp proxy_http proxy_scgi rewrite
-reqtimeout setenvif speling status substitute unique_id userdir usertrack
-version vhost_alias"
+reqtimeout setenvif speling socache_shmcb status substitute unique_id userdir usertrack
+unixd version vhost_alias"
 # The following are also in the source as of this version, but are not available
 # for user selection:
 # bucketeer case_filter case_filter_in echo http isapi optional_fn_export
@@ -33,12 +44,12 @@ MODULE_DEPENDS="
 	dav_fs:dav
 	dav_lock:dav
 	deflate:filter
-	disk_cache:cache
+	cache_disk:cache
 	ext_filter:filter
 	file_cache:cache
 	log_forensic:log_config
 	logio:log_config
-	mem_cache:cache
+	cache_disk:cache
 	mime_magic:mime
 	proxy_ajp:proxy
 	proxy_balancer:proxy
@@ -54,14 +65,13 @@ MODULE_DEFINES="
 	auth_digest:AUTH_DIGEST
 	authnz_ldap:AUTHNZ_LDAP
 	cache:CACHE
+	cache_disk:CACHE
 	dav:DAV
 	dav_fs:DAV
 	dav_lock:DAV
-	disk_cache:CACHE
 	file_cache:CACHE
 	info:INFO
 	ldap:LDAP
-	mem_cache:CACHE
 	proxy:PROXY
 	proxy_ajp:PROXY
 	proxy_balancer:PROXY
@@ -77,14 +87,15 @@ MODULE_DEFINES="
 
 # critical modules for the default config
 MODULE_CRITICAL="
+	authn_core
+	authz_core
 	authz_host
 	dir
 	mime
+	unixd
 "
 
-MY_MODS="${MY_MODS} access_compat authn_core authz_core socache_shmcb unixd"
-
-inherit apache-2
+inherit eutils apache-2
 
 DESCRIPTION="The Apache Web Server."
 HOMEPAGE="http://httpd.apache.org/"
@@ -107,24 +118,14 @@ RDEPEND="${RDEPEND}
 
 # init script fixup - should be rolled into next tarball #389965
 src_prepare() {
+	# the following patch can be removed once it is included in
+	# GENTOO_PATCHNAME="gentoo-apache-2.4.1" ...
+	if [ -f "${FILESDIR}/${GENTOO_PATCHNAME}-${GENTOO_DEVELOPER}-${GENTOO_PATCHSTAMP}-${PVR}.patch" ]; then
+		epatch "${FILESDIR}/${GENTOO_PATCHNAME}-${GENTOO_DEVELOPER}-${GENTOO_PATCHSTAMP}-${PVR}.patch" \
+			|| die "epatch failed"
+	fi
 	apache-2_src_prepare
 	sed -i -e 's/! test -f/test -f/' "${GENTOO_PATCHDIR}"/init/apache2.initd || die "Failed to fix init script"
-	# the folloginw patches can be removed once they're included in
-	# GENTOO_PATCHNAME="gentoo-apache-2.4.1" ...
-	# patch /etc/apache2/modules.d/40_mod_ssl.conf
-	sed -i -e 's/^SSLMutex  file:\/var\/run\/ssl_mutex$/Mutex file:\/var\/run\/ssl_mutex ssl-cache/' \
-		"${GENTOO_PATCHDIR}"/conf/modules.d/40_mod_ssl.conf \
-		|| die "Failed to fix 40_mod_ssl.conf"
-	# patch /etc/apache2/modules.d/00_mod_mime.conf
-	# only "DefaultType none" is allowed, throws warning
-	sed -i -e 's/^DefaultType text\/plain$/DefaultType none/' \
-		"${GENTOO_PATCHDIR}"/conf/modules.d/00_mod_mime.conf \
-		|| die "Failed to fix 00_mod_mime.conf"
-	# patch /etc/apache2/vhosts.d/00_default_vhost.conf
-	# NameVirtualHost is deprecated and throws warning
-	sed -i -e 's/^NameVirtualHost \*:80$/# NameVirtualHost \*:80/' \
-		"${GENTOO_PATCHDIR}"/conf/vhosts.d/00_default_vhost.conf \
-		|| die "Failed to fix 00_default_vhost.conf"
 }
 
 src_install() {
@@ -146,6 +147,29 @@ src_install() {
 	cp "${S}"/support/apxs "${D}"/usr/sbin/apxs || die "Failed to install apxs"
 	chmod 0755 "${D}"/usr/sbin/apxs
 
-	# for previous patch to 40_mod_ssl.conf
-	use ssl && dodir /var/run/ssl_mutex || die "Failed to mkdir ssl_mutex"
+	# create dir defined in 40_mod_ssl.conf
+	if use ssl; then
+		dodir /var/run/apache_ssl_mutex || die "Failed to mkdir ssl_mutex"
+	fi
+}
+
+pkg_postinst()
+{
+	apache-2_pkg_postinst || die "apache-2_pkg_postinst failed"
+	# warnings that default config might not work out of the box
+	for flag in $MODULE_CRITICAL; do
+		if ! use "apache2_modules_${flag}"; then
+			echo
+			ewarn "Warning: Critical module not installed!"
+			ewarn "The flags for modules 'authn_core', 'authz_core' and 'unixd'"
+			ewarn "might not be in the base profile yet."
+			ewarn "Pleae set the following flags:"
+			for cflag in $MODULE_CRITICAL; do
+				use "apache2_modules_${cflag}" || \
+					ewarn "+apache2_modules_${cflag}"
+			done
+			echo
+			break
+		fi
+	done
 }
