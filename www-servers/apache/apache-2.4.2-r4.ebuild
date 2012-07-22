@@ -22,7 +22,7 @@ IUSE_MPMS_THREAD="event worker"
 # authn_core: functionality provided by authn_alias in previous versions
 # authz_core: ? 
 # cache_disk: replacement for mem_cache
-# socache_shmcb: shared object cache provider. Seems to be popular (not SSL dependent).
+# socache_shmcb: shared object cache provider. Seems to be popular (SSL dependent in config).
 # unixd: fixes startup error: Invalid command 'User'
 IUSE_MODULES="access_compat actions alias asis auth_basic auth_digest authn_alias authn_anon
 authn_core authn_dbd authn_dbm authn_file authz_core authz_dbm
@@ -78,6 +78,7 @@ MODULE_DEFINES="
 	proxy_connect:PROXY
 	proxy_ftp:PROXY
 	proxy_http:PROXY
+	socache_shmcb:SSL
 	ssl:SSL
 	status:STATUS
 	suexec:SUEXEC
@@ -146,8 +147,29 @@ src_install() {
 	cp "${S}"/support/apxs "${D}"/usr/sbin/apxs || die "Failed to install apxs"
 	chmod 0755 "${D}"/usr/sbin/apxs
 
-	# for previous patch to 40_mod_ssl.conf
+	# create dir defined in 40_mod_ssl.conf
 	if use ssl; then
 		dodir /var/run/apache_ssl_mutex || die "Failed to mkdir ssl_mutex"
 	fi
+}
+
+pkg_postinst()
+{
+	apache-2_pkg_postinst || die "apache-2_pkg_postinst failed"
+	# warnings that default config might not work out of the box
+	for flag in $MODULE_CRITICAL; do
+		if ! use "apache2_modules_${flag}"; then
+			echo
+			ewarn "Warning: Critical module not installed!"
+			ewarn "The flags for modules 'authn_core', 'authz_core' and 'unixd'"
+			ewarn "might not be in the base profile yet."
+			ewarn "Pleae set the following flags:"
+			for cflag in $MODULE_CRITICAL; do
+				use "apache2_modules_${cflag}" || \
+					ewarn "+apache2_modules_${cflag}"
+			done
+			echo
+			break
+		fi
+	done
 }
