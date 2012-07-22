@@ -156,17 +156,29 @@ src_install() {
 pkg_postinst()
 {
 	apache-2_pkg_postinst || die "apache-2_pkg_postinst failed"
+	# doc won't work without these modules
+	local doc_depends="alias negotiation setenvif"
+	for mod in $doc_depends; do
+		if ! use "apache2_modules_${mod}"; then
+			echo
+			einfo "Info: doc flag set without dependent modules."
+			einfo "Default config for ${PVR} will not work without modules:"
+			einfo "${doc_depends}"
+			echo
+			break
+		fi
+	done
 	# warnings that default config might not work out of the box
-	for flag in $MODULE_CRITICAL; do
-		if ! use "apache2_modules_${flag}"; then
+	for mod in $MODULE_CRITICAL; do
+		if ! use "apache2_modules_${mod}"; then
 			echo
 			ewarn "Warning: Critical module not installed!"
 			ewarn "The flags for modules 'authn_core', 'authz_core' and 'unixd'"
 			ewarn "might not be in the base profile yet."
 			ewarn "Pleae set the following flags:"
-			for cflag in $MODULE_CRITICAL; do
-				use "apache2_modules_${cflag}" || \
-					ewarn "+apache2_modules_${cflag}"
+			for cmod in $MODULE_CRITICAL; do
+				use "apache2_modules_${cmod}" || \
+					ewarn "+apache2_modules_${cmod}"
 			done
 			echo
 			break
