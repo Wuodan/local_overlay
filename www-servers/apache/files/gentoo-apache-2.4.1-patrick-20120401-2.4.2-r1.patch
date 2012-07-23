@@ -1,6 +1,18 @@
-diff -rupN ../gentoo-apache-2.4.1.orig/conf/httpd.conf ../gentoo-apache-2.4.1/conf/httpd.conf
---- ../gentoo-apache-2.4.1/conf/httpd.conf	2012-02-12 23:31:57.000000000 +0100
-+++ ../gentoo-apache-2.4.1/conf/httpd.conf	2012-07-22 04:12:51.932000083 +0200
+Summary of changes:
+a)	apache 2.4 compliant access control (old syntax requires compat module)
+b)	EnableSendfile now defaults to Off.
+c)	FileETag now defaults to "MTime Size" (without INode).
+	Also corrected typo: FileEtag -> FileETag
+d)	DefaultType no longer has any effect, other than to emit a warning.
+e)	LockFile directive has been replaced by Mutex directive.
+f)	SSLMutex directive has been replaced by Mutex directive.
+g)	MaxClients has been renamed to MaxRequestWorkers
+h)	NameVirtualHost directive no longer has any effect, other than to emit a warning.
+Reasons for changes see:
+http://httpd.apache.org/docs/2.4/upgrading.html
+
+--- conf/httpd.conf	2012-02-12 23:31:57.000000000 +0100
++++ conf/httpd.conf	2012-07-22 04:12:51.932000083 +0200
 @@ -36,6 +36,7 @@
  # ServerRoot at a non-local disk, be sure to point the LockFile directive
  # at a local disk.  If you wish to share the same ServerRoot for multiple
@@ -9,9 +21,8 @@ diff -rupN ../gentoo-apache-2.4.1.orig/conf/httpd.conf ../gentoo-apache-2.4.1/co
  ServerRoot "/usr/lib/apache2"
  
  # Dynamic Shared Object (DSO) Support
-diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/00_apache_manual.conf ../gentoo-apache-2.4.1/conf/modules.d/00_apache_manual.conf
---- ../gentoo-apache-2.4.1/conf/modules.d/00_apache_manual.conf	2012-02-12 23:31:57.000000000 +0100
-+++ ../gentoo-apache-2.4.1/conf/modules.d/00_apache_manual.conf	2012-07-22 04:12:51.932000083 +0200
+--- conf/modules.d/00_apache_manual.conf	2012-02-12 23:31:57.000000000 +0100
++++ conf/modules.d/00_apache_manual.conf	2012-07-22 04:12:51.932000083 +0200
 @@ -8,8 +8,7 @@ AliasMatch ^/manual(?:/(?:de|en|es|fr|ja
  <Directory "/usr/share/doc/apache-VERSION/manual">
  	Options Indexes
@@ -22,9 +33,8 @@ diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/00_apache_manual.conf ../g
  
  	<Files *.html>
  		SetHandler type-map
-diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/00_default_settings.conf ../gentoo-apache-2.4.1/conf/modules.d/00_default_settings.conf
---- ../gentoo-apache-2.4.1/conf/modules.d/00_default_settings.conf	2012-02-12 23:31:57.000000000 +0100
-+++ ../gentoo-apache-2.4.1/conf/modules.d/00_default_settings.conf	2012-07-22 04:14:30.819995128 +0200
+--- conf/modules.d/00_default_settings.conf	2012-02-12 23:31:57.000000000 +0100
++++ conf/modules.d/00_default_settings.conf	2012-07-22 04:14:30.819995128 +0200
 @@ -69,13 +69,13 @@ HostnameLookups Off
  # filesystems or if support for these functions is otherwise
  # broken on your system.
@@ -62,9 +72,8 @@ diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/00_default_settings.conf .
  </FilesMatch>
  
  # vim: ts=4 filetype=apache
-diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/00_error_documents.conf ../gentoo-apache-2.4.1/conf/modules.d/00_error_documents.conf
---- ../gentoo-apache-2.4.1/conf/modules.d/00_error_documents.conf	2012-02-12 23:31:57.000000000 +0100
-+++ ../gentoo-apache-2.4.1/conf/modules.d/00_error_documents.conf	2012-07-22 04:12:51.932000083 +0200
+--- conf/modules.d/00_error_documents.conf	2012-02-12 23:31:57.000000000 +0100
++++ conf/modules.d/00_error_documents.conf	2012-07-22 04:12:51.932000083 +0200
 @@ -30,8 +30,7 @@ Alias /error/ "/usr/share/apache2/error/
  	Options IncludesNoExec
  	AddOutputFilter Includes html
@@ -75,9 +84,8 @@ diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/00_error_documents.conf ..
  	LanguagePriority en cs de es fr it ja ko nl pl pt-br ro sv tr
  	ForceLanguagePriority Prefer Fallback
  </Directory>
-diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/00_mod_autoindex.conf ../gentoo-apache-2.4.1/conf/modules.d/00_mod_autoindex.conf
---- ../gentoo-apache-2.4.1/conf/modules.d/00_mod_autoindex.conf	2012-02-12 23:31:57.000000000 +0100
-+++ ../gentoo-apache-2.4.1/conf/modules.d/00_mod_autoindex.conf	2012-07-22 04:12:51.932000083 +0200
+--- conf/modules.d/00_mod_autoindex.conf	2012-02-12 23:31:57.000000000 +0100
++++ conf/modules.d/00_mod_autoindex.conf	2012-07-22 04:12:51.932000083 +0200
 @@ -7,8 +7,7 @@ Alias /icons/ "/usr/share/apache2/icons/
  <Directory "/usr/share/apache2/icons">
  	Options Indexes MultiViews
@@ -88,9 +96,8 @@ diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/00_mod_autoindex.conf ../g
  </Directory>
  </IfModule>
  
-diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/00_mod_info.conf ../gentoo-apache-2.4.1/conf/modules.d/00_mod_info.conf
---- ../gentoo-apache-2.4.1/conf/modules.d/00_mod_info.conf	2012-02-12 23:31:57.000000000 +0100
-+++ ../gentoo-apache-2.4.1/conf/modules.d/00_mod_info.conf	2012-07-22 04:12:51.936000083 +0200
+--- conf/modules.d/00_mod_info.conf	2012-02-12 23:31:57.000000000 +0100
++++ conf/modules.d/00_mod_info.conf	2012-07-22 04:12:51.936000083 +0200
 @@ -3,9 +3,7 @@
  # http://servername/server-info
  <Location /server-info>
@@ -102,9 +109,8 @@ diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/00_mod_info.conf ../gentoo
  </Location>
  </IfDefine>
  
-diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/00_mod_mime.conf ../gentoo-apache-2.4.1/conf/modules.d/00_mod_mime.conf
---- ../gentoo-apache-2.4.1/conf/modules.d/00_mod_mime.conf	2012-02-12 23:31:57.000000000 +0100
-+++ ../gentoo-apache-2.4.1/conf/modules.d/00_mod_mime.conf	2012-07-22 04:12:51.936000083 +0200
+--- conf/modules.d/00_mod_mime.conf	2012-02-12 23:31:57.000000000 +0100
++++ conf/modules.d/00_mod_mime.conf	2012-07-22 04:12:51.936000083 +0200
 @@ -1,12 +1,3 @@
 -# DefaultType: the default MIME type the server will use for a document
 -# if it cannot otherwise determine one, such as from filename extensions.
@@ -118,9 +124,8 @@ diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/00_mod_mime.conf ../gentoo
  <IfModule mime_module>
  # TypesConfig points to the file containing the list of mappings from
  # filename extension to MIME-type.
-diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/00_mod_status.conf ../gentoo-apache-2.4.1/conf/modules.d/00_mod_status.conf
---- ../gentoo-apache-2.4.1/conf/modules.d/00_mod_status.conf	2012-02-12 23:31:57.000000000 +0100
-+++ ../gentoo-apache-2.4.1/conf/modules.d/00_mod_status.conf	2012-07-22 04:12:51.936000083 +0200
+--- conf/modules.d/00_mod_status.conf	2012-02-12 23:31:57.000000000 +0100
++++ conf/modules.d/00_mod_status.conf	2012-07-22 04:12:51.936000083 +0200
 @@ -3,9 +3,7 @@
  # with the URL of http://servername/server-status
  <Location /server-status>
@@ -132,9 +137,8 @@ diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/00_mod_status.conf ../gent
  </Location>
  
  # ExtendedStatus controls whether Apache will generate "full" status
-diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/00_mod_userdir.conf ../gentoo-apache-2.4.1/conf/modules.d/00_mod_userdir.conf
---- ../gentoo-apache-2.4.1/conf/modules.d/00_mod_userdir.conf	2012-02-12 23:31:57.000000000 +0100
-+++ ../gentoo-apache-2.4.1/conf/modules.d/00_mod_userdir.conf	2012-07-22 04:12:51.936000083 +0200
+--- conf/modules.d/00_mod_userdir.conf	2012-02-12 23:31:57.000000000 +0100
++++ conf/modules.d/00_mod_userdir.conf	2012-07-22 04:12:51.936000083 +0200
 @@ -11,12 +11,10 @@ UserDir public_html
  	AllowOverride FileInfo AuthConfig Limit Indexes
  	Options MultiViews Indexes SymLinksIfOwnerMatch IncludesNoExec
@@ -150,9 +154,8 @@ diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/00_mod_userdir.conf ../gen
  	</LimitExcept>
  </Directory>
  
-diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/00_mpm.conf ../gentoo-apache-2.4.1/conf/modules.d/00_mpm.conf
---- ../gentoo-apache-2.4.1/conf/modules.d/00_mpm.conf	2012-02-12 23:31:57.000000000 +0100
-+++ ../gentoo-apache-2.4.1/conf/modules.d/00_mpm.conf	2012-07-22 04:12:51.936000083 +0200
+--- conf/modules.d/00_mpm.conf	2012-02-12 23:31:57.000000000 +0100
++++ conf/modules.d/00_mpm.conf	2012-07-22 04:12:51.936000083 +0200
 @@ -7,7 +7,7 @@
  PidFile /var/run/apache2.pid
  
@@ -216,9 +219,8 @@ diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/00_mpm.conf ../gentoo-apac
  	MaxRequestsPerChild	10000
  </IfModule>
  
-diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/40_mod_ssl.conf ../gentoo-apache-2.4.1/conf/modules.d/40_mod_ssl.conf
---- ../gentoo-apache-2.4.1/conf/modules.d/40_mod_ssl.conf	2012-02-12 23:31:57.000000000 +0100
-+++ ../gentoo-apache-2.4.1/conf/modules.d/40_mod_ssl.conf	2012-07-22 04:12:51.940000083 +0200
+--- conf/modules.d/40_mod_ssl.conf	2012-02-12 23:31:57.000000000 +0100
++++ conf/modules.d/40_mod_ssl.conf	2012-07-22 04:12:51.940000083 +0200
 @@ -57,7 +57,7 @@ SSLSessionCacheTimeout  300
  ## Semaphore:
  # Configure the path to the mutual exclusion semaphore the SSL engine uses
@@ -228,9 +230,8 @@ diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/40_mod_ssl.conf ../gentoo-
  </IfDefine>
  
  # vim: ts=4 filetype=apache
-diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/46_mod_ldap.conf ../gentoo-apache-2.4.1/conf/modules.d/46_mod_ldap.conf
---- ../gentoo-apache-2.4.1/conf/modules.d/46_mod_ldap.conf	2012-02-12 23:31:57.000000000 +0100
-+++ ../gentoo-apache-2.4.1/conf/modules.d/46_mod_ldap.conf	2012-07-22 04:12:51.940000083 +0200
+--- conf/modules.d/46_mod_ldap.conf	2012-02-12 23:31:57.000000000 +0100
++++ conf/modules.d/46_mod_ldap.conf	2012-07-22 04:12:51.940000083 +0200
 @@ -11,9 +11,7 @@ LDAPOpCacheTTL		600
  
  <Location /ldap-status>
@@ -242,9 +243,8 @@ diff -rupN ../gentoo-apache-2.4.1.orig/conf/modules.d/46_mod_ldap.conf ../gentoo
  </Location>
  </IfDefine>
  
-diff -rupN ../gentoo-apache-2.4.1.orig/conf/vhosts.d/00_default_vhost.conf ../gentoo-apache-2.4.1/conf/vhosts.d/00_default_vhost.conf
---- ../gentoo-apache-2.4.1/conf/vhosts.d/00_default_vhost.conf	2012-02-12 23:31:57.000000000 +0100
-+++ ../gentoo-apache-2.4.1/conf/vhosts.d/00_default_vhost.conf	2012-07-22 04:12:51.940000083 +0200
+--- conf/vhosts.d/00_default_vhost.conf	2012-02-12 23:31:57.000000000 +0100
++++ conf/vhosts.d/00_default_vhost.conf	2012-07-22 04:12:51.940000083 +0200
 @@ -25,9 +25,6 @@
  #Listen 12.34.56.78:80
  Listen 80
@@ -255,9 +255,8 @@ diff -rupN ../gentoo-apache-2.4.1.orig/conf/vhosts.d/00_default_vhost.conf ../ge
  # When virtual hosts are enabled, the main host defined in the default
  # httpd.conf configuration will go away. We redefine it here so that it is
  # still available.
-diff -rupN ../gentoo-apache-2.4.1.orig/conf/vhosts.d/default_vhost.include ../gentoo-apache-2.4.1/conf/vhosts.d/default_vhost.include
---- ../gentoo-apache-2.4.1/conf/vhosts.d/default_vhost.include	2012-02-12 23:31:57.000000000 +0100
-+++ ../gentoo-apache-2.4.1/conf/vhosts.d/default_vhost.include	2012-07-22 04:12:51.940000083 +0200
+--- conf/vhosts.d/default_vhost.include	2012-02-12 23:31:57.000000000 +0100
++++ conf/vhosts.d/default_vhost.include	2012-07-22 04:12:51.940000083 +0200
 @@ -31,8 +31,7 @@ DocumentRoot "/var/www/localhost/htdocs"
  	AllowOverride All
  
@@ -278,9 +277,8 @@ diff -rupN ../gentoo-apache-2.4.1.orig/conf/vhosts.d/default_vhost.include ../ge
  </Directory>
  
  # vim: ts=4 filetype=apache
-diff -rupN ../gentoo-apache-2.4.1.orig/docs/ip-based-vhost.conf.example ../gentoo-apache-2.4.1/docs/ip-based-vhost.conf.example
---- ../gentoo-apache-2.4.1/docs/ip-based-vhost.conf.example	2012-02-12 23:31:57.000000000 +0100
-+++ ../gentoo-apache-2.4.1/docs/ip-based-vhost.conf.example	2012-07-22 04:12:51.940000083 +0200
+--- docs/ip-based-vhost.conf.example	2012-02-12 23:31:57.000000000 +0100
++++ docs/ip-based-vhost.conf.example	2012-07-22 04:12:51.940000083 +0200
 @@ -50,8 +50,7 @@
  		Options Indexes FollowSymLinks
  		AllowOverride None
@@ -321,9 +319,8 @@ diff -rupN ../gentoo-apache-2.4.1.orig/docs/ip-based-vhost.conf.example ../gento
  	#</Directory>
  
  	# Create a logfile for this vhost
-diff -rupN ../gentoo-apache-2.4.1.orig/docs/name-based-vhost.conf.example ../gentoo-apache-2.4.1/docs/name-based-vhost.conf.example
---- ../gentoo-apache-2.4.1/docs/name-based-vhost.conf.example	2012-02-12 23:31:57.000000000 +0100
-+++ ../gentoo-apache-2.4.1/docs/name-based-vhost.conf.example	2012-07-22 04:12:51.940000083 +0200
+--- docs/name-based-vhost.conf.example	2012-02-12 23:31:57.000000000 +0100
++++ docs/name-based-vhost.conf.example	2012-07-22 04:12:51.940000083 +0200
 @@ -23,17 +23,8 @@
  #
  # If you want to use a defintion other then the default, you should remove
@@ -383,9 +380,8 @@ diff -rupN ../gentoo-apache-2.4.1.orig/docs/name-based-vhost.conf.example ../gen
  	#</Directory>
  	
  	# Create a logfile for this vhost
-diff -rupN ../gentoo-apache-2.4.1.orig/docs/ssl-vhost.conf.example ../gentoo-apache-2.4.1/docs/ssl-vhost.conf.example
---- ../gentoo-apache-2.4.1/docs/ssl-vhost.conf.example	2012-02-12 23:31:57.000000000 +0100
-+++ ../gentoo-apache-2.4.1/docs/ssl-vhost.conf.example	2012-07-22 04:12:51.944000083 +0200
+--- docs/ssl-vhost.conf.example	2012-02-12 23:31:57.000000000 +0100
++++ docs/ssl-vhost.conf.example	2012-07-22 04:12:51.944000083 +0200
 @@ -40,8 +40,7 @@
  		Options Indexes FollowSymLinks
  		AllowOverride None
