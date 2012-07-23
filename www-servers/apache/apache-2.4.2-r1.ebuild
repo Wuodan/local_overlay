@@ -156,18 +156,6 @@ src_install() {
 pkg_postinst()
 {
 	apache-2_pkg_postinst || die "apache-2_pkg_postinst failed"
-	# doc won't work without these modules
-	local doc_depends="alias negotiation setenvif"
-	for mod in $doc_depends; do
-		if ! use "apache2_modules_${mod}"; then
-			echo
-			einfo "Info: doc flag set without dependent modules."
-			einfo "Default config for ${PVR} will not work without modules:"
-			einfo "${doc_depends}"
-			echo
-			break
-		fi
-	done
 	# warnings that default config might not work out of the box
 	for mod in $MODULE_CRITICAL; do
 		if ! use "apache2_modules_${mod}"; then
@@ -184,4 +172,7 @@ pkg_postinst()
 			break
 		fi
 	done
+	# other infos:
+	# doc: default config needs modules: alias negotiation setenvif
+	# ssl: default config needs modules: socache_shmcb
 }
