@@ -1,5 +1,8 @@
---- orig/libXinerama-1.1.2/configure	2012-03-08 05:29:58.000000000 +0100
-+++ work/libXinerama-1.1.2/configure	2012-07-27 22:18:18.104000011 +0200
+Disable code sections which set CFLAGS="${CFLAGS} -Werror=foo"
+by setting the variable "found" to "yes" instead of "no"
+Stefan Kuhn <wuodan@hispeed.ch> 20120727
+--- configure	2012-03-08 05:29:58.000000000 +0100
++++ configure	2012-07-27 22:18:18.104000011 +0200
 @@ -13695,7 +13695,7 @@
  	CFLAGS="$xorg_testset_save_CFLAGS"
  fi

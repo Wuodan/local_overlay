@@ -16,24 +16,4 @@ RDEPEND="x11-libs/libX11
 	>=x11-proto/xineramaproto-1.2"
 DEPEND="${RDEPEND}"
 
-src_prepare()
-{
-	# disable Werror
-	# sed -i 's/^found="no"$/found="yes"/' configure || die "sed failed"
-	xorg-2_src_prepare
-}
-
-src_compile()
-{
-	# define variables to disable Werror
-	xorg_testset_unknown_warning_option="no"
-	xorg_testset_unused_command_line_argument="no"
-	# todo check nonnull (is unconditional)
-	# init-self (same)
-	# main
-	# missing braces
-	# sequence-point
-	# return-type
-	found="yes"
-	xorg-2_src_compile
-}
+XORG_CONFIGURE_OPTIONS+="--disable-selective-werror"
