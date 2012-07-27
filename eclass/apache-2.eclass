@@ -69,19 +69,21 @@ SRC_URI="mirror://apache/httpd/httpd-${PV}.tar.bz2
 IUSE_MPMS="${IUSE_MPMS_FORK} ${IUSE_MPMS_THREAD}"
 IUSE="${IUSE} debug doc ldap selinux ssl static suexec threads"
 
-IUSE_MODULES_TEMP=
+# @ECLASS-VARIABLE: MODULE_DEFAULTS
+# @DESCRIPTION:
+# This variable can be set in the ebuild and contains a space-separated
+# list of modules to be expanded to default flags according to IUSE-defaults.
+# Example:
+# IUSE_MODULES="foo" with MODULE_DEFAULTS="" => IUSE="apache2_modules_foo"
+# IUSE_MODULES="foo" with MODULE_DEFAULTS="foo" => IUSE="+apache2_modules_foo"
+
 for module in ${IUSE_MODULES} ; do
-	# expand "+foo" to "+apache2_modules_foo"
-	if [ "${module:0:1}" == '+' ]; then
-		IUSE="${IUSE} +apache2_modules_${module:1}"
-		# replace "+foo" with "foo"
-		IUSE_MODULES_TEMP="${IUSE_MODULES_TEMP} ${module:1}"
+	if has ${module} ${MODULE_DEFAULTS} ; then
+		IUSE="${IUSE} +apache2_modules_${module}"
 	else
 		IUSE="${IUSE} apache2_modules_${module}"
-		IUSE_MODULES_TEMP="${IUSE_MODULES_TEMP} ${module}"
 	fi
 done
-IUSE_MODULES="${IUSE_MODULES_TEMP}"
 
 for mpm in ${IUSE_MPMS} ; do
 	IUSE="${IUSE} apache2_mpms_${mpm}"
