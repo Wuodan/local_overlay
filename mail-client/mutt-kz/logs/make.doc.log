@@ -1,0 +1,7 @@
+make: Entering directory `/var/tmp/portage/mail-client/mutt-kz-0_pre20120627/work/mutt-kz-0_pre20120627/doc'
+x86_64-pc-linux-gnu-gcc -DSYSCONFDIR=\"/etc/mutt-kz\" -DBINDIR=\"/usr/bin\" -DHAVE_CONFIG_H=1 -I. -I..  -I. -I.. -I/usr/include -I.. -I../intl  -Wall -pedantic -Wno-long-long -O2 -pipe -c makedoc.c
+x86_64-pc-linux-gnu-gcc  -Wall -pedantic -Wno-long-long -O2 -pipe  -Wl,-O1 -Wl,--as-needed -o makedoc makedoc.o  -lnotmuch 
+x86_64-pc-linux-gnu-gcc -E -I. -I.. -I/usr/include -I.. -DSYSCONFDIR=\"/etc/mutt-kz\" -DBINDIR=\"/usr/bin\" -DHAVE_CONFIG_H=1 -I../intl -D_MAKEDOC -C ../init.h | ./makedoc -m | 	    \
+	cat ./muttrc.man.head - ./muttrc.man.tail\
+	> muttrc.man
+make: Leaving directory `/var/tmp/portage/mail-client/mutt-kz-0_pre20120627/work/mutt-kz-0_pre20120627/doc'
