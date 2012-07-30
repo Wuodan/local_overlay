@@ -94,7 +94,7 @@ src_prepare() {
 
 	# don't just build documentation (lengthy process, with big dependencies)
 	if use !doc ; then
-		sed -i -e '/SUBDIRS =/s/doc//' Makefile.in || die
+		sed -i -e '/SUBDIRS =/s/doc//' Makefile.in || die "sed failed"
 	fi
 }
 
@@ -197,9 +197,9 @@ src_install() {
 			-e 's#in @docdir@,#at http://www.mutt.org/,#' \
 			-e "s#@sysconfdir@#${EPREFIX}/etc/${MY_PN}#" \
 			-e "s#@bindir@#${EPREFIX}/usr/bin#" \
-			doc/mutt.man > mutt.1
-		cp doc/muttbug.man flea.1
-		cp doc/muttrc.man muttrc.5
+			doc/mutt.man > mutt.1 || die "sed failed"
+		cp doc/muttbug.man flea.1 || die "cp failed"
+		cp doc/muttrc.man muttrc.5 || die "cp failed"
 		doman mutt.1 flea.1 muttrc.5
 	else
 		# nuke manpages that should be provided by an MTA, bug #177605
