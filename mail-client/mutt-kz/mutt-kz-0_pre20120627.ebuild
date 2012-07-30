@@ -4,14 +4,14 @@
 
 EAPI=4
 
-inherit eutils autotools
+inherit eutils autotools vcs-snapshot
 
 DESCRIPTION="A fork of mutt, the small but very powerful text-based mail client"
 HOMEPAGE="https://github.com/karelzak/mutt-kz/wiki/"
 GIT_REPO_URI="http://github.com/karelzak/${PN}"
 GIT_COMMIT="12a7ab46c9155d674cf6f249e831983647f4b47c"
 SRC_URI="${GIT_REPO_URI}/tarball/${GIT_COMMIT} -> ${P}.tar.gz"
-S="${WORKDIR}/karelzak-${PN}-${GIT_COMMIT:0:7}"
+# S="${WORKDIR}/karelzak-${PN}-${GIT_COMMIT:0:7}"
 
 LICENSE="GPL-2"
 SLOT="0"
