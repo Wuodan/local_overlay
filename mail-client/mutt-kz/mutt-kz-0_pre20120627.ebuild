@@ -110,7 +110,7 @@ src_configure() {
 		--with-curses \
 		--with-docdir="${EPREFIX}"/usr/share/doc/${PF} \
 		--with-regex \
-		--with-exec-shell=${EPREFIX}/bin/sh"
+		--with-exec-shell="${EPREFIX}"/bin/sh"
 
 	case $CHOST in
 		*-solaris*)
