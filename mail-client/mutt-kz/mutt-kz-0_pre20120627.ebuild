@@ -186,7 +186,7 @@ src_install() {
 	fi
 
 	# A newer file is provided by app-misc/mime-types. So we link it.
-	rm "${ED}"/etc/${MY_PN}/mime.types
+	rm "${ED}"/etc/${MY_PN}/mime.types || die "Failed to delete file."
 	dosym /etc/mime.types /etc/${MY_PN}/mime.types
 
 	# A man-page is always handy, so fake one
@@ -198,12 +198,9 @@ src_install() {
 			-e "s#@sysconfdir@#${EPREFIX}/etc/${MY_PN}#" \
 			-e "s#@bindir@#${EPREFIX}/usr/bin#" \
 			doc/mutt.man > mutt.1 || die "sed failed"
-		cp doc/muttbug.man flea.1 || die "cp failed"
-		# newman doc/muttbug.man flea.1
-		cp doc/muttrc.man muttrc.5 || die "cp failed"
-		# newman doc/muttrc.man muttrc.5
-		doman mutt.1 flea.1 muttrc.5
-		# doman mutt.1
+		newman doc/muttbug.man flea.1
+		newman doc/muttrc.man muttrc.5
+		doman mutt.1
 	else
 		# nuke manpages that should be provided by an MTA, bug #177605
 		rm "${ED}"/usr/share/man/man5/{mbox,mmdf}.5 \
