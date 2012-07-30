@@ -72,11 +72,10 @@ RDEPEND="${RDEPEND}
 P_NAME="mutt"
 
 src_prepare() {
-	# patches for severe warnings plus others from
-	# mail-client/mutt for gentoo's mutt tutorial
-	for p in "${FILESDIR}/${PF}"/[0-9][0-9]-*.patch ; do
-		epatch "${p}"
-	done
+	# patch for a QA severe warnings
+	epatch "${FILESDIR}/${PF}"/00-severe-warnings.patch
+	# add Gentoo's progress bar, used in the sample .muttrc
+	epatch "${FILESDIR}/${PF}"/01-progress-bar.patch
 
 	# patch version string for bug reports
 	sed -i -e 's/"Mutt %s (%s)"/"Mutt-KZ %s (%s, Gentoo '"${PVR}"')"/' \
