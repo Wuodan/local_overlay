@@ -69,7 +69,7 @@ RDEPEND="${RDEPEND}
 		crypt? ( net-mail/notmuch[crypt] )
 	)"
 
-P_NAME="mutt"
+MY_PN="mutt"
 
 src_prepare() {
 	# patch for a QA severe warning
@@ -79,7 +79,7 @@ src_prepare() {
 
 	# patch version string for bug reports
 	sed -i -e 's/"Mutt %s (%s)"/"Mutt-KZ %s (%s, Gentoo '"${PVR}"')"/' \
-		muttlib.c || die "failed patching in Gentoo version"
+		muttlib.c || die "failed patching Gentoo version"
 
 	# allow user patches
 	epatch_user
@@ -113,7 +113,7 @@ src_configure() {
 		$(use_with !notmuch mixmaster) \
 		--enable-external-dotlock \
 		--enable-nfs-fix \
-		--sysconfdir="${EPREFIX}"/etc/${P_NAME} \
+		--sysconfdir="${EPREFIX}"/etc/${MY_PN} \
 		--with-curses \
 		--with-docdir="${EPREFIX}"/usr/share/doc/${PF} \
 		--with-regex \
@@ -171,11 +171,11 @@ src_configure() {
 	einfo $myconf
 	einfo "### myconf ###"
 
-	econf ${myconf} || die "configure failed"
+	econf ${myconf}
 }
 
 src_install() {
-	make DESTDIR="${D}" install || die "install failed"
+	emake DESTDIR="${D}" install
 
 	if use mbox; then
 		insinto /etc/mutt
@@ -186,16 +186,16 @@ src_install() {
 	fi
 
 	# A newer file is provided by app-misc/mime-types. So we link it.
-	rm "${ED}"/etc/${P_NAME}/mime.types
-	dosym /etc/mime.types /etc/${P_NAME}/mime.types
+	rm "${ED}"/etc/${MY_PN}/mime.types
+	dosym /etc/mime.types /etc/${MY_PN}/mime.types
 
 	# A man-page is always handy, so fake one
 	if use !doc; then
-		make -C doc DESTDIR="${D}" muttrc.man || die
-		make the fake slightly better, bug #413405
+		emake -C doc DESTDIR="${D}" muttrc.man
+		# make the fake slightly better, bug #413405
 		sed -e 's#@docdir@/manual.txt#http://www.mutt.org/doc/devel/manual.html#' \
 			-e 's#in @docdir@,#at http://www.mutt.org/,#' \
-			-e "s#@sysconfdir@#${EPREFIX}/etc/${P_NAME}#" \
+			-e "s#@sysconfdir@#${EPREFIX}/etc/${MY_PN}#" \
 			-e "s#@bindir@#${EPREFIX}/usr/bin#" \
 			doc/mutt.man > mutt.1
 		cp doc/muttbug.man flea.1
@@ -204,7 +204,7 @@ src_install() {
 	else
 		# nuke manpages that should be provided by an MTA, bug #177605
 		rm "${ED}"/usr/share/man/man5/{mbox,mmdf}.5 \
-			|| ewarn "failed to remove files, please file a bug"
+			|| die "failed to remove files, please file a bug"
 	fi
 
 	dodoc BEWARE COPYRIGHT ChangeLog NEWS OPS* PATCHES README* TODO VERSION
