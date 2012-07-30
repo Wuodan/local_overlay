@@ -1,7 +1,3 @@
-http://article.gmane.org/gmane.mail.mutt.devel/18743
-
-Adds a "progress" color item that draws a vertical progress bar in the
-last line.
 diff --git a/PATCHES b/PATCHES
 index e69de29..785edd0 100644
 --- a/PATCHES
@@ -21,109 +17,63 @@ index 9a3a552..f7db847 100644
  };
  
 diff --git a/curs_lib.c b/curs_lib.c
-index e5a0113..3384448 100644
+index e5a0113..c5ee2e6 100644
 --- a/curs_lib.c
 +++ b/curs_lib.c
-@@ -389,6 +389,98 @@ void mutt_progress_init (progress_t* progress, const char *msg,
-         + (unsigned int) (tv.tv_usec / 1000);
+@@ -390,6 +390,52 @@ void mutt_progress_init (progress_t* progress, const char *msg,
    mutt_progress_update (progress, 0, 0);
  }
-+ 
-+static void message_bar (int percent, const char *fmt, ...)
-+{
-+  va_list ap;
-+  char buf[STRING], buf2[STRING];
-+  int w = percent * COLS / 100;
-+  size_t l;
-+
-+  va_start (ap, fmt);
-+  vsnprintf (buf, sizeof (buf), fmt, ap);
-+  l = mutt_strwidth (buf);
-+  va_end (ap);
-+
-+  mutt_format_string(buf2, sizeof (buf2),
-+		     0, COLS-2, FMT_LEFT, 0, buf, sizeof (buf), 0);
-+
-+  move (LINES - 1, 0);
-+
-+  if (l < w)
-+  {
-+    SETCOLOR(MT_COLOR_PROGRESS);
-+    addstr (buf2);
-+    w -= l;
-+    while (w--)
-+      addch(' ');
-+    SETCOLOR(MT_COLOR_NORMAL);
-+    clrtoeol ();
-+    mutt_refresh();
-+  }
-+  else
-+  {
-+    size_t bw;
-+    char ch;
-+    int off = mutt_wstr_trunc (buf2, sizeof (buf2), w, &bw);
-+
-+    ch = buf2[off];
-+    buf2[off] = 0;
-+    SETCOLOR(MT_COLOR_PROGRESS);
-+    addstr (buf2);
-+    buf2[off] = ch;
-+    SETCOLOR(MT_COLOR_NORMAL);
-+    addstr (&buf2[off]);
-+    clrtoeol ();
-+    mutt_refresh();
-+  }
-+}
-+
-+static void message_bar (int percent, const char *fmt, ...)
-+{
-+  va_list ap;
-+  char buf[STRING], buf2[STRING];
-+  int w = percent * COLS / 100;
-+  size_t l;
-+
-+  va_start (ap, fmt);
-+  vsnprintf (buf, sizeof (buf), fmt, ap);
-+  l = mutt_strwidth (buf);
-+  va_end (ap);
-+
-+  mutt_format_string(buf2, sizeof (buf2),
-+		     0, COLS-2, FMT_LEFT, 0, buf, sizeof (buf), 0);
-+
-+  move (LINES - 1, 0);
-+
-+  if (l < w)
-+  {
-+    SETCOLOR(MT_COLOR_PROGRESS);
-+    addstr (buf2);
-+    w -= l;
-+    while (w--)
-+      addch(' ');
-+    SETCOLOR(MT_COLOR_NORMAL);
-+    clrtoeol ();
-+    mutt_refresh();
-+  }
-+  else
-+  {
-+    size_t bw;
-+    char ch;
-+    int off = mutt_wstr_trunc (buf2, sizeof (buf2), w, &bw);
-+
-+    ch = buf2[off];
-+    buf2[off] = 0;
-+    SETCOLOR(MT_COLOR_PROGRESS);
-+    addstr (buf2);
-+    buf2[off] = ch;
-+    SETCOLOR(MT_COLOR_NORMAL);
-+    addstr (&buf2[off]);
-+    clrtoeol ();
-+    mutt_refresh();
-+  }
-+}
  
++static void message_bar (int percent, const char *fmt, ...)
++{
++  va_list ap;
++  char buf[STRING], buf2[STRING];
++  int w = percent * COLS / 100;
++  size_t l;
++
++  va_start (ap, fmt);
++  vsnprintf (buf, sizeof (buf), fmt, ap);
++  l = mutt_strwidth (buf);
++  va_end (ap);
++
++  mutt_format_string(buf2, sizeof (buf2),
++    0, COLS-2, FMT_LEFT, 0, buf, sizeof (buf), 0);
++
++  move (LINES - 1, 0);
++
++  if (l < w)
++  {
++    SETCOLOR(MT_COLOR_PROGRESS);
++    addstr (buf2);
++    w -= l;
++    while (w--)
++      addch(' ');
++    SETCOLOR(MT_COLOR_NORMAL);
++    clrtoeol ();
++    mutt_refresh();
++  }
++  else
++  {
++    size_t bw;
++    char ch;
++    int off = mutt_wstr_trunc (buf2, sizeof (buf2), w, &bw);
++
++    ch = buf2[off];
++    buf2[off] = 0;
++    SETCOLOR(MT_COLOR_PROGRESS);
++    addstr (buf2);
++    buf2[off] = ch;
++    SETCOLOR(MT_COLOR_NORMAL);
++    addstr (&buf2[off]);
++    clrtoeol ();
++    mutt_refresh();
++  }
++}
++
  void mutt_progress_update (progress_t* progress, long pos, int percent)
  {
-@@ -440,14 +532,14 @@ void mutt_progress_update (progress_t* progress, long pos, int percent)
+   char posstr[SHORT_STRING];
+@@ -440,16 +486,16 @@ void mutt_progress_update (progress_t* progress, long pos, int percent)
  
      if (progress->size > 0)
      {
@@ -140,8 +90,11 @@ index e5a0113..3384448 100644
 -	mutt_message ("%s %s (%d%%)", progress->msg, posstr, percent);
 +        message_bar (percent, "%s %s (%d%%)", progress->msg, posstr, percent);
        else
- 	mutt_message ("%s %s", progress->msg, posstr);
+-	mutt_message ("%s %s", progress->msg, posstr);
++        mutt_message ("%s %s", progress->msg, posstr);
      }
+   }
+ 
 diff --git a/doc/manual.xml.head b/doc/manual.xml.head
 index 0d95886..025af03 100644
 --- a/doc/manual.xml.head

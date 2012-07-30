@@ -17,3 +17,12 @@ set move=no
 # one for maildir-style folders.
 
 set index_format="%4C %Z %{%b %d} %-16.16L  %s"
+
+# set some defaults for the sidebar feature, it's integrated anyway
+set sidebar_width = 35
+set sidebar_visible = yes
+# color sidebar_new yellow default
+bind index <left> sidebar-prev
+bind index <right> sidebar-next
+bind index <space> sidebar-open
+bind index <Esc>S sidebar-toggle

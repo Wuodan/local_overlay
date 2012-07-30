@@ -15,8 +15,12 @@ EGIT_COMMIT="12a7ab46c9155d674cf6f249e831983647f4b47c"
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64"
+
+# added IUSE-DEFAULTS for sane default flags with gentoo mutt tutorial
 # TODO: implement "prefix" flag like in original mutt. Must test it first.
-IUSE="berkdb crypt debug doc gdbm gnutls gpg idn imap +notmuch mbox nls pop qdbm sasl sidebar smime smtp ssl tokyocabinet"
+# TODO: test mbox flag
+IUSE="berkdb crypt debug doc gdbm gnutls gpg idn +imap +notmuch mbox nls pop
+qdbm sasl smime +smtp ssl tokyocabinet"
 
 RDEPEND="
 	app-misc/mime-types
@@ -54,7 +58,7 @@ DEPEND="${RDEPEND}
 		app-text/docbook-xsl-stylesheets
 		dev-libs/libxml2
 		dev-libs/libxslt
-		|| ( www-client/elinks www-client/lynx www-client/w3m )
+		|| ( www-client/w3m www-client/elinks www-client/lynx )
 	)"
 # net-mail/notmuch
 RDEPEND="${RDEPEND}
@@ -62,6 +66,8 @@ RDEPEND="${RDEPEND}
 		net-mail/notmuch[mutt]
 		crypt? ( net-mail/notmuch[crypt] )
 	)"
+
+P_NAME="mutt"
 
 src_prepare() {
 	# patches for severe warnings plus others from
@@ -106,7 +112,7 @@ src_configure() {
 		$(use_with !notmuch mixmaster) \
 		--enable-external-dotlock \
 		--enable-nfs-fix \
-		--sysconfdir="${EPREFIX}"/etc/${PN} \
+		--sysconfdir="${EPREFIX}"/etc/${P_NAME} \
 		--with-curses \
 		--with-docdir="${EPREFIX}"/usr/share/doc/${PF} \
 		--with-regex \
@@ -179,8 +185,8 @@ src_install() {
 	fi
 
 	# A newer file is provided by app-misc/mime-types. So we link it.
-	rm "${ED}"/etc/${PN}/mime.types
-	dosym /etc/mime.types /etc/${PN}/mime.types
+	rm "${ED}"/etc/${P_NAME}/mime.types
+	dosym /etc/mime.types /etc/${P_NAME}/mime.types
 
 	# A man-page is always handy, so fake one
 	if use !doc; then
@@ -188,7 +194,7 @@ src_install() {
 		make the fake slightly better, bug #413405
 		sed -e 's#@docdir@/manual.txt#http://www.mutt.org/doc/devel/manual.html#' \
 			-e 's#in @docdir@,#at http://www.mutt.org/,#' \
-			-e "s#@sysconfdir@#${EPREFIX}/etc/${PN}#" \
+			-e "s#@sysconfdir@#${EPREFIX}/etc/${P_NAME}#" \
 			-e "s#@bindir@#${EPREFIX}/usr/bin#" \
 			doc/mutt.man > mutt.1
 		cp doc/muttbug.man flea.1
@@ -209,8 +215,12 @@ pkg_postinst() {
 	elog "the Gentoo QuickStart Guide to Mutt E-Mail:"
 	elog "   http://www.gentoo.org/doc/en/guide-to-mutt.xml"
 	echo
+
 	if use notmuch ; then
-		elog "TODO info about notmuch setup/new"
+		# TODO: find a config that works with notmuch, please help ;)
+		elog "Note that you can use notmuch specific mutt config file, see -F <config> in"
+		elog "\"man mutt\" and also \"man muttrc\". It's also recomended to run \"notmuch setup\""
+		elog "and \"notmuch new\"."
 		echo
 	fi
 }
