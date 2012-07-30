@@ -218,7 +218,7 @@ pkg_postinst() {
 	echo
 
 	if use notmuch ; then
-		# TODO: find a config that works with notmuch, please help ;)
+		# TODO: document a config that works out of the box with notmuch, please help ;)
 		elog "Note that you can use notmuch specific mutt config file, see -F <config> in"
 		elog "\"man mutt\" and also \"man muttrc\". It's also recomended to run \"notmuch setup\""
 		elog "and \"notmuch new\"."
