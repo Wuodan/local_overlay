@@ -74,8 +74,8 @@ P_NAME="mutt"
 src_prepare() {
 	# patch for a QA severe warning
 	# add Gentoo's progress bar, used in the sample .muttrc
-	epatch "${FILESDIR}/${PF}"/00-severe-warnings.patch \
-		"${FILESDIR}/${PF}"/01-progress-bar.patch
+	epatch "${FILESDIR}/${P}"-severe-warnings.patch \
+		"${FILESDIR}/${P}"-progress-bar.patch
 
 	# patch version string for bug reports
 	sed -i -e 's/"Mutt %s (%s)"/"Mutt-KZ %s (%s, Gentoo '"${PVR}"')"/' \
