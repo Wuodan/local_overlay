@@ -72,7 +72,7 @@ RDEPEND="${RDEPEND}
 P_NAME="mutt"
 
 src_prepare() {
-	# patch for a QA severe warnings
+	# patch for a QA severe warning
 	epatch "${FILESDIR}/${PF}"/00-severe-warnings.patch
 	# add Gentoo's progress bar, used in the sample .muttrc
 	epatch "${FILESDIR}/${PF}"/01-progress-bar.patch
