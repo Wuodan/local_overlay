@@ -1,3 +1,5 @@
+Adds the Gentoo specific progress bar that is used in Gentoo's Mutt guide.
+Proposed upstreams in https://github.com/karelzak/mutt-kz/pull/23
 diff --git a/PATCHES b/PATCHES
 index e69de29..785edd0 100644
 --- a/PATCHES

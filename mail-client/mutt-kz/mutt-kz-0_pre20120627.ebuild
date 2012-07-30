@@ -61,6 +61,8 @@ DEPEND="${RDEPEND}
 		|| ( www-client/w3m www-client/elinks www-client/lynx )
 	)"
 # net-mail/notmuch
+# unsure on mutt flag for net-mail/notmuch
+# unsure on crypt dependency too
 RDEPEND="${RDEPEND}
 	notmuch? (
 		net-mail/notmuch[mutt]
@@ -166,9 +168,9 @@ src_configure() {
 		myconf="${myconf} --with-homespool=Maildir"
 	fi
 
-	echo "### myconf ###"
-	echo $myconf
-	echo "### myconf ###"
+	einfo "### myconf ###"
+	einfo $myconf
+	einfo "### myconf ###"
 
 	econf ${myconf} || die "configure failed"
 }
