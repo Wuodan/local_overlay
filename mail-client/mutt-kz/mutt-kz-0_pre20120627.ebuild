@@ -29,7 +29,6 @@ RDEPEND="
 		!gnutls? ( ssl? ( >=dev-libs/openssl-0.9.6 ) )
 		sasl?    ( >=dev-libs/cyrus-sasl-2 )
 	)
-	notmuch? ( net-mail/notmuch )
 	pop?     (
 		gnutls?  ( >=net-libs/gnutls-1.0.17 )
 		!gnutls? ( ssl? ( >=dev-libs/openssl-0.9.6 ) )
@@ -57,9 +56,19 @@ DEPEND="${RDEPEND}
 		dev-libs/libxslt
 		|| ( www-client/elinks www-client/lynx www-client/w3m )
 	)"
+# net-mail/notmuch
+RDEPEND="${RDEPEND}
+	notmuch? (
+		net-mail/notmuch[mutt]
+		crypt? ( net-mail/notmuch[crypt] )
+	)"
 
 src_prepare() {
-	epatch "${FILESDIR}/${PF}_severe-warnings.patch"
+	# patches for severe warnings plus others from
+	# mail-client/mutt for gentoo's mutt tutorial
+	for p in "${FILESDIR}/${PF}"/[0-9][0-9]-*.patch ; do
+		epatch "${p}"
+	done
 
 	# patch version string for bug reports
 	sed -i -e 's/"Mutt %s (%s)"/"Mutt-KZ %s (%s, Gentoo '"${PVR}"')"/' \
@@ -99,7 +108,7 @@ src_configure() {
 		--enable-nfs-fix \
 		--sysconfdir="${EPREFIX}"/etc/${PN} \
 		--with-curses \
-		--with-docdir="${EPREFIX}"/usr/share/doc/${PN}-${PVR} \
+		--with-docdir="${EPREFIX}"/usr/share/doc/${PF} \
 		--with-regex \
 		--with-exec-shell=${EPREFIX}/bin/sh"
 
@@ -200,6 +209,10 @@ pkg_postinst() {
 	elog "the Gentoo QuickStart Guide to Mutt E-Mail:"
 	elog "   http://www.gentoo.org/doc/en/guide-to-mutt.xml"
 	echo
+	if use notmuch ; then
+		elog "TODO info about notmuch setup/new"
+		echo
+	fi
 }
 
 pkg_info()
