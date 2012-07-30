@@ -19,7 +19,7 @@ KEYWORDS="~amd64"
 # added IUSE-DEFAULTS for sane default flags with gentoo mutt tutorial
 # TODO: implement "prefix" flag like in original mutt. Must test it first.
 # TODO: test mbox flag
-IUSE="berkdb crypt debug doc gdbm gnutls gpg idn +imap +notmuch mbox nls pop
+IUSE="berkdb crypt debug doc gdbm gnutls gpg idn +imap notmuch mbox nls pop
 qdbm sasl smime +smtp ssl tokyocabinet"
 
 RDEPEND="
