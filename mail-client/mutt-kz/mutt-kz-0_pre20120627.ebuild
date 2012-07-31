@@ -27,36 +27,36 @@ qdbm sasl smime +smtp ssl tokyocabinet"
 # vanilla mutt gives some flags preference over others instead of this!
 # mutex for "gnutls ssl"
 REQUIRED_USE="${REQUIRED_USE}
-	gnutls?	( !ssl )
-	ssl?	( !gnutls )"
+	gnutls? ( !ssl )
+	ssl? ( !gnutls )"
 # mutex for "berkdb gdbm qdbm tokyocabinet"
 # no mutex for berkdm and gdbm, they are most likely in profile
 # TODO: find out if any of these is even used with notmuch
 REQUIRED_USE="${REQUIRED_USE}
-	qdbm?			( ^^ ( berkdb gdbm qdbm tokyocabinet ) )
-	tokyocabinet?	( ^^ ( berkdb gdbm qdbm tokyocabinet ) )"
+	qdbm? ( ^^ ( berkdb gdbm qdbm tokyocabinet ) )
+	tokyocabinet? ( ^^ ( berkdb gdbm qdbm tokyocabinet ) )"
 
 # dependencies used several times
 RDEPEND_PROTOCOL="
-	gnutls?	( >=net-libs/gnutls-1.0.17 )
-	ssl?	( >=dev-libs/openssl-0.9.6 )
-	sasl?	( >=dev-libs/cyrus-sasl-2 )"
+	gnutls? ( >=net-libs/gnutls-1.0.17 )
+	ssl? ( >=dev-libs/openssl-0.9.6 )
+	sasl? ( >=dev-libs/cyrus-sasl-2 )"
 
 RDEPEND="
 	app-misc/mime-types
 	!mail-client/mutt
 	>=sys-libs/ncurses-5.2
-	gpg?     ( >=app-crypt/gpgme-0.9.0 )
-	idn?     ( net-dns/libidn )
-	imap?    ( ${RDEPEND_PROTOCOL} )
-	pop?     ( ${RDEPEND_PROTOCOL} )
-	smime?   ( >=dev-libs/openssl-0.9.6 )
-	smtp?    ( ${RDEPEND_PROTOCOL} )
-	tokyocabinet?  ( dev-db/tokyocabinet )
+	gpg? ( >=app-crypt/gpgme-0.9.0 )
+	idn? ( net-dns/libidn )
+	imap? ( ${RDEPEND_PROTOCOL} )
+	pop? ( ${RDEPEND_PROTOCOL} )
+	smime? ( >=dev-libs/openssl-0.9.6 )
+	smtp? ( ${RDEPEND_PROTOCOL} )
+	tokyocabinet? ( dev-db/tokyocabinet )
 	!tokyocabinet? (
-		qdbm?  ( dev-db/qdbm )
+		qdbm? ( dev-db/qdbm )
 		!qdbm? (
-			gdbm?  ( sys-libs/gdbm )
+			gdbm? ( sys-libs/gdbm )
 			!gdbm? ( berkdb? ( >=sys-libs/db-4 ) )
 		)
 	)"
@@ -185,10 +185,10 @@ src_install() {
 	emake DESTDIR="${D}" install
 
 	if use mbox; then
-		insinto /etc/mutt
+		insinto /etc/"${MY_PN}"
 		newins "${FILESDIR}"/Muttrc.mbox Muttrc
 	else
-		insinto /etc/mutt
+		insinto /etc/"${MY_PN}"
 		doins "${FILESDIR}"/Muttrc
 	fi
 
@@ -241,5 +241,5 @@ pkg_postinst() {
 
 pkg_info()
 {
-	einfo "`mutt -v`"
+	einfo "`"${MY_PN}" -v`"
 }
