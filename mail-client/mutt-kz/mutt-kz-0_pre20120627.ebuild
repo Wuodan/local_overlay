@@ -36,21 +36,21 @@ REQUIRED_USE="${REQUIRED_USE}
 	tokyocabinet? ( ^^ ( berkdb gdbm qdbm tokyocabinet ) )"
 
 # dependencies used several times
-CDEPEND_PROTOCOL="
+RDEPEND_PROTOCOL="
 	gnutls?  ( >=net-libs/gnutls-1.0.17 )
 	!gnutls? ( ssl? ( >=dev-libs/openssl-0.9.6 ) )
 	sasl?    ( >=dev-libs/cyrus-sasl-2 )"
 
-CDEPEND="
+RDEPEND="
 	app-misc/mime-types
 	!mail-client/mutt
 	>=sys-libs/ncurses-5.2
 	gpg?     ( >=app-crypt/gpgme-0.9.0 )
 	idn?     ( net-dns/libidn )
-	imap?    ( ${CDEPEND_PROTOCOL} )
-	pop?     ( ${CDEPEND_PROTOCOL} )
+	imap?    ( ${RDEPEND_PROTOCOL} )
+	pop?     ( ${RDEPEND_PROTOCOL} )
 	smime?   ( >=dev-libs/openssl-0.9.6 )
-	smtp?    ( ${CDEPEND_PROTOCOL} )
+	smtp?    ( ${RDEPEND_PROTOCOL} )
 	tokyocabinet?  ( dev-db/tokyocabinet )
 	!tokyocabinet? (
 		qdbm?  ( dev-db/qdbm )
@@ -61,13 +61,12 @@ CDEPEND="
 	)"
 # unsure on mutt flag for net-mail/notmuch
 # unsure on crypt dependency too
-CDEPEND="${CDEPEND}
+RDEPEND="${RDEPEND}
 	notmuch? (
 		net-mail/notmuch[mutt]
 		crypt? ( net-mail/notmuch[crypt] )
 	)"
-RDEPEND="${CDEPEND}"
-DEPEND="${CDEPEND}
+DEPEND="${RDEPEND}
 	net-mail/mailbase
 	doc? (
 		app-text/docbook-xsl-stylesheets
