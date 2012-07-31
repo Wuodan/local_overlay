@@ -239,7 +239,6 @@ pkg_postinst() {
 	fi
 }
 
-pkg_info()
-{
+pkg_info() {
 	einfo "`"${MY_PN}" -v`"
 }
