@@ -14,7 +14,7 @@ SRC_URI="${GIT_REPO_URI}/tarball/${GIT_COMMIT} -> ${P}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="~amd64"
+KEYWORDS="~amd64 ~x86"
 
 # added IUSE-DEFAULTS for sane default flags with gentoo mutt tutorial
 # activated "+imap +smtp"
@@ -23,25 +23,11 @@ KEYWORDS="~amd64"
 IUSE="berkdb crypt debug doc gdbm gnutls gpg idn +imap notmuch mbox nls pop
 qdbm sasl smime +smtp ssl tokyocabinet"
 
-# prohibit use flag combinations which make no sense
-# vanilla mutt gives some flags preference over others instead of this!
-# mutex for "gnutls ssl"
-REQUIRED_USE="${REQUIRED_USE}
-	gnutls? ( !ssl )
-	ssl? ( !gnutls )"
-# mutex for "berkdb gdbm qdbm tokyocabinet"
-# no mutex for berkdm and gdbm, they are most likely in profile
-# TODO: find out if any of these is even used with notmuch
-REQUIRED_USE="${REQUIRED_USE}
-	qdbm? ( ^^ ( berkdb gdbm qdbm tokyocabinet ) )
-	tokyocabinet? ( ^^ ( berkdb gdbm qdbm tokyocabinet ) )"
-
 # dependencies used several times
 RDEPEND_PROTOCOL="
 	gnutls? ( >=net-libs/gnutls-1.0.17 )
-	ssl? ( >=dev-libs/openssl-0.9.6 )
+	!gnutls? ( ssl? ( >=dev-libs/openssl-0.9.6 ) )
 	sasl? ( >=dev-libs/cyrus-sasl-2 )"
-
 RDEPEND="
 	app-misc/mime-types
 	!mail-client/mutt
@@ -60,15 +46,16 @@ RDEPEND="
 			!gdbm? ( berkdb? ( >=sys-libs/db-4 ) )
 		)
 	)"
+# unsure if mailbase only belongs to DEPEND
 # unsure on mutt flag for net-mail/notmuch
 # unsure on crypt dependency too
 RDEPEND="${RDEPEND}
+	net-mail/mailbase
 	notmuch? (
 		net-mail/notmuch[mutt]
 		crypt? ( net-mail/notmuch[crypt] )
 	)"
 DEPEND="${RDEPEND}
-	net-mail/mailbase
 	doc? (
 		app-text/docbook-xsl-stylesheets
 		dev-libs/libxml2
@@ -129,54 +116,50 @@ src_configure() {
 	case $CHOST in
 		*-solaris*)
 			# Solaris has no flock in the standard headers
-			myconf="${myconf} --enable-fcntl --disable-flock"
+			myconf+=" --enable-fcntl --disable-flock"
 		;;
 		*)
-			myconf="${myconf} --disable-fcntl --enable-flock"
+			myconf+=" --disable-fcntl --enable-flock"
 		;;
 	esac
 
 	# mutt prioritizes gdbm over bdb, so we will too.
 	# hcache feature requires at least one database is in USE.
 	if use tokyocabinet; then
-		myconf="${myconf} --enable-hcache \
+		myconf+=" --enable-hcache \
 			--with-tokyocabinet --without-qdbm --without-gdbm --without-bdb"
 	elif use qdbm; then
-		myconf="${myconf} --enable-hcache \
+		myconf+=" --enable-hcache \
 			--without-tokyocabinet --with-qdbm --without-gdbm --without-bdb"
 	elif use gdbm ; then
-		myconf="${myconf} --enable-hcache \
+		myconf+=" --enable-hcache \
 			--without-tokyocabinet --without-qdbm --with-gdbm --without-bdb"
 	elif use berkdb; then
-		myconf="${myconf} --enable-hcache \
+		myconf+=" --enable-hcache \
 			--without-tokyocabinet --without-qdbm --without-gdbm --with-bdb"
 	else
-		myconf="${myconf} --disable-hcache \
+		myconf+=" --disable-hcache \
 			--without-tokyocabinet --without-qdbm --without-gdbm --without-bdb"
 	fi
 
 	# there's no need for gnutls, ssl or sasl without socket support
 	if use pop || use imap || use smtp ; then
 		if use gnutls; then
-			myconf="${myconf} --with-gnutls"
+			myconf+=" --with-gnutls"
 		elif use ssl; then
-			myconf="${myconf} --with-ssl"
+			myconf+=" --with-ssl"
 		fi
 		# not sure if this should be mutually exclusive with the other two
-		myconf="${myconf} $(use_with sasl)"
+		myconf+=" $(use_with sasl)"
 	else
-		myconf="${myconf} --without-gnutls --without-ssl --without-sasl"
+		myconf+=" --without-gnutls --without-ssl --without-sasl"
 	fi
 
 	if use mbox; then
-		myconf="${myconf} --with-mailpath=${EPREFIX}/var/spool/mail"
+		myconf+=" --with-mailpath=${EPREFIX}/var/spool/mail"
 	else
-		myconf="${myconf} --with-homespool=Maildir"
+		myconf+=" --with-homespool=Maildir"
 	fi
-
-	einfo "### myconf ###"
-	einfo $myconf
-	einfo "### myconf ###"
 
 	econf ${myconf}
 }
@@ -223,12 +206,6 @@ pkg_postinst() {
 	elog "the Gentoo QuickStart Guide to Mutt E-Mail:"
 	elog "   http://www.gentoo.org/doc/en/guide-to-mutt.xml"
 	echo
-
-	if use berkdb && use gdbm; then
-		# berkdb and gdbm are likely to be activated both through profile
-		elog "Info: both berkdb and gdbm are active - gdbm is used."
-		echo
-	fi
 
 	if use notmuch ; then
 		# TODO: document a config that works out of the box with notmuch, please help ;)
