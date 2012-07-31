@@ -27,19 +27,20 @@ qdbm sasl smime +smtp ssl tokyocabinet"
 # vanilla mutt gives some flags preference over others instead of this!
 # mutex for "gnutls ssl"
 REQUIRED_USE="${REQUIRED_USE}
-	gnutls? ( !ssl ) ssl? ( !gnutls )"
+	gnutls?	( !ssl )
+	ssl?	( !gnutls )"
 # mutex for "berkdb gdbm qdbm tokyocabinet"
 # no mutex for berkdm and gdbm, they are most likely in profile
 # TODO: find out if any of these is even used with notmuch
 REQUIRED_USE="${REQUIRED_USE}
-	qdbm? ( ^^ ( berkdb gdbm qdbm tokyocabinet ) )
-	tokyocabinet? ( ^^ ( berkdb gdbm qdbm tokyocabinet ) )"
+	qdbm?			( ^^ ( berkdb gdbm qdbm tokyocabinet ) )
+	tokyocabinet?	( ^^ ( berkdb gdbm qdbm tokyocabinet ) )"
 
 # dependencies used several times
 RDEPEND_PROTOCOL="
-	gnutls?  ( >=net-libs/gnutls-1.0.17 )
-	!gnutls? ( ssl? ( >=dev-libs/openssl-0.9.6 ) )
-	sasl?    ( >=dev-libs/cyrus-sasl-2 )"
+	gnutls?	( >=net-libs/gnutls-1.0.17 )
+	ssl?	( >=dev-libs/openssl-0.9.6 )
+	sasl?	( >=dev-libs/cyrus-sasl-2 )"
 
 RDEPEND="
 	app-misc/mime-types
