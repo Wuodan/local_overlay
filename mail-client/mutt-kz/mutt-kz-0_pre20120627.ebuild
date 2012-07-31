@@ -35,22 +35,22 @@ REQUIRED_USE="${REQUIRED_USE}
 	qdbm? ( ^^ ( berkdb gdbm qdbm tokyocabinet ) )
 	tokyocabinet? ( ^^ ( berkdb gdbm qdbm tokyocabinet ) )"
 
-# var used several times in RDEPEND
-RDEPEND_PROTOCOL="
+# dependencies used several times
+CDEPEND_PROTOCOL="
 	gnutls?  ( >=net-libs/gnutls-1.0.17 )
 	!gnutls? ( ssl? ( >=dev-libs/openssl-0.9.6 ) )
 	sasl?    ( >=dev-libs/cyrus-sasl-2 )"
 
-RDEPEND="
+CDEPEND="
 	app-misc/mime-types
 	!mail-client/mutt
 	>=sys-libs/ncurses-5.2
 	gpg?     ( >=app-crypt/gpgme-0.9.0 )
 	idn?     ( net-dns/libidn )
-	imap?    ( ${RDEPEND_PROTOCOL} )
-	pop?     ( ${RDEPEND_PROTOCOL} )
+	imap?    ( ${CDEPEND_PROTOCOL} )
+	pop?     ( ${CDEPEND_PROTOCOL} )
 	smime?   ( >=dev-libs/openssl-0.9.6 )
-	smtp?    ( ${RDEPEND_PROTOCOL} )
+	smtp?    ( ${CDEPEND_PROTOCOL} )
 	tokyocabinet?  ( dev-db/tokyocabinet )
 	!tokyocabinet? (
 		qdbm?  ( dev-db/qdbm )
@@ -59,21 +59,21 @@ RDEPEND="
 			!gdbm? ( berkdb? ( >=sys-libs/db-4 ) )
 		)
 	)"
-DEPEND="${RDEPEND}
+# unsure on mutt flag for net-mail/notmuch
+# unsure on crypt dependency too
+CDEPEND="${CDEPEND}
+	notmuch? (
+		net-mail/notmuch[mutt]
+		crypt? ( net-mail/notmuch[crypt] )
+	)"
+RDEPEND="${CDEPEND}"
+DEPEND="${CDEPEND}
 	net-mail/mailbase
 	doc? (
 		app-text/docbook-xsl-stylesheets
 		dev-libs/libxml2
 		dev-libs/libxslt
 		|| ( www-client/w3m www-client/elinks www-client/lynx )
-	)"
-# net-mail/notmuch
-# unsure on mutt flag for net-mail/notmuch
-# unsure on crypt dependency too
-RDEPEND="${RDEPEND}
-	notmuch? (
-		net-mail/notmuch[mutt]
-		crypt? ( net-mail/notmuch[crypt] )
 	)"
 
 MY_PN="mutt"
