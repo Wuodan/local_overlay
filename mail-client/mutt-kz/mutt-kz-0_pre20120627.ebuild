@@ -17,11 +17,25 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 # added IUSE-DEFAULTS for sane default flags with gentoo mutt tutorial
+# activated "+imap +smtp"
 # TODO: implement "prefix" flag like in original mutt. Must test it first.
 # TODO: test mbox flag
 IUSE="berkdb crypt debug doc gdbm gnutls gpg idn +imap notmuch mbox nls pop
 qdbm sasl smime +smtp ssl tokyocabinet"
 
+# prohibit use flag combinations which make no sense
+# vanilla mutt gives some flags preference over others instead of this!
+# mutex for "gnutls ssl"
+REQUIRED_USE="${REQUIRED_USE}
+	gnutls? ( !ssl ) ssl? ( !gnutls )"
+# mutex for "berkdb gdbm qdbm tokyocabinet"
+# no mutex for berkdm and gdbm, they are most likely in profile
+# TODO: find out if any of these is even used with notmuch
+REQUIRED_USE="${REQUIRED_USE}
+	qdbm? ( ^^ ( berkdb gdbm qdbm tokyocabinet ) )
+	tokyocabinet? ( ^^ ( berkdb gdbm qdbm tokyocabinet ) )"
+
+# var used several times in RDEPEND
 RDEPEND_PROTOCOL="
 	gnutls?  ( >=net-libs/gnutls-1.0.17 )
 	!gnutls? ( ssl? ( >=dev-libs/openssl-0.9.6 ) )
@@ -209,6 +223,12 @@ pkg_postinst() {
 	elog "the Gentoo QuickStart Guide to Mutt E-Mail:"
 	elog "   http://www.gentoo.org/doc/en/guide-to-mutt.xml"
 	echo
+
+	if use berkdb && use gdbm; then
+		# berkdb and gdbm are likely to be activated both through profile
+		elog "Info: both berkdb and gdbm are active - gdbm is used."
+		echo
+	fi
 
 	if use notmuch ; then
 		# TODO: document a config that works out of the box with notmuch, please help ;)
