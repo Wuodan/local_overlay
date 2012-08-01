@@ -16,12 +16,10 @@ LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
 
-# added IUSE-DEFAULTS for sane default flags with gentoo mutt tutorial
-# activated "+imap +smtp"
 # TODO: implement "prefix" flag like in original mutt. Must test it first.
 # TODO: test mbox flag
-IUSE="berkdb crypt debug doc gdbm gnutls gpg idn +imap notmuch mbox nls pop
-qdbm sasl smime +smtp ssl tokyocabinet"
+IUSE="berkdb crypt debug doc gdbm gnutls gpg idn imap notmuch mbox nls pop
+qdbm sasl smime smtp ssl tokyocabinet"
 
 # dependencies used several times
 RDEPEND_PROTOCOL="
