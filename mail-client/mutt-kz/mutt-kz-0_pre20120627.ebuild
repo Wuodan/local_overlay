@@ -165,11 +165,10 @@ src_configure() {
 src_install() {
 	emake DESTDIR="${D}" install
 
+	insinto /etc/"${MY_PN}"
 	if use mbox; then
-		insinto /etc/"${MY_PN}"
 		newins "${FILESDIR}"/Muttrc.mbox Muttrc
 	else
-		insinto /etc/"${MY_PN}"
 		doins "${FILESDIR}"/Muttrc
 	fi
 
