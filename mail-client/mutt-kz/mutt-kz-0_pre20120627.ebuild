@@ -194,7 +194,7 @@ src_install() {
 			|| die "failed to remove files, please file a bug"
 	fi
 
-	dodoc BEWARE COPYRIGHT ChangeLog NEWS OPS* PATCHES README* TODO VERSION
+	dodoc BEWARE ChangeLog NEWS OPS* PATCHES README* TODO
 }
 
 pkg_postinst() {
