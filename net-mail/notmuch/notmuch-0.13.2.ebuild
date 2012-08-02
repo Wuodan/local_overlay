@@ -46,6 +46,7 @@ RDEPEND="${CDEPEND}
 	zsh-completion? ( app-shells/zsh )
 	"
 
+DOCS=( AUTHORS NEWS README )
 SITEFILE="50${PN}-gentoo.el"
 MY_LD_LIBRARY_PATH="${WORKDIR}/${P}/lib"
 
@@ -59,8 +60,6 @@ bindings() {
 }
 
 pkg_setup() {
-	# is this the correct place to set DOCS var?
-	use doc && DOCS=( AUTHORS NEWS README )
 	if use emacs; then
 		elisp-need-emacs 23 || die "Emacs version too low"
 	fi
@@ -71,19 +70,11 @@ src_prepare() {
 	default
 	bindings python distutils_src_prepare
 
-	# prepvent doc from being installed by distutils_src_install
-	use doc || rm README || die "rm failed"
-
 	if use deliver; then
 		pushd contrib/notmuch-deliver || die
 		mv README.mkd README-deliver.mkd || die "mv failed"
-		if use doc; then
-			sed -i 's/README.mkd/README-deliver.mkd/' Makefile.am || \
-				die "sed failed"
-		else
-			# prevent doc from being built & installed
-			sed -i '/README.mkd/d' Makefile.am || die "sed failed"
-		fi
+		sed -i 's/README.mkd/README-deliver.mkd/' Makefile.am || \
+			die "sed failed"
 		AT_M4DIR="m4"
 		eautoreconf
 		popd || die
@@ -163,7 +154,7 @@ src_install() {
 		doman notmuch-mutt.1
 		insinto /etc/mutt
 		doins notmuch-mutt.rc
-		use doc && dodoc README-mutt
+		dodoc README-mutt
 		popd || die
 	fi
 
