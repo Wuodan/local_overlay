@@ -1,4 +1,4 @@
-# Copyright 1999-2012 Gentoo Foundation
+# Copyright 1999-2011 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
@@ -12,13 +12,13 @@ MY_P=${P/_rc/-rc}
 MY_PV=v$(get_version_component_range 1-2)
 DESCRIPTION="Stable kernel pre-release wifi subsystem backport"
 HOMEPAGE="http://wireless.kernel.org/en/users/Download/stable"
-CRAZY_VERSIONING="2-snpc"
+CRAZY_VERSIONING="1-snpc"
 SRC_URI="http://www.orbit-lab.org/kernel/${PN}-3.0-stable/${MY_PV}/${MY_P}-${CRAZY_VERSIONING}.tar.bz2"
 
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~arm ~x86"
-IUSE="atheros_obey_crda atheros_alx bluetooth b43 b44 debugfs debug-driver full-debug injection livecd loadmodules noleds"
+IUSE="atheros_obey_crda bluetooth b43 b44 debugfs debug-driver full-debug injection livecd loadmodules noleds"
 
 DEPEND="!net-wireless/compat-wireless-builder"
 RDEPEND="${DEPEND}
@@ -94,17 +94,14 @@ src_prepare() {
 	#CONFIG_B43LEGACY=
 	fi
 
-#	Build alx module instead of atl1c (required for Atheros AR8161 and AR8162)
-	if use atheros_alx; then
-		sed -i 's/CONFIG_ALX=n/CONFIG_ALX=m/' "${S}"/config.mk || die "Failed to endable Atheros ALX driver"
-		sed -i 's/CONFIG_ATL1C=m/CONFIG_ATL1C=n/' "${S}"/config.mk || die "Failed to disable Atheros ATL1C driver"
-	fi
-
 #	fixme: there are more bluethooth settings in the config.mk
 	if ! use bluetooth; then
 		sed -i '/CONFIG_COMPAT_BLUETOOTH=/s/ */#/' "${S}"/config.mk || die "unable to disable bluetooth driver"
 		sed -i '/CONFIG_COMPAT_BLUETOOTH_MODULES=/s/ */#/' "${S}"/config.mk || die "unable to bluetooth B44 driver"
 	fi
+
+	#enable alx atheros ethernet driver
+	sed -i 's/CONFIG_ALX=n/CONFIG_ALX=m/' "${S}"/config.mk || die "Failed to endable Atheros ALX driver"
 
 	# replace calls to /usr/src/linux/Makefile
 	# actually the call is to a symlink and it gets "kernelversion"
