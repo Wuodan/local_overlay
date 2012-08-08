@@ -1,0 +1,42 @@
+--- Makefile	2012-06-20 00:24:27.000000000 +0200
++++ /root/work/compat-wireless-3.5-rc3-2-snpc/Makefile	2012-08-07 21:06:00.648000151 +0200
+@@ -110,6 +110,7 @@
+ $(CREL_CHECK):
+ 	@# Force to regenerate compat autoconf
+ 	+@./compat/scripts/gen-compat-config.sh > $(COMPAT_CONFIG)
++	@echo "rm CREL_CHECK"
+ 	@rm -f $(CONFIG_CHECK)
+ 	+@./scripts/check_config.sh
+ 	@md5sum $(COMPAT_CONFIG_CW) > $(CONFIG_CHECK)
+@@ -131,6 +132,7 @@
+ 
+ btuninstall:
+ 	@# New location, matches upstream
++	@echo "rm btuninstall"
+ 	@rm -rf $(KLIB)/$(KMODDIR)/net/bluetooth/
+ 	@rm -rf $(KLIB)/$(KMODDIR)/drivers/bluetooth/
+ 	@# Lets only remove the stuff we are sure we are providing
+@@ -140,6 +142,7 @@
+ 
+ btclean:
+ 	$(MAKE) -C /lib/modules/$(shell uname -r)/build M=$(PWD) BT=TRUE clean
++	@echo "rm btclean"
+ 	@rm -f $(CREL_PRE)*
+ 
+ install: uninstall install-modules install-scripts
+@@ -214,6 +217,7 @@
+ 
+ uninstall:
+ 	@# New location, matches upstream
++	@echo "rm uninstall"
+ 	@rm -rf $(KLIB)/$(KMODDIR)/compat/
+ 	@rm -rf $(KLIB)/$(KMODDIR)/net/mac80211/
+ 	@rm -rf $(KLIB)/$(KMODDIR)/net/rfkill/
+@@ -237,6 +241,7 @@
+ 	@if [ -d net -a -d $(KLIB_BUILD) ]; then \
+ 		$(MAKE) -C $(KLIB_BUILD) M=$(PWD) clean ;\
+ 	fi
++	@echo "rm clean"
+ 	@rm -f $(CREL_PRE)*
+ unload:
+ 	@./scripts/unload.sh

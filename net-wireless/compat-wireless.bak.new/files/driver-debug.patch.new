@@ -1,0 +1,253 @@
+--- /root/config.mk	2012-08-08 02:23:05.307998530 +0200
++++ config.mk	2012-08-08 02:23:45.656000113 +0200
+@@ -10,11 +10,11 @@
+ 
+ ifneq ($(wildcard $(KLIB_BUILD)/Makefile),)
+ 
+-KERNEL_VERSION := $(shell $(MAKE) -C $(KLIB_BUILD) kernelversion | sed -n 's/^\([0-9]\)\..*/\1/p')
++KERNEL_VERSION := $(echo 3.3.8-gentoo | sed -n 's/^\([0-9]\)\..*/\1/p')
+ 
+ ifneq ($(KERNEL_VERSION),2)
+ else
+-KERNEL_26SUBLEVEL := $(shell $(MAKE) -C $(KLIB_BUILD) kernelversion | sed -n 's/^2\.6\.\([0-9]\+\).*/\1/p')
++KERNEL_26SUBLEVEL := $(echo 3.3.8-gentoo | sed -n 's/^2\.6\.\([0-9]\+\).*/\1/p')
+ endif
+ 
+ ifdef CONFIG_COMPAT_KERNEL_2_6_24
+@@ -99,8 +99,8 @@
+ ifeq ($(CONFIG_BT),y)
+ # we'll ignore compiling bluetooth
+ else
+- export CONFIG_COMPAT_BLUETOOTH=y
+- export CONFIG_COMPAT_BLUETOOTH_MODULES=m
++#export CONFIG_COMPAT_BLUETOOTH=y
++#export CONFIG_COMPAT_BLUETOOTH_MODULES=m
+  export CONFIG_HID_GENERIC=m
+ endif
+ endif #CONFIG_COMPAT_KERNEL_2_6_27
+@@ -149,15 +149,15 @@
+ export CONFIG_COMPAT_MAC80211_DRIVER_API_TRACER=y
+ endif #CONFIG_COMPAT_KERNEL_2_6_33
+ 
+-# export CONFIG_MAC80211_DEBUGFS=y
++export CONFIG_MAC80211_DEBUGFS=y
+ # export CONFIG_MAC80211_NOINLINE=y
+-# export CONFIG_MAC80211_VERBOSE_DEBUG=y
+-# export CONFIG_MAC80211_HT_DEBUG=y
+-# export CONFIG_MAC80211_TKIP_DEBUG=y
+-# export CONFIG_MAC80211_IBSS_DEBUG=y
+-# export CONFIG_MAC80211_VERBOSE_PS_DEBUG=y
+-# export CONFIG_MAC80211_VERBOSE_MPL_DEBUG=y
+-# export CONFIG_MAC80211_VERBOSE_MHWMP_DEBUG=y
++ export CONFIG_MAC80211_VERBOSE_DEBUG=y
++ export CONFIG_MAC80211_HT_DEBUG=y
++ export CONFIG_MAC80211_TKIP_DEBUG=y
++ export CONFIG_MAC80211_IBSS_DEBUG=y
++ export CONFIG_MAC80211_VERBOSE_PS_DEBUG=y
++ export CONFIG_MAC80211_VERBOSE_MPL_DEBUG=y
++ export CONFIG_MAC80211_VERBOSE_MHWMP_DEBUG=y
+ # export CONFIG_MAC80211_VERBOSE_TDLS_DEBUG
+ # export CONFIG_MAC80211_DEBUG_COUNTERS=y
+ 
+@@ -180,7 +180,7 @@
+ 
+ export CONFIG_CFG80211=m
+ export CONFIG_CFG80211_DEFAULT_PS=y
+-# export CONFIG_CFG80211_DEBUGFS=y
++export CONFIG_CFG80211_DEBUGFS=y
+ # export CONFIG_NL80211_TESTMODE=y
+ # export CONFIG_CFG80211_DEVELOPER_WARNINGS=y
+ export CONFIG_CFG80211_REG_DEBUG=y
+@@ -191,7 +191,7 @@
+ export CONFIG_LIB80211_CRYPT_WEP=m
+ export CONFIG_LIB80211_CRYPT_CCMP=m
+ export CONFIG_LIB80211_CRYPT_TKIP=m
+-# export CONFIG_LIB80211_DEBUG=y
++ export CONFIG_LIB80211_DEBUG=y
+ 
+ export CONFIG_BT=m
+ export CONFIG_BT_RFCOMM=m
+@@ -247,14 +247,14 @@
+ export CONFIG_MAC80211_HWSIM=m
+ 
+ export CONFIG_ATH5K=m
+-# export CONFIG_ATH5K_DEBUG=y
++ export CONFIG_ATH5K_DEBUG=y
+ # export CONFIG_ATH5K_TRACER=y
+ # export CONFIG_ATH5K_AHB=y
+ 
+ export CONFIG_ATH9K=m
+ export CONFIG_ATH9K_HW=m
+ export CONFIG_ATH9K_COMMON=m
+-# export CONFIG_ATH9K_DEBUGFS=y
++export CONFIG_ATH9K_DEBUGFS=y
+ # export CONFIG_ATH9K_AHB=y
+ # export CONFIG_ATH9K_PKTLOG=y
+ 
+@@ -270,7 +270,7 @@
+ 
+ ifndef CONFIG_COMPAT_KERNEL_2_6_27
+ export CONFIG_ATH6KL=m
+-# export CONFIG_ATH6KL_DEBUG=y
++ export CONFIG_ATH6KL_DEBUG=y
+ endif #CONFIG_COMPAT_KERNEL_2_6_27
+ 
+ # PCI Drivers
+@@ -281,21 +281,21 @@
+ 
+ export CONFIG_IWLWIFI=m
+ export CONFIG_IWLWIFI_P2P=y
+-# export CONFIG_IWLWIFI_DEBUG=y
+-# export CONFIG_IWLWIFI_DEBUGFS=y
++ export CONFIG_IWLWIFI_DEBUG=y
++export CONFIG_IWLWIFI_DEBUGFS=y
+ # export CONFIG_IWLWIFI_DEVICE_TRACING=y
+ # export CONFIG_IWLWIFI_DEBUG_EXPERIMENTAL_UCODE=y
+ 
+ export CONFIG_IWLEGACY=m
+ export CONFIG_COMPAT_IWL4965=m
+ export CONFIG_IWL3945=m
+-# export CONFIG_IWLEGACY_DEBUG=y
+-# export CONFIG_IWLEGACY_DEBUGFS=y
++ export CONFIG_IWLEGACY_DEBUG=y
++export CONFIG_IWLEGACY_DEBUGFS=y
+ 
+ 
+-export CONFIG_B43=m
++#export CONFIG_B43=m
+ export CONFIG_B43_HWRNG=y
+-export CONFIG_B43_PCI_AUTOSELECT=y
++#export CONFIG_B43_PCI_AUTOSELECT=y
+ ifdef CONFIG_PCMCIA
+ export CONFIG_B43_PCMCIA=y
+ endif #CONFIG_PCMCIA
+@@ -306,7 +306,7 @@
+ export CONFIG_B43_PHY_N=y
+ export CONFIG_B43_PHY_HT=y
+ # export CONFIG_B43_PHY_LCN=y
+-# export CONFIG_B43_DEBUG=y
++ export CONFIG_B43_DEBUG=y
+ 
+ export CONFIG_B43LEGACY=m
+ export CONFIG_B43LEGACY_HWRNG=y
+@@ -314,24 +314,24 @@
+ ifdef CONFIG_MAC80211_LEDS
+ export CONFIG_B43LEGACY_LEDS=y
+ endif #CONFIG_MAC80211_LEDS
+-# export CONFIG_B43LEGACY_DEBUG=y
++ export CONFIG_B43LEGACY_DEBUG=y
+ export CONFIG_B43LEGACY_DMA=y
+ export CONFIG_B43LEGACY_PIO=y
+ 
+ ifdef CONFIG_WIRELESS_EXT
+ # The Intel ipws
+ export CONFIG_LIBIPW=m
+-# export CONFIG_LIBIPW_DEBUG=y
++ export CONFIG_LIBIPW_DEBUG=y
+ 
+ export CONFIG_IPW2100=m
+ export CONFIG_IPW2100_MONITOR=y
+-# export CONFIG_IPW2100_DEBUG=y
++ export CONFIG_IPW2100_DEBUG=y
+ export CONFIG_IPW2200=m
+ export CONFIG_IPW2200_MONITOR=y
+ export CONFIG_IPW2200_RADIOTAP=y
+ export CONFIG_IPW2200_PROMISCUOUS=y
+ export CONFIG_IPW2200_QOS=y
+-# export CONFIG_IPW2200_DEBUG=y
++ export CONFIG_IPW2200_DEBUG=y
+ # The above enables use a second interface prefixed 'rtap'.
+ #           Example usage:
+ #
+@@ -356,7 +356,7 @@
+ ifdef CONFIG_PCMCIA
+ export CONFIG_SSB_PCMCIAHOST=y
+ endif #CONFIG_PCMCIA
+-# export CONFIG_SSB_DEBUG=y
++ export CONFIG_SSB_DEBUG=y
+ export CONFIG_SSB_DRIVER_PCICORE=y
+ export CONFIG_B43_SSB=y
+ endif #CONFIG_SSB
+@@ -364,14 +364,14 @@
+ export CONFIG_BCMA=m
+ export CONFIG_BCMA_BLOCKIO=y
+ export CONFIG_BCMA_HOST_PCI=y
+-# export CONFIG_BCMA_DEBUG=y
++ export CONFIG_BCMA_DEBUG=y
+ export CONFIG_B43_BCMA=y
+ export CONFIG_B43_BCMA_EXTRA=y
+ 
+ export CONFIG_P54_PCI=m
+ 
+-export CONFIG_B44=m
+-export CONFIG_B44_PCI=y
++#export CONFIG_B44=m
++#export CONFIG_B44_PCI=y
+ 
+ export CONFIG_RTL8180=m
+ 
+@@ -453,7 +453,7 @@
+ ifdef CONFIG_USB
+ ifndef CONFIG_COMPAT_KERNEL_2_6_29
+ export CONFIG_COMPAT_ZD1211RW=m
+-# export CONFIG_ZD1211RW_DEBUG=y
++ export CONFIG_ZD1211RW_DEBUG=y
+ endif #CONFIG_COMPAT_KERNEL_2_6_29
+ 
+ # Sorry, rndis_wlan uses cancel_work_sync which is new and can't be done in compat...
+@@ -495,7 +495,7 @@
+ ifdef CONFIG_MAC80211_LEDS
+ export CONFIG_CARL9170_LEDS=y
+ endif #CONFIG_MAC80211_LEDS
+-# export CONFIG_CARL9170_DEBUGFS=y
++export CONFIG_CARL9170_DEBUGFS=y
+ export CONFIG_CARL9170_WPC=y
+ endif #CONFIG_COMPAT_KERNEL_2_6_29
+ 
+@@ -505,7 +505,7 @@
+ export CONFIG_COMPAT_USB_URB_THREAD_FIX=y
+ 
+ export CONFIG_ATH9K_HTC=m
+-# export CONFIG_ATH9K_HTC_DEBUGFS=y
++export CONFIG_ATH9K_HTC_DEBUGFS=y
+ 
+ export CONFIG_ATH6KL_USB=m
+ 
+@@ -593,7 +593,7 @@
+ endif #CONFIG_COMPAT_KERNEL_2_6_32
+ 
+ export CONFIG_IWM=m
+-# export CONFIG_IWM_DEBUG=y
++ export CONFIG_IWM_DEBUG=y
+ # export CONFIG_IWM_TRACING=y
+ 
+ export CONFIG_BT_HCIBTSDIO=m
+@@ -623,8 +623,8 @@
+ export CONFIG_RT2X00_LIB_LEDS=y
+ endif #CONFIG_LEDS_CLASS
+ endif #CONFIG_COMPAT_KERNEL_2_6_25
+-# export CONFIG_RT2X00_DEBUG=y
+-# export CONFIG_RT2X00_LIB_DEBUGFS=y
++ export CONFIG_RT2X00_DEBUG=y
++export CONFIG_RT2X00_LIB_DEBUGFS=y
+ endif
+ 
+ # p54
+@@ -635,7 +635,7 @@
+ 
+ # Atheros
+ export CONFIG_ATH_COMMON=m
+-# export CONFIG_ATH_DEBUG=y
++ export CONFIG_ATH_DEBUG=y
+ 
+ export CONFIG_BRCMUTIL=m
+ # export CONFIG_BRCMDBG=y
+@@ -669,7 +669,7 @@
+ export CONFIG_LIBERTAS_THINFIRM=m
+ export CONFIG_LIBERTAS=m
+ export CONFIG_LIBERTAS_MESH=y
+-# export CONFIG_LIBERTAS_DEBUG=y
++ export CONFIG_LIBERTAS_DEBUG=y
+ endif
+ endif #CONFIG_COMPAT_KERNEL_2_6_27
+ 
