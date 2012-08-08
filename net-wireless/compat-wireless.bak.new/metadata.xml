@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
-<pkgmetadata>
-<use>
-<flag name="atheros_alx">Use module alx instead of atl1c. Required for chipsets AR8161 and AR8162.</flag>
-<flag name="injection">Add patches for better wifi injection support</flag>
-</use>
-</pkgmetadata>
