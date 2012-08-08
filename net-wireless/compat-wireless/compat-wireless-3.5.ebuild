@@ -108,9 +108,7 @@ src_prepare() {
 	sed -i "s/shell \$(MAKE) -C \$(KLIB_BUILD) kernelversion/echo ${KV_FULL}/g" config.mk || die "sed failed"
 	sed -i "s/make -C \$KLIB_BUILD kernelversion/echo ${KV_FULL}/g" scripts/gen-compat-autoconf.sh || die "sed failed"
 
-	# patches for hardened
-	# epatch "${FILESDIR}"/HARDENED.patch
-	epatch "${FILESDIR}"/HARDENED_EXTRACT.patch
+	epatch "${FILESDIR}"/hardened.patch
 }
 
 src_compile() {
