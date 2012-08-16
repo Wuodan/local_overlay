@@ -14,7 +14,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
 
-DEPEND="dev-libs/libxml2"
+DEPEND="dev-libs/libxml2 dev-libs/popt"
 RDEPEND="${DEPEND}"
 
 pkg_setup(){
