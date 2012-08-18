@@ -14,8 +14,11 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
 
-DEPEND="dev-libs/libxml2 dev-libs/popt"
-RDEPEND="${DEPEND}"
+RDEPEND="
+	dev-libs/libxml2
+	dev-libs/popt"
+DEPEND="${RDEPEND}
+	virtual/pkgconfig"
 
 pkg_setup(){
 	tc-export CC

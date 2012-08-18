@@ -10,9 +10,10 @@
 +CFLAGS ?= -g3 -O2 -Wall -Werror
 +CC ?= gcc
  
- CFLAGS += $(shell pkg-config --cflags libxml-2.0)
+-CFLAGS += $(shell pkg-config --cflags libxml-2.0)
 -LFLAGS += -lpopt $(shell pkg-config --libs libxml-2.0)
-+LIBS += -lpopt $(shell pkg-config --libs libxml-2.0)
++CFLAGS += $(shell pkg-config --cflags libxml-2.0 popt)
++LIBS += $(shell pkg-config --libs libxml-2.0 popt)
  
  all : dumpet
  
