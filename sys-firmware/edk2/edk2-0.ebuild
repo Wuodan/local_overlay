@@ -37,11 +37,14 @@ SLOT="0"
 KEYWORDS="~amd64"
 IUSE="hello-world kvm shell"
 
-RDEPEND=""
 DEPEND="
 	app-arch/unzip
 	sys-libs/glibc
-	kvm? ( sys-power/iasl )"
+	kvm? (
+		>=app-emulation/qemu-kvm-0.9.1
+		sys-power/iasl
+	)"
+RDEPEND="kvm? ( >=app-emulation/qemu-kvm-0.9.1 )"
 
 S="$(dirname ${S})"
 
@@ -117,19 +120,21 @@ src_install(){
 	if use hello-world; then
 		# dodir "/usr/share/${PN}/hello-world"
 		insinto "/usr/share/${PN}/hello-world"
-		doins MdeModule/RELEASE_GCC45/X64/HelloWorld.efi
-	fi
-
-	if use kvm; then
-		# dodir "/usr/share/${PN}/kvm"
-		insinto "/usr/share/${PN}/kvm"
-		doins Build/OvmfX64/RELEASE_GCC45/FV/OVMF.fd
-		doins Build/OvmfX64/RELEASE_GCC45/FV/CirrusLogic5446.rom
+		doins Build/MdeModule/RELEASE_GCC45/X64/HelloWorld.efi
 	fi
 
 	if use shell; then
 		# dodir "/usr/share/${PN}/shell"
 		insinto "/usr/share/${PN}/shell"
-		doins Shell/RELEASE_GCC45/X64/Shell.efi
+		newins Build/Shell/RELEASE_GCC45/X64/Shell.efi Shellx64.efi
+	fi
+
+	if use kvm; then
+		# dodir "/usr/share/${PN}/kvm"
+		insinto "/usr/share/${PN}/kvm"
+		newins Build/OvmfX64/RELEASE_GCC45/FV/OVMF.fd uefibios.bin
+		newins Build/OvmfX64/RELEASE_GCC45/FV/CirrusLogic5446.rom vgabios-cirrus.bin
+		insinto /usr/share/qemu
+		dosym "../${PN}/kvm/uefibios.bin" uefibios.bin || die "WTF"
 	fi
 }
