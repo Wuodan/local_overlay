@@ -6,7 +6,7 @@ EAPI=4
 
 PYTHON_DEPEND="2"
 PYTHON_USE_WITH="sqlite"
-inherit python subversion toolchain-funcs
+inherit python subversion toolchain-funcs flag-o-matic
 
 DESCRIPTION="A modern, feature-rich, cross-platform firmware development env. for the UEFI and PI specifications"
 HOMEPAGE="http://sourceforge.net/apps/mediawiki/tianocore"
@@ -86,6 +86,31 @@ src_unpack(){
 	done
 }
 
+src_prepare(){
+	# errors occur with -O -O1 -O2 but not with -O3
+	filter-flags -O*
+	# patch compiler flags
+	sed -i -r -e "s/^(CC = ).*$/\1`tc-getCC`/" \
+		-e "s/^(CXX = ).*$/\1`tc-getCXX`/" \
+		-e "s/^(AS = ).*$/\1`tc-getAS`/" \
+		-e "s/^(AR = ).*$/\1`tc-getAR`/" \
+		-e "s/^(LD = ).*$/\1`tc-getLD`/" \
+		-e "s/^(CFLAGS = ).*$/\1`echo "${CFLAGS}"`/" \
+		-e "s/^(LFLAGS = ).*$/\1`echo "${LFLAGS}"`/" \
+		BaseTools/Source/C/Makefiles/header.makefile || die "Failed to patch compiler flags"
+	for file in dlg/makefile antlr/makefile support/genmk/makefile; do
+		sed -i -r -e "s/^(CC *= *).*$/\1`tc-getCC`/" \
+			-e "s/^(CXX *= *).*$/\1`echo "${CFLAGS}"`/" \
+			"BaseTools/Source/C/VfrCompile/Pccts/${file}" || die "Failed to patch compiler flags in ${file}"
+	done
+	sed -i -r -e "s/^(DEFINE GCC44_ALL_CC_FLAGS *=.*) -Werror /\1 `echo "${CFLAGS}"` /" \
+		-e "s/gcc$/`tc-getCC`/" \
+		-e "s/as$/`tc-getAS`/" \
+		-e "s/ar$/`tc-getAR`/" \
+		-e "s/ld$/`tc-getLD`/" \
+		BaseTools/Conf/tools_def.template || die "Failed to patch compiler flags"
+}
+
 src_compile(){
 	# $ARCH is used, preserve old value
 	# Gentoo uses 'amd64', the package needs 'X64'
@@ -106,7 +131,7 @@ src_compile(){
 	if use hello-world; then
 		build --arch "${ARCH}" --platform MdeModulePkg/MdeModulePkg.dsc --tagname "${tagname}" \
 			--module MdeModulePkg/Application/HelloWorld/HelloWorld.inf \
-			--buildtarget RELEASE -n 9 || die "Failed to build HelloWorld"
+			--buildtarget RELEASE || die "Failed to build HelloWorld"
 		# create startup.nsh for kvm testing
 		echo "fs0:\HelloWorld.efi" > Build/MdeModule/RELEASE_GCC45/X64/startup.nsh || die "Failed to
 		create startup.nsh"
@@ -114,13 +139,13 @@ src_compile(){
 
 	if use kvm; then
 		build --arch "${ARCH}" --platform OvmfPkg/OvmfPkgX64.dsc --tagname "${tagname}" \
-			--buildtarget RELEASE -n 9 || die "Failed to build UEFI-shell"
+			--buildtarget RELEASE || die "Failed to build UEFI-shell"
 	fi
 
 	if use shell; then
 		build --arch "${ARCH}" --platform ShellPkg/ShellPkg.dsc --tagname "${tagname}" \
 			--module ShellPkg/Application/Shell/Shell.inf \
-			--buildtarget RELEASE -n 9 || die "Failed to build UEFI-shell"
+			--buildtarget RELEASE || die "Failed to build UEFI-shell"
 	fi
 
 	# reset $ARCH
