@@ -20,7 +20,7 @@ ESVN_REPO_URI="http://edk2.svn.sourceforge.net/svnroot/edk2/trunk/edk2"
 LICENSE="BSD"
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE="hello-world kvm shell"
+IUSE="+hello-world kvm shell"
 REQUIRED_USE="|| ( hello-world kvm shell )"
 
 DEPEND="
