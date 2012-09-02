@@ -15,28 +15,13 @@ REPO_REV="@11337"
 # REPO_REV="@13452"
 # REPO_REV="@13692"
 ESVN_REPO_URI="http://edk2.svn.sourceforge.net/svnroot/edk2/trunk/edk2"
-REPO_PKG="
-		MdePkg
-		MdeModulePkg
-"
-use kvm && REPO_PKG+="
-		OvmfPkg
-		OptionRomPkg
-		UefiCpuPkg
-		IntelFrameworkModulePkg
-		PcAtChipsetPkg
-		FatBinPkg
-		EdkShellBinPkg
-		IntelFrameworkPkg
-	"
-( use kvm || use shell ) && REPO_PKG+="
-		ShellPkg
-	"
+
 
 LICENSE="BSD"
 SLOT="0"
 KEYWORDS="~amd64"
 IUSE="hello-world kvm shell"
+REQUIRED_USE="|| ( hello-world kvm shell )"
 
 DEPEND="
 	app-arch/unzip
@@ -61,13 +46,27 @@ S="$(dirname ${S})"
 # /usr/include/bits/string3.h:85:70: warning: call to void* __builtin___memset_chk(void*, int, long unsigned int, long unsigned int) will always overflow destination buffer
 
 pkg_setup() {
-	if use !hello-world && use !kvm && use !shell; then
-		die "Select at least one module to be built!"
-	fi
 	python_set_active_version 2
 }
 
 src_unpack(){
+	local repo_pkg="
+			MdePkg
+			MdeModulePkg
+	"
+	use kvm && repo_pkg+="
+			OvmfPkg
+			OptionRomPkg
+			UefiCpuPkg
+			IntelFrameworkModulePkg
+			PcAtChipsetPkg
+			FatBinPkg
+			EdkShellBinPkg
+			IntelFrameworkPkg
+		"
+	( use kvm || use shell ) && repo_pkg+="
+			ShellPkg
+		"
 	einfo "### Be patient! ###"
 	einfo "Downloading individual folders is slow, but really decreases total download size."
 	einfo "### Be patient! ###"
@@ -117,7 +116,7 @@ src_compile(){
 	local oldARCH="${ARCH}"
 	ARCH='X64'
 
-	# build the cross-compiler
+	# build the BaseTools
 	emake -C BaseTools
 
 	export EDK_TOOLS_PATH="${S}"/BaseTools
@@ -169,7 +168,7 @@ src_install(){
 		newins Build/OvmfX64/RELEASE_GCC45/FV/OVMF.fd uefibios.bin
 		newins Build/OvmfX64/RELEASE_GCC45/FV/CirrusLogic5446.rom vgabios-cirrus.bin
 		# insinto /usr/share/qemu
-		dosym "../${PN}/kvm/uefibios.bin" /usr/share/qemu/uefibios.bin || die "WTF"
+		dosym "../${PN}/kvm/uefibios.bin" /usr/share/qemu/uefibios.bin
 	fi
 }
 
