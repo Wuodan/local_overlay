@@ -167,7 +167,6 @@ src_install(){
 		insinto "/usr/share/${PN}/kvm"
 		newins Build/OvmfX64/RELEASE_GCC45/FV/OVMF.fd uefibios.bin
 		newins Build/OvmfX64/RELEASE_GCC45/FV/CirrusLogic5446.rom vgabios-cirrus.bin
-		# insinto /usr/share/qemu
 		dosym "../${PN}/kvm/uefibios.bin" /usr/share/qemu/uefibios.bin
 	fi
 }
