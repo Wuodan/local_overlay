@@ -13,5 +13,6 @@ environment for the UEFI and PI specifications.
 <pkg>app-emulation/qemu-kvm</pkg>.</flag>
 <flag name="kvm">Creates the uefi-bios for <pkg>app-emulation/qemu-kvm</pkg>.</flag>
 <flag name="shell">Creates the uefi-shell.</flag>
+<flag name="development">DO NOT SET THIS. FOR EBUILD DEVELOPMENT ONLY !</flag>
 </use>
 </pkgmetadata>

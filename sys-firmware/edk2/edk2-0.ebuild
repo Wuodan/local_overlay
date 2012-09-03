@@ -16,11 +16,10 @@ REPO_REV="@11337"
 # REPO_REV="@13692"
 ESVN_REPO_URI="http://edk2.svn.sourceforge.net/svnroot/edk2/trunk/edk2"
 
-
 LICENSE="BSD"
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE="+hello-world kvm shell"
+IUSE="+hello-world kvm shell development"
 REQUIRED_USE="|| ( hello-world kvm shell )"
 
 DEPEND="
@@ -36,6 +35,7 @@ RDEPEND="kvm? ( >=app-emulation/qemu-kvm-0.9.1 )"
 
 S="$(dirname ${S})"
 
+TAGNAME="GCC$(gcc-major-version)$(gcc-minor-version)"
 # TODO:
 # fix this:
 # In function ‘void* memset(void*, int, size_t)’,
@@ -50,6 +50,14 @@ pkg_setup() {
 }
 
 src_unpack(){
+	# for debugging, the download takes to long
+	if use development; then
+		cp -ar "${FILESDIR}/../../edk-src" . || die "cp failed"
+		mv edk-src/* . || die "mv failed"
+		rmdir edk-src || die "rmdir failed"
+		return
+	fi
+
 	local repo_pkg="
 			MdePkg
 			MdeModulePkg
@@ -80,7 +88,7 @@ src_unpack(){
 		subversion_fetch "${ESVN_REPO_URI}/${dir}${REPO_REV}" "${dir}"
 	done
 
-	for dir in ${REPO_PKG}; do
+	for dir in ${repo_pkg}; do
 		subversion_fetch "${ESVN_REPO_URI}/${dir}${REPO_REV}" "${dir}"
 	done
 }
@@ -88,25 +96,32 @@ src_unpack(){
 src_prepare(){
 	# errors occur with -O -O1 -O2 but not with -O3
 	filter-flags -O*
+	# TODO AS=gcc ...why I don't know
 	# patch compiler flags
-	sed -i -r -e "s/^(CC = ).*$/\1`tc-getCC`/" \
+	sed -i -r \
+		-e "s/^(CC = ).*$/\1`tc-getCC`/" \
 		-e "s/^(CXX = ).*$/\1`tc-getCXX`/" \
 		-e "s/^(AS = ).*$/\1`tc-getAS`/" \
 		-e "s/^(AR = ).*$/\1`tc-getAR`/" \
 		-e "s/^(LD = ).*$/\1`tc-getLD`/" \
-		-e "s/^(CFLAGS = ).*$/\1`echo "${CFLAGS}"`/" \
-		-e "s/^(LFLAGS = ).*$/\1`echo "${LFLAGS}"`/" \
+		-e "s/ -Werror//" \
+		-e "s/^(CFLAGS = )/\1`echo "${CFLAGS}"` /" \
+		-e "s/^(LFLAGS = )/\1`echo "${LFLAGS}"` /" \
 		BaseTools/Source/C/Makefiles/header.makefile || die "Failed to patch compiler flags"
 	for file in dlg/makefile antlr/makefile support/genmk/makefile; do
-		sed -i -r -e "s/^(CC *= *).*$/\1`tc-getCC`/" \
+		sed -i -r \
+			-e "s/^(CC *= *).*$/\1`tc-getCC`/" \
 			-e "s/^(CXX *= *).*$/\1`echo "${CFLAGS}"`/" \
 			"BaseTools/Source/C/VfrCompile/Pccts/${file}" || die "Failed to patch compiler flags in ${file}"
 	done
-	sed -i -r -e "s/^(DEFINE GCC44_ALL_CC_FLAGS *=.*) -Werror /\1 `echo "${CFLAGS}"` /" \
-		-e "s/gcc$/`tc-getCC`/" \
-		-e "s/as$/`tc-getAS`/" \
-		-e "s/ar$/`tc-getAR`/" \
-		-e "s/ld$/`tc-getLD`/" \
+	# filter our -march, building for kvm guest!
+	filter-flags -march*
+	sed -i -r \
+		-e "s/gcc[[:space:]]*$/`tc-getCC`/" \
+		-e "s/as[[:space:]]*$/`tc-getAS`/" \
+		-e "s/ar[[:space:]]*$/`tc-getAR`/" \
+		-e "s/ld[[:space:]]*$/`tc-getLD`/" \
+		-e "s/^(DEFINE GCC44_ALL_CC_FLAGS *=)(.*) -Werror /\1 `echo "${CFLAGS}"` \2 /" \
 		BaseTools/Conf/tools_def.template || die "Failed to patch compiler flags"
 }
 
@@ -117,7 +132,7 @@ src_compile(){
 	ARCH='X64'
 
 	# build the BaseTools
-	emake -C BaseTools
+	MAKEOPTS+="-j1" emake -C BaseTools
 
 	export EDK_TOOLS_PATH="${S}"/BaseTools
 	# this mainly appends to $PATH
@@ -126,9 +141,8 @@ src_compile(){
 	# build using the generated cross-compiler
 	# for a list of options, run 'build --help' or look at BaseTools/Source/Python/build/build.py MyOptionParser()
 	# TODO: -n X should be number of CPU+1. See no effect of it so far
-	local tagname="GCC$(gcc-major-version)$(gcc-minor-version)"
 	if use hello-world; then
-		build --arch "${ARCH}" --platform MdeModulePkg/MdeModulePkg.dsc --tagname "${tagname}" \
+		build --arch "${ARCH}" --platform MdeModulePkg/MdeModulePkg.dsc --tagname "${TAGNAME}" \
 			--module MdeModulePkg/Application/HelloWorld/HelloWorld.inf \
 			--buildtarget RELEASE || die "Failed to build HelloWorld"
 		# create startup.nsh for kvm testing
@@ -137,12 +151,12 @@ src_compile(){
 	fi
 
 	if use kvm; then
-		build --arch "${ARCH}" --platform OvmfPkg/OvmfPkgX64.dsc --tagname "${tagname}" \
+		build --arch "${ARCH}" --platform OvmfPkg/OvmfPkgX64.dsc --tagname "${TAGNAME}" \
 			--buildtarget RELEASE || die "Failed to build UEFI-shell"
 	fi
 
 	if use shell; then
-		build --arch "${ARCH}" --platform ShellPkg/ShellPkg.dsc --tagname "${tagname}" \
+		build --arch "${ARCH}" --platform ShellPkg/ShellPkg.dsc --tagname "${TAGNAME}" \
 			--module ShellPkg/Application/Shell/Shell.inf \
 			--buildtarget RELEASE || die "Failed to build UEFI-shell"
 	fi
@@ -154,8 +168,8 @@ src_compile(){
 src_install(){
 	if use hello-world; then
 		insinto "/usr/share/${PN}/hello-world"
-		doins Build/MdeModule/RELEASE_GCC45/X64/HelloWorld.efi
-		doins Build/MdeModule/RELEASE_GCC45/X64/startup.nsh
+		doins "Build/MdeModule/RELEASE_${TAGNAME}/X64/HelloWorld.efi"
+		doins "Build/MdeModule/RELEASE_${TAGNAME}/X64/startup.nsh"
 	fi
 
 	if use shell; then
