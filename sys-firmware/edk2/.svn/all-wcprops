@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/3996/portage/trunk/sys-firmware/edk2
+END
+metadata.xml
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/3996/portage/trunk/sys-firmware/edk2/metadata.xml
+END
+Manifest
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/3996/portage/trunk/sys-firmware/edk2/Manifest
+END
+edk2-9999-r11337.ebuild
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/3996/portage/trunk/sys-firmware/edk2/edk2-9999-r11337.ebuild
+END

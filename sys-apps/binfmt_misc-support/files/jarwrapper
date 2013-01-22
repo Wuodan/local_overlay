@@ -1,0 +1,5 @@
+#!/bin/bash
+# /usr/local/java/bin/jarwrapper - the wrapper for binfmt_misc/jar
+# copied from https://www.kernel.org/doc/Documentation/java.txt
+
+java -jar $1
