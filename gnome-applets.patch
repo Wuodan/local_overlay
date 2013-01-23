@@ -1,0 +1,10 @@
+--- /usr/portage/gnome-base/gnome-applets/gnome-applets-3.4.1.ebuild	2012-12-10 03:01:16.000000000 +0100
++++ /usr/local/portage/gnome-base/gnome-applets/gnome-applets-3.4.1.ebuild	2013-01-23 16:24:48.801044193 +0100
+@@ -36,6 +36,7 @@
+ 	>=dev-libs/libxml2-2.5.0
+ 	>=x11-themes/gnome-icon-theme-2.15.91
+ 	>=dev-libs/libgweather-2.91.0
++	<dev-libs/libgweather-3.5:2
+ 	x11-libs/libX11
+ 
+ 	gnome?	(

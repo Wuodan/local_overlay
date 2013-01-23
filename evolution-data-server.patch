@@ -1,0 +1,13 @@
+--- /usr/portage/gnome-extra/evolution-data-server/evolution-data-server-3.4.4.ebuild	2012-11-25 21:01:16.000000000 +0100
++++ /usr/local/portage/gnome-extra/evolution-data-server/evolution-data-server-3.4.4.ebuild	2013-01-23 16:38:55.522008567 +0100
+@@ -42,7 +42,9 @@
+ 	introspection? ( >=dev-libs/gobject-introspection-0.9.12 )
+ 	kerberos? ( virtual/krb5 )
+ 	ldap? ( >=net-nds/openldap-2 )
+-	weather? ( >=dev-libs/libgweather-2.90.0:2 )
++	weather? (
++		>=dev-libs/libgweather-2.90.0:2
++		<dev-libs/libgweather-3.5:2 )
+ "
+ DEPEND="${RDEPEND}
+ 	dev-util/fix-la-relink-command

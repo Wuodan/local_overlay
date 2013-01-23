@@ -1,0 +1,25 @@
+libgweather renamed some files, see:
+http://git.gnome.org/browse/libgweather/commit/?id=c92d71b772c23b8dcdaf1e5baea8a1bba890c4da
+
+This causes problems when a package includes these files like:
+#include <libgweather/weather.h>
+while after the rename, "weather.h" would be "gweather-weather.h".
+
+Example:
+Downgrading from evolution-3.6.2-r1 to evolution-3.4.4 - fails because libgweather still has a newer version with the files renamed.
+
+Investigation:
+I grepped the gentoo tree for all dependencies on libgweather, then checked the packages for the problem.
+Packages depending on libgweather:
+gnome-base/gnome-applets
+gnome-base/gnome-panels
+gnome-extra/evolution-data-server
+gnome-extra/gnome-clocks
+mail-client/evolution
+
+Of these, only gnome-extra/gnome-clocks was unaffected.
+
+
+Additional changes:
+For gnome-base/gnome-panel-3.4.2.1:
+Changed the restriction on gnome-base/dconf, since it does not build with >v0.14, see bug #452648.
