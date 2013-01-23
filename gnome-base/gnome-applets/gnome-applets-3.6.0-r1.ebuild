@@ -28,7 +28,7 @@ RDEPEND="
 	dev-libs/atk
 	>=dev-libs/glib-2.22:2
 	>=gnome-base/gconf-2.8:2
-	>=gnome-base/gnome-panel-2.91.91
+	>=gnome-base/gnome-panel-3.5
 	x11-libs/cairo
 	>=x11-libs/libxklavier-4
 	>=x11-libs/libwnck-2.91.0:3
