@@ -1,0 +1,33 @@
+--- compat-drivers-3.8-rc7-1-u.orig/include/net/bluetooth/bluetooth.h	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/include/net/bluetooth/bluetooth.h	2013-02-14 18:28:06.852075342 +0100
+@@ -206,7 +206,7 @@
+         struct file_operations   fops;
+         int (* custom_seq_show)(struct seq_file *, void *);
+ #endif
+-};
++} __no_const;
+ 
+ int  bt_sock_register(int proto, const struct net_proto_family *ops);
+ int  bt_sock_unregister(int proto);
+--- compat-drivers-3.8-rc7-1-u.orig/include/net/mac80211.h	2013-02-11 00:31:59.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/include/net/mac80211.h	2013-02-14 18:35:03.692047288 +0100
+@@ -2652,7 +2652,7 @@
+ 				     struct ieee80211_chanctx_conf *ctx);
+ 
+ 	void (*restart_complete)(struct ieee80211_hw *hw);
+-};
++} __no_const;
+ 
+ /**
+  * ieee80211_alloc_hw -  Allocate a new hardware device
+--- compat-drivers-3.8-rc7-1-u.orig/net/wireless/core.h	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/net/wireless/core.h	2013-02-14 19:01:25.736940543 +0100
+@@ -28,7 +28,7 @@
+ 	struct mutex mtx;
+ 
+ 	/* rfkill support */
+-	struct rfkill_ops rfkill_ops;
++	rfkill_ops_no_const rfkill_ops;
+ 	struct rfkill *rfkill;
+ 	struct work_struct rfkill_sync;
+ 
