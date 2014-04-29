@@ -10,9 +10,8 @@ environment for the UEFI and PI specifications.
 </longdescription>
 <use>
 <flag name="hello-world">Creates a HelloWorld.efi, ready to use with
-<pkg>app-emulation/qemu-kvm</pkg>.</flag>
-<flag name="kvm">Creates the uefi-bios for <pkg>app-emulation/qemu-kvm</pkg>.</flag>
+<pkg>app-emulation/qemu</pkg>.</flag>
+<flag name="qemu">Creates the uefi-bios for <pkg>app-emulation/qemu</pkg>.</flag>
 <flag name="shell">Creates the uefi-shell.</flag>
-<flag name="development">DO NOT SET THIS. FOR EBUILD DEVELOPMENT ONLY !</flag>
 </use>
 </pkgmetadata>
