@@ -1,0 +1,1 @@
+/var/lib/layman/pentoo/eclass/compat-drivers-3.7.eclass

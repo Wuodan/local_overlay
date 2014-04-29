@@ -1,0 +1,10 @@
+--- /usr/portage/gnome-base/gnome-panel/gnome-panel-3.4.2.1.ebuild	2012-10-16 06:01:15.000000000 +0200
++++ /usr/local/portage/gnome-base/gnome-panel/gnome-panel-3.4.2.1.ebuild	2013-01-23 16:27:04.626038502 +0100
+@@ -19,6 +19,7 @@
+ 
+ RDEPEND=">=dev-libs/glib-2.31.14:2
+ 	>=dev-libs/libgweather-2.91:2
++	<dev-libs/libgweather-3.5:2
+ 	dev-libs/libxml2:2
+ 	gnome-base/dconf
+ 	>=gnome-base/gconf-2.6.1:2[introspection?]

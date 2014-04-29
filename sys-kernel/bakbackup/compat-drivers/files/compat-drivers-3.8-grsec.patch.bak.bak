@@ -1,0 +1,211 @@
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/mac80211_hwsim.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/mac80211_hwsim.c	2013-02-12 21:39:38.242631480 +0100
+@@ -2062,25 +2062,27 @@
+ 
+ 	if (channels > 1) {
+ 		hwsim_if_comb.num_different_channels = channels;
+-		mac80211_hwsim_ops.hw_scan = mac80211_hwsim_hw_scan;
+-		mac80211_hwsim_ops.cancel_hw_scan =
++		pax_open_kernel();
++		*(void **)&mac80211_hwsim_ops.hw_scan = mac80211_hwsim_hw_scan;
++		*(void **)&mac80211_hwsim_ops.cancel_hw_scan =
+ 			mac80211_hwsim_cancel_hw_scan;
+-		mac80211_hwsim_ops.sw_scan_start = NULL;
+-		mac80211_hwsim_ops.sw_scan_complete = NULL;
+-		mac80211_hwsim_ops.remain_on_channel =
++		*(void **)&mac80211_hwsim_ops.sw_scan_start = NULL;
++		*(void **)&mac80211_hwsim_ops.sw_scan_complete = NULL;
++		*(void **)&mac80211_hwsim_ops.remain_on_channel =
+ 			mac80211_hwsim_roc;
+-		mac80211_hwsim_ops.cancel_remain_on_channel =
++		*(void **)&mac80211_hwsim_ops.cancel_remain_on_channel =
+ 			mac80211_hwsim_croc;
+-		mac80211_hwsim_ops.add_chanctx =
++		*(void **)&mac80211_hwsim_ops.add_chanctx =
+ 			mac80211_hwsim_add_chanctx;
+-		mac80211_hwsim_ops.remove_chanctx =
++		*(void **)&mac80211_hwsim_ops.remove_chanctx =
+ 			mac80211_hwsim_remove_chanctx;
+-		mac80211_hwsim_ops.change_chanctx =
++		*(void **)&mac80211_hwsim_ops.change_chanctx =
+ 			mac80211_hwsim_change_chanctx;
+-		mac80211_hwsim_ops.assign_vif_chanctx =
++		*(void **)&mac80211_hwsim_ops.assign_vif_chanctx =
+ 			mac80211_hwsim_assign_vif_chanctx;
+-		mac80211_hwsim_ops.unassign_vif_chanctx =
++		*(void **)&mac80211_hwsim_ops.unassign_vif_chanctx =
+ 			mac80211_hwsim_unassign_vif_chanctx;
++		pax_close_kernel();
+ 	}
+ 
+ 	spin_lock_init(&hwsim_radio_lock);
+--- compat-drivers-3.8-rc7-1-u.orig/net/bluetooth/af_bluetooth.c	2013-02-11 00:31:59.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/net/bluetooth/af_bluetooth.c	2013-02-12 22:07:04.971703708 +0100
+@@ -647,11 +647,13 @@
+ 
+ 	sk_list->custom_seq_show = seq_show;
+ 
+-	sk_list->fops.owner     = module;
+-	sk_list->fops.open      = bt_seq_open;
+-	sk_list->fops.read      = seq_read;
+-	sk_list->fops.llseek    = seq_lseek;
+-	sk_list->fops.release   = seq_release_private;
++	pax_open_kernel();
++	*(void **)&sk_list->fops.owner     = module;
++	*(void **)&sk_list->fops.open      = bt_seq_open;
++	*(void **)&sk_list->fops.read      = seq_read;
++	*(void **)&sk_list->fops.llseek    = seq_lseek;
++	*(void **)&sk_list->fops.release   = seq_release_private;
++	pax_close_kernel();
+ 
+ 	pde = proc_net_fops_create(net, name, 0, &sk_list->fops);
+ 	if (!pde)
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/ath/ath9k/init.c	2013-02-11 00:31:59.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/ath/ath9k/init.c	2013-02-13 21:31:13.977164678 +0100
+@@ -573,9 +573,11 @@
+ 
+ 	ah->hw = sc->hw;
+ 	ah->hw_version.devid = devid;
+-	ah->reg_ops.read = ath9k_ioread32;
+-	ah->reg_ops.write = ath9k_iowrite32;
+-	ah->reg_ops.rmw = ath9k_reg_rmw;
++	pax_open_kernel();
++	*(void **)&ah->reg_ops.read = ath9k_ioread32;
++	*(void **)&ah->reg_ops.write = ath9k_iowrite32;
++	*(void **)&ah->reg_ops.rmw = ath9k_reg_rmw;
++	pax_close_kernel();
+ 	atomic_set(&ah->intr_ref_cnt, -1);
+ 	sc->sc_ah = ah;
+ 
+--- compat-drivers-3.8-rc7-1-u.orig/net/wireless/core.c	2013-02-11 00:31:59.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/net/wireless/core.c	2013-02-12 22:56:39.216834168 +0100
+@@ -359,10 +359,12 @@
+ 	wiphy_net_set(&rdev->wiphy, &init_net);
+ #endif
+ 
+-	rdev->rfkill_ops.set_block = cfg80211_rfkill_set_block;
+-	rdev->rfkill = rfkill_alloc(dev_name(&rdev->wiphy.dev),
++	pax_open_kernel();
++	*(void **)&rdev->rfkill_ops.set_block = cfg80211_rfkill_set_block;
++	*(void **)&rdev->rfkill = rfkill_alloc(dev_name(&rdev->wiphy.dev),
+ 				   &rdev->wiphy.dev, RFKILL_TYPE_WLAN,
+ 				   &rdev->rfkill_ops, rdev);
++	pax_close_kernel();
+ 
+ 	if (!rdev->rfkill) {
+ 		kfree(rdev);
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/brcm80211/brcmsmac/phy/phy_lcn.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/brcm80211/brcmsmac/phy/phy_lcn.c	2013-02-13 22:15:10.352986761 +0100
+@@ -5081,15 +5081,17 @@
+ 	pi->xtalfreq = si_pmu_alp_clock(pi->sh->sih);
+ 	pi_lcn->lcnphy_papd_rxGnCtrl_init = 0;
+ 
+-	pi->pi_fptr.init = wlc_phy_init_lcnphy;
+-	pi->pi_fptr.calinit = wlc_phy_cal_init_lcnphy;
+-	pi->pi_fptr.chanset = wlc_phy_chanspec_set_lcnphy;
+-	pi->pi_fptr.txpwrrecalc = wlc_phy_txpower_recalc_target_lcnphy;
+-	pi->pi_fptr.txiqccget = wlc_lcnphy_get_tx_iqcc;
+-	pi->pi_fptr.txiqccset = wlc_lcnphy_set_tx_iqcc;
+-	pi->pi_fptr.txloccget = wlc_lcnphy_get_tx_locc;
+-	pi->pi_fptr.radioloftget = wlc_lcnphy_get_radio_loft;
+-	pi->pi_fptr.detach = wlc_phy_detach_lcnphy;
++	pax_open_kernel();
++	*(void **)&pi->pi_fptr.init = wlc_phy_init_lcnphy;
++	*(void **)&pi->pi_fptr.calinit = wlc_phy_cal_init_lcnphy;
++	*(void **)&pi->pi_fptr.chanset = wlc_phy_chanspec_set_lcnphy;
++	*(void **)&pi->pi_fptr.txpwrrecalc = wlc_phy_txpower_recalc_target_lcnphy;
++	*(void **)&pi->pi_fptr.txiqccget = wlc_lcnphy_get_tx_iqcc;
++	*(void **)&pi->pi_fptr.txiqccset = wlc_lcnphy_set_tx_iqcc;
++	*(void **)&pi->pi_fptr.txloccget = wlc_lcnphy_get_tx_locc;
++	*(void **)&pi->pi_fptr.radioloftget = wlc_lcnphy_get_radio_loft;
++	*(void **)&pi->pi_fptr.detach = wlc_phy_detach_lcnphy;
++	pax_close_kernel();
+ 
+ 	if (!wlc_phy_txpwr_srom_read_lcnphy(pi))
+ 		return false;
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/brcm80211/brcmsmac/phy/phy_n.c	2013-02-11 00:31:59.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/brcm80211/brcmsmac/phy/phy_n.c	2013-02-13 21:36:59.898141330 +0100
+@@ -14653,10 +14653,12 @@
+ 	if (pi->nphy_txpwrctrl == PHY_TPC_HW_ON)
+ 		pi->hwpwrctrl_capable = true;
+ 
+-	pi->pi_fptr.init = wlc_phy_init_nphy;
+-	pi->pi_fptr.calinit = wlc_phy_cal_init_nphy;
+-	pi->pi_fptr.chanset = wlc_phy_chanspec_set_nphy;
+-	pi->pi_fptr.txpwrrecalc = wlc_phy_txpower_recalc_target_nphy;
++	pax_open_kernel();
++	*(void **)&pi->pi_fptr.init = wlc_phy_init_nphy;
++	*(void **)&pi->pi_fptr.calinit = wlc_phy_cal_init_nphy;
++	*(void **)&pi->pi_fptr.chanset = wlc_phy_chanspec_set_nphy;
++	*(void **)&pi->pi_fptr.txpwrrecalc = wlc_phy_txpower_recalc_target_nphy;
++	pax_close_kernel();
+ 
+ 	if (!wlc_phy_txpwr_srom_read_nphy(pi))
+ 		return false;
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/ath/ath9k/htc_drv_init.c	2013-02-11 00:31:59.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/ath/ath9k/htc_drv_init.c	2013-02-13 12:44:14.547012281 +0100
+@@ -627,12 +627,14 @@
+ 	ah->hw_version.devid = devid;
+ 	ah->hw_version.usbdev = drv_info;
+ 	ah->ah_flags |= AH_USE_EEPROM;
+-	ah->reg_ops.read = ath9k_regread;
+-	ah->reg_ops.multi_read = ath9k_multi_regread;
+-	ah->reg_ops.write = ath9k_regwrite;
+-	ah->reg_ops.enable_write_buffer = ath9k_enable_regwrite_buffer;
+-	ah->reg_ops.write_flush = ath9k_regwrite_flush;
+-	ah->reg_ops.rmw = ath9k_reg_rmw;
++	pax_open_kernel();
++	*(void **)&ah->reg_ops.read = ath9k_regread;
++	*(void **)&ah->reg_ops.multi_read = ath9k_multi_regread;
++	*(void **)&ah->reg_ops.write = ath9k_regwrite;
++	*(void **)&ah->reg_ops.enable_write_buffer = ath9k_enable_regwrite_buffer;
++	*(void **)&ah->reg_ops.write_flush = ath9k_regwrite_flush;
++	*(void **)&ah->reg_ops.rmw = ath9k_reg_rmw;
++	pax_close_kernel();
+ 	priv->ah = ah;
+ 
+ 	common = ath9k_hw_common(ah);
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/iwlegacy/3945-mac.c	2013-02-11 00:31:59.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/iwlegacy/3945-mac.c	2013-02-13 21:27:12.995180939 +0100
+@@ -3617,7 +3617,9 @@
+ 	 */
+ 	if (il3945_mod_params.disable_hw_scan) {
+ 		D_INFO("Disabling hw_scan\n");
+-		il3945_mac_ops.hw_scan = NULL;
++		pax_open_kernel();
++		*(void **)&il3945_mac_ops.hw_scan = NULL;
++		pax_close_kernel();
+ 	}
+ 
+ 	D_INFO("*** LOAD DRIVER ***\n");
+--- compat-drivers-3.8-rc7-1-u.orig/net/wireless/core.c	2013-02-13 21:44:48.796109689 +0100
++++ compat-drivers-3.8-rc7-1-u/net/wireless/core.c	2013-02-13 21:47:19.559099514 +0100
+@@ -632,7 +632,9 @@
+ 
+ 	if (!rdev->ops->rfkill_poll)
+ 		return;
+-	rdev->rfkill_ops.poll = cfg80211_rfkill_poll;
++	pax_open_kernel();
++	*(void **)&rdev->rfkill_ops.poll = cfg80211_rfkill_poll;
++	pax_close_kernel();
+ 	rfkill_resume_polling(rdev->rfkill);
+ }
+ EXPORT_SYMBOL(wiphy_rfkill_start_polling);
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/ath/ath9k/ar9002_hw.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/ath/ath9k/ar9002_hw.c	2013-02-13 22:17:09.666978709 +0100
+@@ -414,10 +414,12 @@
+ 	struct ath_hw_private_ops *priv_ops = ath9k_hw_private_ops(ah);
+ 	struct ath_hw_ops *ops = ath9k_hw_ops(ah);
+ 
+-	priv_ops->init_mode_regs = ar9002_hw_init_mode_regs;
+-	priv_ops->init_mode_gain_regs = ar9002_hw_init_mode_gain_regs;
++	pax_open_kernel();
++	*(void **)&priv_ops->init_mode_regs = ar9002_hw_init_mode_regs;
++	*(void **)&priv_ops->init_mode_gain_regs = ar9002_hw_init_mode_gain_regs;
+ 
+-	ops->config_pci_powersave = ar9002_hw_configpcipowersave;
++	*(void **)&ops->config_pci_powersave = ar9002_hw_configpcipowersave;
++	pax_close_kernel();
+ 
+ 	ar5008_hw_attach_phy_ops(ah);
+ 	if (AR_SREV_9280_20_OR_LATER(ah))

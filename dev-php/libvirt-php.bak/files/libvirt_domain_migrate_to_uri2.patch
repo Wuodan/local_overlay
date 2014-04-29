@@ -1,0 +1,240 @@
+--- src/libvirt-php.h
++++ src/libvirt-php.h
+@@ -328,6 +328,7 @@
+ PHP_FUNCTION(libvirt_domain_get_block_info);
+ PHP_FUNCTION(libvirt_domain_get_network_info);
+ PHP_FUNCTION(libvirt_domain_migrate_to_uri);
++PHP_FUNCTION(libvirt_domain_migrate_to_uri2);
+ PHP_FUNCTION(libvirt_domain_get_autostart);
+ PHP_FUNCTION(libvirt_domain_set_autostart);
+ PHP_FUNCTION(libvirt_domain_is_active);
+--- src/libvirt-php.c
++++ src/libvirt-php.c
+@@ -111,6 +111,7 @@
+ 	PHP_FE(libvirt_domain_get_connect, NULL)
+ 	PHP_FE(libvirt_domain_migrate, NULL)
+ 	PHP_FE(libvirt_domain_migrate_to_uri, NULL)
++	PHP_FE(libvirt_domain_migrate_to_uri2, NULL)
+ 	PHP_FE(libvirt_domain_get_job_info, NULL)
+ 	PHP_FE(libvirt_domain_xml_xpath, NULL)
+ 	PHP_FE(libvirt_domain_get_block_info, NULL)
+@@ -5375,6 +5376,52 @@
+ 	RETURN_FALSE;
+ }
+ 
++/*
++	Function name:	libvirt_domain_migrate_to_uri2
++	Since version:	0.4.6(-1)
++	Description:	Function is used migrate domain to another libvirt daemon specified by it's URI
++	Arguments:	@res [resource]: libvirt domain resource, e.g. from libvirt_domain_lookup_by_*()
++			@dconnuri [string]: URI for target libvirtd
++			@miguri [string]: URI for invoking the migration
++			@dxml [string]: XML config for launching guest on target
++			@flags [int]: migration flags
++			@dname [string]: domain name to rename domain to on destination side
++			@bandwidth [int]: migration bandwidth in Mbps
++	Returns:	TRUE for success, FALSE on error
++*/
++PHP_FUNCTION(libvirt_domain_migrate_to_uri2)
++{
++	php_libvirt_domain *domain=NULL;
++	zval *zdomain;
++	int retval;
++	char *dconnuri;
++	int donnuri_len;
++	char *miguri;
++	int miguri_len;
++	char *dxml;
++	int dxml_len;
++	long flags=0;
++	char *dname;
++	int dname_len;
++	long bandwidth;	 
++ 
++ 	dconnuri=NULL;
++	donnuri_len=0;
++	miguri=NULL;
++	miguri_len=0;
++	dxml=NULL;
++	dxml_len=0;
++	dname=NULL;
++	dname_len=0;
++	bandwidth=0;
++	GET_DOMAIN_FROM_ARGS("r|sslsl",&zdomain,&dconnuri,&dconnuri_len,&miguri,&miguri_len,&dxml,&dxml_len,&flags,&dname,&dname_len,&bandwidth);
++
++	retval=virDomainMigrateToURI2(domain->domain,dconnuri,miguri,dxml,flags,dname,bandwidth);
++	DPRINTF("%s: virDomainMigrateToURI2() returned %d\n", PHPFUNC, retval);
++
++	if (retval == 0) RETURN_TRUE;
++	RETURN_FALSE;
++}
+ 
+ /*
+ 	Function name:	libvirt_domain_migrate
+--- docs/api-reference.html.in
++++ docs/api-reference.html.in
+@@ -77,6 +77,7 @@
+ 	<code class="docref">libvirt_domain_interface_stats</code>($res, $path)<br />
+ 	<code class="docref">libvirt_domain_get_connect</code>($res)<br />
+ 	<code class="docref">libvirt_domain_migrate_to_uri</code>($res, $dest_uri, $flags, $dname, $bandwidth)<br />
++	<code class="docref">libvirt_domain_migrate_to_uri2</code>($res, $dconnuri, $miguri, $dxml, $flags, $dname, $bandwidth)<br />
+ 	<code class="docref">libvirt_domain_migrate</code>($res, $dest_conn, $flags, $dname, $bandwidth)<br />
+ 	<code class="docref">libvirt_domain_get_job_info</code>($res)<br />
+ 	<code class="docref">libvirt_domain_has_current_snapshot</code>($res)<br />
+@@ -2457,6 +2458,80 @@
+ 		    </td>
+ 		  </tr>
+ 		  <tr>
++		    <td>
++			<span class="term"><i><tt>@flags [int]</tt></i>:</span>
++		    </td>
++		    <td>
++			 migration flags
++		    </td>
++		  </tr>
++		  <tr>
++		    <td>
++			<span class="term"><i><tt>@dname [string]</tt></i>:</span>
++		    </td>
++		    <td>
++			 domain name to rename domain to on destination side
++		    </td>
++		  </tr>
++		  <tr>
++		    <td>
++			<span class="term"><i><tt>@bandwidth [int]</tt></i>:</span>
++		    </td>
++		    <td>
++			 migration bandwidth in Mbps
++		    </td>
++		  </tr>
++		  <tr>
++		    <td>
++			<span class="term"><i><tt>Returns</tt></i>:</span>
++		    </td>
++		    <td>
++			TRUE for success, FALSE on error
++		    </td>
++		  </tr>
++		</tbody>
++	</table>
++</div>
++<h3><a name="libvirt_domain_migrate_to_uri2"><code>libvirt_domain_migrate_to_uri2</code></a></h3>
++<pre class="programlisting">libvirt_domain_migrate_to_uri2($res, $dconnuri, $miguri, $dxml, $flags, $dname, $bandwidth)</pre>
++<p>[Since version 0.4.6(-1)]</p>
++<p>Function is used migrate domain to another libvirt daemon specified by it's URI.</p><div class="variablelist">
++	<table border="0">
++		<col align="left" />
++		<tbody>
++		  <tr>
++		    <td>
++			<span class="term"><i><tt>res [resource]</tt></i>:</span>
++		    </td>
++		    <td>
++			 libvirt domain resource, e.g. from libvirt_domain_lookup_by_*()
++		    </td>
++		  </tr>
++		  <tr>
++		    <td>
++			<span class="term"><i><tt>@dconnuri [string]</tt></i>:</span>
++		    </td>
++		    <td>
++			 URI for target libvirtd
++		    </td>
++		  </tr>
++		  <tr>
++		    <td>
++			<span class="term"><i><tt>@miguri [string]</tt></i>:</span>
++		    </td>
++		    <td>
++			 URI for invoking the migration
++		    </td>
++		  </tr>
++		  <tr>
++		    <td>
++			<span class="term"><i><tt>@dxml [string]</tt></i>:</span>
++		    </td>
++		    <td>
++			 XML config for launching guest on target
++		    </td>
++		  </tr>
++		  <tr>
+ 		    <td>
+ 			<span class="term"><i><tt>@flags [int]</tt></i>:</span>
+ 		    </td>
+--- docs/api-reference.html
++++ docs/api-reference.html
+@@ -114,7 +114,7 @@
+       <div id="content">
+         <h1>PHP API Reference guide</h1>
+         <h3>Functions</h3>
+-        <pre>Total number of functions: 134. Functions supported are:<br /><br /><a href="#libvirt_get_last_error"><code>libvirt_get_last_error</code></a>()<br /><a href="#libvirt_connect"><code>libvirt_connect</code></a>($url, $readonly, $credentials)<br /><a href="#libvirt_node_get_info"><code>libvirt_node_get_info</code></a>($conn)<br /><a href="#libvirt_node_get_cpu_stats"><code>libvirt_node_get_cpu_stats</code></a>($conn, $cpunr)<br /><a href="#libvirt_node_get_cpu_stats_for_each_cpu"><code>libvirt_node_get_cpu_stats_for_each_cpu</code></a>($conn, $time)<br /><a href="#libvirt_node_get_mem_stats"><code>libvirt_node_get_mem_stats</code></a>($conn)<br /><a href="#libvirt_connect_get_information"><code>libvirt_connect_get_information</code></a>($conn)<br /><a href="#libvirt_connect_get_uri"><code>libvirt_connect_get_uri</code></a>($conn)<br /><a href="#libvirt_connect_get_hostname"><code>libvirt_connect_get_hostname</code></a>($conn)<br /><a href="#libvirt_image_create"><code>libvirt_image_create</code></a>($conn, $name, $size, $format)<br /><a href="#libvirt_image_remove"><code>libvirt_image_remove</code></a>($conn, $image)<br /><a href="#libvirt_connect_get_hypervisor"><code>libvirt_connect_get_hypervisor</code></a>($conn)<br /><a href="#libvirt_connect_is_encrypted"><code>libvirt_connect_is_encrypted</code></a>($conn)<br /><a href="#libvirt_connect_is_secure"><code>libvirt_connect_is_secure</code></a>($conn)<br /><a href="#libvirt_connect_get_maxvcpus"><code>libvirt_connect_get_maxvcpus</code></a>($conn)<br /><a href="#libvirt_connect_get_sysinfo"><code>libvirt_connect_get_sysinfo</code></a>($conn)<br /><a href="#libvirt_domain_get_counts"><code>libvirt_domain_get_counts</code></a>($conn)<br /><a href="#libvirt_domain_get_autostart"><code>libvirt_domain_get_autostart</code></a>($res)<br /><a href="#libvirt_domain_set_autostart"><code>libvirt_domain_set_autostart</code></a>($res, $flags)<br /><a href="#libvirt_domain_is_active"><code>libvirt_domain_is_active</code></a>($res)<br /><a href="#libvirt_domain_lookup_by_name"><code>libvirt_domain_lookup_by_name</code></a>($res, $name)<br /><a href="#libvirt_domain_lookup_by_uuid"><code>libvirt_domain_lookup_by_uuid</code></a>($res, $uuid)<br /><a href="#libvirt_domain_lookup_by_uuid_string"><code>libvirt_domain_lookup_by_uuid_string</code></a>($res, $uuid)<br /><a href="#libvirt_domain_lookup_by_id"><code>libvirt_domain_lookup_by_id</code></a>($conn, $id)<br /><a href="#libvirt_domain_get_name"><code>libvirt_domain_get_name</code></a>($res)<br /><a href="#libvirt_domain_get_uuid_string"><code>libvirt_domain_get_uuid_string</code></a>($res)<br /><a href="#libvirt_domain_get_screenshot_api"><code>libvirt_domain_get_screenshot_api</code></a>($res, $screenID)<br /><a href="#libvirt_domain_get_screenshot"><code>libvirt_domain_get_screenshot</code></a>($res, $server, $scancode)<br /><a href="#libvirt_domain_get_screen_dimensions"><code>libvirt_domain_get_screen_dimensions</code></a>($res, $server)<br /><a href="#libvirt_domain_send_keys"><code>libvirt_domain_send_keys</code></a>($res, $server, $scancode)<br /><a href="#libvirt_domain_send_pointer_event"><code>libvirt_domain_send_pointer_event</code></a>($res, $server, $pos_x, $pos_y, $clicked, $release)<br /><a href="#libvirt_domain_get_uuid"><code>libvirt_domain_get_uuid</code></a>($res)<br /><a href="#libvirt_domain_get_id"><code>libvirt_domain_get_id</code></a>($res)<br /><a href="#libvirt_domain_get_next_dev_ids"><code>libvirt_domain_get_next_dev_ids</code></a>($res)<br /><a href="#libvirt_connect_get_capabilities"><code>libvirt_connect_get_capabilities</code></a>($conn, $xpath)<br /><a href="#libvirt_connect_get_emulator"><code>libvirt_connect_get_emulator</code></a>($conn, $arch)<br /><a href="#libvirt_domain_new"><code>libvirt_domain_new</code></a>($conn, $name, $arch, $memMB, $maxmemMB, $vcpus, $iso_image, $disks, $networks, $flags)<br /><a href="#libvirt_domain_new_get_vnc"><code>libvirt_domain_new_get_vnc</code></a>($one)<br /><a href="#libvirt_domain_get_xml_desc"><code>libvirt_domain_get_xml_desc</code></a>($res, $xpath)<br /><a href="#libvirt_domain_get_disk_devices"><code>libvirt_domain_get_disk_devices</code></a>($res)<br /><a href="#libvirt_domain_get_interface_devices"><code>libvirt_domain_get_interface_devices</code></a>($res)<br /><a href="#libvirt_domain_change_vcpus"><code>libvirt_domain_change_vcpus</code></a>($res, $numCpus)<br /><a href="#libvirt_domain_change_memory"><code>libvirt_domain_change_memory</code></a>($res, $allocMem, $allocMax)<br /><a href="#libvirt_domain_change_boot_devices"><code>libvirt_domain_change_boot_devices</code></a>($res, $first, $second)<br /><a href="#libvirt_domain_disk_add"><code>libvirt_domain_disk_add</code></a>($res, $img, $dev, $typ, $driver, $flags)<br /><a href="#libvirt_domain_disk_remove"><code>libvirt_domain_disk_remove</code></a>($res, $dev, $flags)<br /><a href="#libvirt_domain_nic_add"><code>libvirt_domain_nic_add</code></a>($res, $mac, $network, $model, $flags)<br /><a href="#libvirt_domain_nic_remove"><code>libvirt_domain_nic_remove</code></a>($res, $dev, $flags)<br /><a href="#libvirt_domain_get_info"><code>libvirt_domain_get_info</code></a>($res)<br /><a href="#libvirt_domain_create"><code>libvirt_domain_create</code></a>($res)<br /><a href="#libvirt_domain_destroy"><code>libvirt_domain_destroy</code></a>($res)<br /><a href="#libvirt_domain_resume"><code>libvirt_domain_resume</code></a>($res)<br /><a href="#libvirt_domain_core_dump"><code>libvirt_domain_core_dump</code></a>($res)<br /><a href="#libvirt_domain_shutdown"><code>libvirt_domain_shutdown</code></a>($res)<br /><a href="#ibvirt_domain_managedsave"><code>ibvirt_domain_managedsave</code></a>($res)<br /><a href="#libvirt_domain_suspend"><code>libvirt_domain_suspend</code></a>($res)<br /><a href="#libvirt_domain_undefine"><code>libvirt_domain_undefine</code></a>($res)<br /><a href="#libvirt_domain_reboot"><code>libvirt_domain_reboot</code></a>($res)<br /><a href="#libvirt_domain_define_xml"><code>libvirt_domain_define_xml</code></a>($conn, $xml)<br /><a href="#libvirt_domain_create_xml"><code>libvirt_domain_create_xml</code></a>($conn, $xml)<br /><a href="#libvirt_domain_memory_peek"><code>libvirt_domain_memory_peek</code></a>($res)<br /><a href="#libvirt_domain_memory_stats"><code>libvirt_domain_memory_stats</code></a>($res)<br /><a href="#libvirt_domain_update_device"><code>libvirt_domain_update_device</code></a>($res, $xml, $flags)<br /><a href="#libvirt_domain_block_stats"><code>libvirt_domain_block_stats</code></a>($res, $path)<br /><a href="#libvirt_domain_get_network_info"><code>libvirt_domain_get_network_info</code></a>($res, $mac)<br /><a href="#libvirt_domain_get_block_info"><code>libvirt_domain_get_block_info</code></a>($res, $dev)<br /><a href="#libvirt_domain_xml_xpath"><code>libvirt_domain_xml_xpath</code></a>($res, $xpath)<br /><a href="#libvirt_domain_interface_stats"><code>libvirt_domain_interface_stats</code></a>($res, $path)<br /><a href="#libvirt_domain_get_connect"><code>libvirt_domain_get_connect</code></a>($res)<br /><a href="#libvirt_domain_migrate_to_uri"><code>libvirt_domain_migrate_to_uri</code></a>($res, $dest_uri, $flags, $dname, $bandwidth)<br /><a href="#libvirt_domain_migrate"><code>libvirt_domain_migrate</code></a>($res, $dest_conn, $flags, $dname, $bandwidth)<br /><a href="#libvirt_domain_get_job_info"><code>libvirt_domain_get_job_info</code></a>($res)<br /><a href="#libvirt_domain_has_current_snapshot"><code>libvirt_domain_has_current_snapshot</code></a>($res)<br /><a href="#libvirt_domain_snapshot_lookup_by_name"><code>libvirt_domain_snapshot_lookup_by_name</code></a>($res, $name)<br /><a href="#libvirt_domain_snapshot_create"><code>libvirt_domain_snapshot_create</code></a>($res)<br /><a href="#libvirt_domain_snapshot_get_xml"><code>libvirt_domain_snapshot_get_xml</code></a>($res)<br /><a href="#libvirt_domain_snapshot_revert"><code>libvirt_domain_snapshot_revert</code></a>($res)<br /><a href="#libvirt_domain_snapshot_delete"><code>libvirt_domain_snapshot_delete</code></a>($res, $flags)<br /><a href="#libvirt_list_domain_snapshots"><code>libvirt_list_domain_snapshots</code></a>($res)<br /><a href="#libvirt_storagepool_lookup_by_name"><code>libvirt_storagepool_lookup_by_name</code></a>($res, $name)<br /><a href="#libvirt_storagepool_lookup_by_volume"><code>libvirt_storagepool_lookup_by_volume</code></a>($res)<br /><a href="#libvirt_storagepool_list_volumes"><code>libvirt_storagepool_list_volumes</code></a>($res)<br /><a href="#libvirt_storagepool_get_info"><code>libvirt_storagepool_get_info</code></a>($res)<br /><a href="#libvirt_storagevolume_lookup_by_name"><code>libvirt_storagevolume_lookup_by_name</code></a>($res, $name)<br /><a href="#libvirt_storagevolume_lookup_by_path"><code>libvirt_storagevolume_lookup_by_path</code></a>($res, $path)<br /><a href="#libvirt_storagevolume_get_name"><code>libvirt_storagevolume_get_name</code></a>($res)<br /><a href="#libvirt_storagevolume_get_path"><code>libvirt_storagevolume_get_path</code></a>($res)<br /><a href="#libvirt_storagevolume_get_info"><code>libvirt_storagevolume_get_info</code></a>($res)<br /><a href="#libvirt_storagevolume_get_xml_desc"><code>libvirt_storagevolume_get_xml_desc</code></a>($res, $xpath)<br /><a href="#libvirt_storagevolume_create_xml"><code>libvirt_storagevolume_create_xml</code></a>($res, $xml)<br /><a href="#libvirt_storagevolume_create_xml_from"><code>libvirt_storagevolume_create_xml_from</code></a>($pool, $xml, $original_volume)<br /><a href="#libvirt_storagevolume_delete"><code>libvirt_storagevolume_delete</code></a>($res, $flags)<br /><a href="#libvirt_storagepool_get_uuid_string"><code>libvirt_storagepool_get_uuid_string</code></a>($res)<br /><a href="#libvirt_storagepool_get_name"><code>libvirt_storagepool_get_name</code></a>($res)<br /><a href="#libvirt_storagepool_lookup_by_uuid_string"><code>libvirt_storagepool_lookup_by_uuid_string</code></a>($res, $uuid)<br /><a href="#libvirt_storagepool_get_xml_desc"><code>libvirt_storagepool_get_xml_desc</code></a>($res, $xpath)<br /><a href="#libvirt_storagepool_define_xml"><code>libvirt_storagepool_define_xml</code></a>($res, $xml, $flags)<br /><a href="#libvirt_storagepool_undefine"><code>libvirt_storagepool_undefine</code></a>($res)<br /><a href="#libvirt_storagepool_create"><code>libvirt_storagepool_create</code></a>($res)<br /><a href="#libvirt_storagepool_destroy"><code>libvirt_storagepool_destroy</code></a>($res)<br /><a href="#libvirt_storagepool_is_active"><code>libvirt_storagepool_is_active</code></a>($res)<br /><a href="#libvirt_storagepool_get_volume_count"><code>libvirt_storagepool_get_volume_count</code></a>($res)<br /><a href="#libvirt_storagepool_refresh"><code>libvirt_storagepool_refresh</code></a>($res, $flags)<br /><a href="#libvirt_storagepool_set_autostart"><code>libvirt_storagepool_set_autostart</code></a>($res, $flags)<br /><a href="#libvirt_storagepool_get_autostart"><code>libvirt_storagepool_get_autostart</code></a>($res)<br /><a href="#libvirt_storagepool_build"><code>libvirt_storagepool_build</code></a>($res)<br /><a href="#libvirt_storagepool_delete"><code>libvirt_storagepool_delete</code></a>($res)<br /><a href="#libvirt_list_storagepools"><code>libvirt_list_storagepools</code></a>($res)<br /><a href="#libvirt_list_active_storagepools"><code>libvirt_list_active_storagepools</code></a>($res)<br /><a href="#libvirt_list_inactive_storagepools"><code>libvirt_list_inactive_storagepools</code></a>($res)<br /><a href="#libvirt_list_domains"><code>libvirt_list_domains</code></a>($res)<br /><a href="#libvirt_list_domain_resources"><code>libvirt_list_domain_resources</code></a>($res)<br /><a href="#libvirt_list_active_domain_ids"><code>libvirt_list_active_domain_ids</code></a>($res)<br /><a href="#libvirt_list_active_domains"><code>libvirt_list_active_domains</code></a>($res)<br /><a href="#libvirt_list_inactive_domains"><code>libvirt_list_inactive_domains</code></a>($res)<br /><a href="#libvirt_list_networks"><code>libvirt_list_networks</code></a>($res, $flags)<br /><a href="#libvirt_list_nodedevs"><code>libvirt_list_nodedevs</code></a>($res, $cap)<br /><a href="#libvirt_nodedev_get"><code>libvirt_nodedev_get</code></a>($res, $name)<br /><a href="#libvirt_nodedev_capabilities"><code>libvirt_nodedev_capabilities</code></a>($res)<br /><a href="#libvirt_nodedev_get_xml_desc"><code>libvirt_nodedev_get_xml_desc</code></a>($res, $xpath)<br /><a href="#libvirt_nodedev_get_information"><code>libvirt_nodedev_get_information</code></a>($res)<br /><a href="#libvirt_network_define_xml"><code>libvirt_network_define_xml</code></a>($res, $xml)<br /><a href="#libvirt_network_undefine"><code>libvirt_network_undefine</code></a>($res)<br /><a href="#libvirt_network_get"><code>libvirt_network_get</code></a>($res, $name)<br /><a href="#libvirt_network_get_bridge"><code>libvirt_network_get_bridge</code></a>($res)<br /><a href="#libvirt_network_get_active"><code>libvirt_network_get_active</code></a>($res)<br /><a href="#libvirt_network_get_information"><code>libvirt_network_get_information</code></a>($res)<br /><a href="#libvirt_network_set_active"><code>libvirt_network_set_active</code></a>($res)<br /><a href="#libvirt_network_get_xml_desc"><code>libvirt_network_get_xml_desc</code></a>($res, $xpath)<br /><a href="#libvirt_version"><code>libvirt_version</code></a>($type)<br /><a href="#libvirt_check_version"><code>libvirt_check_version</code></a>($major, $minor, $micro, $type)<br /><a href="#libvirt_has_feature"><code>libvirt_has_feature</code></a>($name)<br /><a href="#libvirt_get_iso_images"><code>libvirt_get_iso_images</code></a>($path)<br /><a href="#libvirt_print_binding_resources"><code>libvirt_print_binding_resources</code></a>()<br /><a href="#libvirt_logfile_set"><code>libvirt_logfile_set</code></a>($filename, $maxsize)<br /></pre>
++        <pre>Total number of functions: 134. Functions supported are:<br /><br /><a href="#libvirt_get_last_error"><code>libvirt_get_last_error</code></a>()<br /><a href="#libvirt_connect"><code>libvirt_connect</code></a>($url, $readonly, $credentials)<br /><a href="#libvirt_node_get_info"><code>libvirt_node_get_info</code></a>($conn)<br /><a href="#libvirt_node_get_cpu_stats"><code>libvirt_node_get_cpu_stats</code></a>($conn, $cpunr)<br /><a href="#libvirt_node_get_cpu_stats_for_each_cpu"><code>libvirt_node_get_cpu_stats_for_each_cpu</code></a>($conn, $time)<br /><a href="#libvirt_node_get_mem_stats"><code>libvirt_node_get_mem_stats</code></a>($conn)<br /><a href="#libvirt_connect_get_information"><code>libvirt_connect_get_information</code></a>($conn)<br /><a href="#libvirt_connect_get_uri"><code>libvirt_connect_get_uri</code></a>($conn)<br /><a href="#libvirt_connect_get_hostname"><code>libvirt_connect_get_hostname</code></a>($conn)<br /><a href="#libvirt_image_create"><code>libvirt_image_create</code></a>($conn, $name, $size, $format)<br /><a href="#libvirt_image_remove"><code>libvirt_image_remove</code></a>($conn, $image)<br /><a href="#libvirt_connect_get_hypervisor"><code>libvirt_connect_get_hypervisor</code></a>($conn)<br /><a href="#libvirt_connect_is_encrypted"><code>libvirt_connect_is_encrypted</code></a>($conn)<br /><a href="#libvirt_connect_is_secure"><code>libvirt_connect_is_secure</code></a>($conn)<br /><a href="#libvirt_connect_get_maxvcpus"><code>libvirt_connect_get_maxvcpus</code></a>($conn)<br /><a href="#libvirt_connect_get_sysinfo"><code>libvirt_connect_get_sysinfo</code></a>($conn)<br /><a href="#libvirt_domain_get_counts"><code>libvirt_domain_get_counts</code></a>($conn)<br /><a href="#libvirt_domain_get_autostart"><code>libvirt_domain_get_autostart</code></a>($res)<br /><a href="#libvirt_domain_set_autostart"><code>libvirt_domain_set_autostart</code></a>($res, $flags)<br /><a href="#libvirt_domain_is_active"><code>libvirt_domain_is_active</code></a>($res)<br /><a href="#libvirt_domain_lookup_by_name"><code>libvirt_domain_lookup_by_name</code></a>($res, $name)<br /><a href="#libvirt_domain_lookup_by_uuid"><code>libvirt_domain_lookup_by_uuid</code></a>($res, $uuid)<br /><a href="#libvirt_domain_lookup_by_uuid_string"><code>libvirt_domain_lookup_by_uuid_string</code></a>($res, $uuid)<br /><a href="#libvirt_domain_lookup_by_id"><code>libvirt_domain_lookup_by_id</code></a>($conn, $id)<br /><a href="#libvirt_domain_get_name"><code>libvirt_domain_get_name</code></a>($res)<br /><a href="#libvirt_domain_get_uuid_string"><code>libvirt_domain_get_uuid_string</code></a>($res)<br /><a href="#libvirt_domain_get_screenshot_api"><code>libvirt_domain_get_screenshot_api</code></a>($res, $screenID)<br /><a href="#libvirt_domain_get_screenshot"><code>libvirt_domain_get_screenshot</code></a>($res, $server, $scancode)<br /><a href="#libvirt_domain_get_screen_dimensions"><code>libvirt_domain_get_screen_dimensions</code></a>($res, $server)<br /><a href="#libvirt_domain_send_keys"><code>libvirt_domain_send_keys</code></a>($res, $server, $scancode)<br /><a href="#libvirt_domain_send_pointer_event"><code>libvirt_domain_send_pointer_event</code></a>($res, $server, $pos_x, $pos_y, $clicked, $release)<br /><a href="#libvirt_domain_get_uuid"><code>libvirt_domain_get_uuid</code></a>($res)<br /><a href="#libvirt_domain_get_id"><code>libvirt_domain_get_id</code></a>($res)<br /><a href="#libvirt_domain_get_next_dev_ids"><code>libvirt_domain_get_next_dev_ids</code></a>($res)<br /><a href="#libvirt_connect_get_capabilities"><code>libvirt_connect_get_capabilities</code></a>($conn, $xpath)<br /><a href="#libvirt_connect_get_emulator"><code>libvirt_connect_get_emulator</code></a>($conn, $arch)<br /><a href="#libvirt_domain_new"><code>libvirt_domain_new</code></a>($conn, $name, $arch, $memMB, $maxmemMB, $vcpus, $iso_image, $disks, $networks, $flags)<br /><a href="#libvirt_domain_new_get_vnc"><code>libvirt_domain_new_get_vnc</code></a>($one)<br /><a href="#libvirt_domain_get_xml_desc"><code>libvirt_domain_get_xml_desc</code></a>($res, $xpath)<br /><a href="#libvirt_domain_get_disk_devices"><code>libvirt_domain_get_disk_devices</code></a>($res)<br /><a href="#libvirt_domain_get_interface_devices"><code>libvirt_domain_get_interface_devices</code></a>($res)<br /><a href="#libvirt_domain_change_vcpus"><code>libvirt_domain_change_vcpus</code></a>($res, $numCpus)<br /><a href="#libvirt_domain_change_memory"><code>libvirt_domain_change_memory</code></a>($res, $allocMem, $allocMax)<br /><a href="#libvirt_domain_change_boot_devices"><code>libvirt_domain_change_boot_devices</code></a>($res, $first, $second)<br /><a href="#libvirt_domain_disk_add"><code>libvirt_domain_disk_add</code></a>($res, $img, $dev, $typ, $driver, $flags)<br /><a href="#libvirt_domain_disk_remove"><code>libvirt_domain_disk_remove</code></a>($res, $dev, $flags)<br /><a href="#libvirt_domain_nic_add"><code>libvirt_domain_nic_add</code></a>($res, $mac, $network, $model, $flags)<br /><a href="#libvirt_domain_nic_remove"><code>libvirt_domain_nic_remove</code></a>($res, $dev, $flags)<br /><a href="#libvirt_domain_get_info"><code>libvirt_domain_get_info</code></a>($res)<br /><a href="#libvirt_domain_create"><code>libvirt_domain_create</code></a>($res)<br /><a href="#libvirt_domain_destroy"><code>libvirt_domain_destroy</code></a>($res)<br /><a href="#libvirt_domain_resume"><code>libvirt_domain_resume</code></a>($res)<br /><a href="#libvirt_domain_core_dump"><code>libvirt_domain_core_dump</code></a>($res)<br /><a href="#libvirt_domain_shutdown"><code>libvirt_domain_shutdown</code></a>($res)<br /><a href="#ibvirt_domain_managedsave"><code>ibvirt_domain_managedsave</code></a>($res)<br /><a href="#libvirt_domain_suspend"><code>libvirt_domain_suspend</code></a>($res)<br /><a href="#libvirt_domain_undefine"><code>libvirt_domain_undefine</code></a>($res)<br /><a href="#libvirt_domain_reboot"><code>libvirt_domain_reboot</code></a>($res)<br /><a href="#libvirt_domain_define_xml"><code>libvirt_domain_define_xml</code></a>($conn, $xml)<br /><a href="#libvirt_domain_create_xml"><code>libvirt_domain_create_xml</code></a>($conn, $xml)<br /><a href="#libvirt_domain_memory_peek"><code>libvirt_domain_memory_peek</code></a>($res)<br /><a href="#libvirt_domain_memory_stats"><code>libvirt_domain_memory_stats</code></a>($res)<br /><a href="#libvirt_domain_update_device"><code>libvirt_domain_update_device</code></a>($res, $xml, $flags)<br /><a href="#libvirt_domain_block_stats"><code>libvirt_domain_block_stats</code></a>($res, $path)<br /><a href="#libvirt_domain_get_network_info"><code>libvirt_domain_get_network_info</code></a>($res, $mac)<br /><a href="#libvirt_domain_get_block_info"><code>libvirt_domain_get_block_info</code></a>($res, $dev)<br /><a href="#libvirt_domain_xml_xpath"><code>libvirt_domain_xml_xpath</code></a>($res, $xpath)<br /><a href="#libvirt_domain_interface_stats"><code>libvirt_domain_interface_stats</code></a>($res, $path)<br /><a href="#libvirt_domain_get_connect"><code>libvirt_domain_get_connect</code></a>($res)<br /><a href="#libvirt_domain_migrate_to_uri"><code>libvirt_domain_migrate_to_uri</code></a>($res, $dest_uri, $flags, $dname, $bandwidth)<br /><a href="#libvirt_domain_migrate_to_uri2"><code>libvirt_domain_migrate_to_uri2</code></a>($res, $dconnuri, $miguri, $dxml, $flags, $dname, $bandwidth)<br /><a href="#libvirt_domain_migrate"><code>libvirt_domain_migrate</code></a>($res, $dest_conn, $flags, $dname, $bandwidth)<br /><a href="#libvirt_domain_get_job_info"><code>libvirt_domain_get_job_info</code></a>($res)<br /><a href="#libvirt_domain_has_current_snapshot"><code>libvirt_domain_has_current_snapshot</code></a>($res)<br /><a href="#libvirt_domain_snapshot_lookup_by_name"><code>libvirt_domain_snapshot_lookup_by_name</code></a>($res, $name)<br /><a href="#libvirt_domain_snapshot_create"><code>libvirt_domain_snapshot_create</code></a>($res)<br /><a href="#libvirt_domain_snapshot_get_xml"><code>libvirt_domain_snapshot_get_xml</code></a>($res)<br /><a href="#libvirt_domain_snapshot_revert"><code>libvirt_domain_snapshot_revert</code></a>($res)<br /><a href="#libvirt_domain_snapshot_delete"><code>libvirt_domain_snapshot_delete</code></a>($res, $flags)<br /><a href="#libvirt_list_domain_snapshots"><code>libvirt_list_domain_snapshots</code></a>($res)<br /><a href="#libvirt_storagepool_lookup_by_name"><code>libvirt_storagepool_lookup_by_name</code></a>($res, $name)<br /><a href="#libvirt_storagepool_lookup_by_volume"><code>libvirt_storagepool_lookup_by_volume</code></a>($res)<br /><a href="#libvirt_storagepool_list_volumes"><code>libvirt_storagepool_list_volumes</code></a>($res)<br /><a href="#libvirt_storagepool_get_info"><code>libvirt_storagepool_get_info</code></a>($res)<br /><a href="#libvirt_storagevolume_lookup_by_name"><code>libvirt_storagevolume_lookup_by_name</code></a>($res, $name)<br /><a href="#libvirt_storagevolume_lookup_by_path"><code>libvirt_storagevolume_lookup_by_path</code></a>($res, $path)<br /><a href="#libvirt_storagevolume_get_name"><code>libvirt_storagevolume_get_name</code></a>($res)<br /><a href="#libvirt_storagevolume_get_path"><code>libvirt_storagevolume_get_path</code></a>($res)<br /><a href="#libvirt_storagevolume_get_info"><code>libvirt_storagevolume_get_info</code></a>($res)<br /><a href="#libvirt_storagevolume_get_xml_desc"><code>libvirt_storagevolume_get_xml_desc</code></a>($res, $xpath)<br /><a href="#libvirt_storagevolume_create_xml"><code>libvirt_storagevolume_create_xml</code></a>($res, $xml)<br /><a href="#libvirt_storagevolume_create_xml_from"><code>libvirt_storagevolume_create_xml_from</code></a>($pool, $xml, $original_volume)<br /><a href="#libvirt_storagevolume_delete"><code>libvirt_storagevolume_delete</code></a>($res, $flags)<br /><a href="#libvirt_storagepool_get_uuid_string"><code>libvirt_storagepool_get_uuid_string</code></a>($res)<br /><a href="#libvirt_storagepool_get_name"><code>libvirt_storagepool_get_name</code></a>($res)<br /><a href="#libvirt_storagepool_lookup_by_uuid_string"><code>libvirt_storagepool_lookup_by_uuid_string</code></a>($res, $uuid)<br /><a href="#libvirt_storagepool_get_xml_desc"><code>libvirt_storagepool_get_xml_desc</code></a>($res, $xpath)<br /><a href="#libvirt_storagepool_define_xml"><code>libvirt_storagepool_define_xml</code></a>($res, $xml, $flags)<br /><a href="#libvirt_storagepool_undefine"><code>libvirt_storagepool_undefine</code></a>($res)<br /><a href="#libvirt_storagepool_create"><code>libvirt_storagepool_create</code></a>($res)<br /><a href="#libvirt_storagepool_destroy"><code>libvirt_storagepool_destroy</code></a>($res)<br /><a href="#libvirt_storagepool_is_active"><code>libvirt_storagepool_is_active</code></a>($res)<br /><a href="#libvirt_storagepool_get_volume_count"><code>libvirt_storagepool_get_volume_count</code></a>($res)<br /><a href="#libvirt_storagepool_refresh"><code>libvirt_storagepool_refresh</code></a>($res, $flags)<br /><a href="#libvirt_storagepool_set_autostart"><code>libvirt_storagepool_set_autostart</code></a>($res, $flags)<br /><a href="#libvirt_storagepool_get_autostart"><code>libvirt_storagepool_get_autostart</code></a>($res)<br /><a href="#libvirt_storagepool_build"><code>libvirt_storagepool_build</code></a>($res)<br /><a href="#libvirt_storagepool_delete"><code>libvirt_storagepool_delete</code></a>($res)<br /><a href="#libvirt_list_storagepools"><code>libvirt_list_storagepools</code></a>($res)<br /><a href="#libvirt_list_active_storagepools"><code>libvirt_list_active_storagepools</code></a>($res)<br /><a href="#libvirt_list_inactive_storagepools"><code>libvirt_list_inactive_storagepools</code></a>($res)<br /><a href="#libvirt_list_domains"><code>libvirt_list_domains</code></a>($res)<br /><a href="#libvirt_list_domain_resources"><code>libvirt_list_domain_resources</code></a>($res)<br /><a href="#libvirt_list_active_domain_ids"><code>libvirt_list_active_domain_ids</code></a>($res)<br /><a href="#libvirt_list_active_domains"><code>libvirt_list_active_domains</code></a>($res)<br /><a href="#libvirt_list_inactive_domains"><code>libvirt_list_inactive_domains</code></a>($res)<br /><a href="#libvirt_list_networks"><code>libvirt_list_networks</code></a>($res, $flags)<br /><a href="#libvirt_list_nodedevs"><code>libvirt_list_nodedevs</code></a>($res, $cap)<br /><a href="#libvirt_nodedev_get"><code>libvirt_nodedev_get</code></a>($res, $name)<br /><a href="#libvirt_nodedev_capabilities"><code>libvirt_nodedev_capabilities</code></a>($res)<br /><a href="#libvirt_nodedev_get_xml_desc"><code>libvirt_nodedev_get_xml_desc</code></a>($res, $xpath)<br /><a href="#libvirt_nodedev_get_information"><code>libvirt_nodedev_get_information</code></a>($res)<br /><a href="#libvirt_network_define_xml"><code>libvirt_network_define_xml</code></a>($res, $xml)<br /><a href="#libvirt_network_undefine"><code>libvirt_network_undefine</code></a>($res)<br /><a href="#libvirt_network_get"><code>libvirt_network_get</code></a>($res, $name)<br /><a href="#libvirt_network_get_bridge"><code>libvirt_network_get_bridge</code></a>($res)<br /><a href="#libvirt_network_get_active"><code>libvirt_network_get_active</code></a>($res)<br /><a href="#libvirt_network_get_information"><code>libvirt_network_get_information</code></a>($res)<br /><a href="#libvirt_network_set_active"><code>libvirt_network_set_active</code></a>($res)<br /><a href="#libvirt_network_get_xml_desc"><code>libvirt_network_get_xml_desc</code></a>($res, $xpath)<br /><a href="#libvirt_version"><code>libvirt_version</code></a>($type)<br /><a href="#libvirt_check_version"><code>libvirt_check_version</code></a>($major, $minor, $micro, $type)<br /><a href="#libvirt_has_feature"><code>libvirt_has_feature</code></a>($name)<br /><a href="#libvirt_get_iso_images"><code>libvirt_get_iso_images</code></a>($path)<br /><a href="#libvirt_print_binding_resources"><code>libvirt_print_binding_resources</code></a>()<br /><a href="#libvirt_logfile_set"><code>libvirt_logfile_set</code></a>($filename, $maxsize)<br /></pre>
+         <h3>
+           <a name="libvirt_get_last_error" id="libvirt_get_last_error">
+             <code>libvirt_get_last_error</code>
+@@ -2028,6 +2028,64 @@
+ 		    </td>
+ 		  </tr><tr><td>
+ 			<span class="term"><i><tt>@flags [int]</tt></i>:</span>
++		    </td>
++		    <td>
++			 migration flags
++		    </td>
++		  </tr><tr><td>
++			<span class="term"><i><tt>@dname [string]</tt></i>:</span>
++		    </td>
++		    <td>
++			 domain name to rename domain to on destination side
++		    </td>
++		  </tr><tr><td>
++			<span class="term"><i><tt>@bandwidth [int]</tt></i>:</span>
++		    </td>
++		    <td>
++			 migration bandwidth in Mbps
++		    </td>
++		  </tr><tr><td>
++			<span class="term"><i><tt>Returns</tt></i>:</span>
++		    </td>
++		    <td>
++			TRUE for success, FALSE on error
++		    </td>
++		  </tr></tbody></table></div>
++        <h3>
++          <a name="libvirt_domain_migrate_to_uri2" id="libvirt_domain_migrate_to_uri2">
++            <code>libvirt_domain_migrate_to_uri2</code>
++          </a>
++        </h3>
++        <pre class="programlisting">libvirt_domain_migrate_to_uri2($res, $dconnuri, $miguri, $dxml, $flags, $dname, $bandwidth)</pre>
++        <p>[Since version 0.4.6(-1)]</p>
++        <p>Function is used migrate domain to another libvirt daemon specified by it's URI.</p>
++        <div class="variablelist">
++	<table border="0"><col align="left" /><tbody><tr><td>
++			<span class="term"><i><tt>res [resource]</tt></i>:</span>
++		    </td>
++		    <td>
++			 libvirt domain resource, e.g. from libvirt_domain_lookup_by_*()
++		    </td>
++		  </tr><tr><td>
++			<span class="term"><i><tt>@dconnuri [string]</tt></i>:</span>
++		    </td>
++		    <td>
++			 URI for target libvirtd
++		    </td>
++		  </tr><tr><td>
++			<span class="term"><i><tt>@miguri [string]</tt></i>:</span>
++		    </td>
++		    <td>
++			 URI for invoking the migration
++		    </td>
++		  </tr><tr><td>
++			<span class="term"><i><tt>@dxml [string]</tt></i>:</span>
++		    </td>
++		    <td>
++			 XML config for launching guest on target
++		    </td>
++		  </tr><tr><td>
++			<span class="term"><i><tt>@flags [int]</tt></i>:</span>
+ 		    </td>
+ 		    <td>
+ 			 migration flags

@@ -1,0 +1,78 @@
+--- ./ext/ldap/ldap.c
++++ ./ext/ldap/ldap.c
+@@ -1257,17 +1257,17 @@
+  */
+ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
+ {
+-	zval *link, *entry, **value, **ivalue;
++	zval *link, *entry, **value, **ivalue, *assert_ctrl;
+ 	ldap_linkdata *ld;
+-	char *dn;
++	char *dn, *assert;
+ 	LDAPMod **ldap_mods;
+-	int i, j, num_attribs, num_values, dn_len;
++	int i, j, num_attribs, num_values, dn_len, assert_len;
+ 	int *num_berval;
+ 	char *attribute;
+ 	ulong index;
+ 	int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
+ 
+-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsa", &link, &dn, &dn_len, &entry) != SUCCESS) {
++	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsa|s", &link, &dn, &dn_len, &entry, &assert, &assert_len) != SUCCESS) {
+ 		return;
+ 	}	
+ 
+@@ -1343,15 +1343,21 @@
+ 		zend_hash_move_forward(Z_ARRVAL_P(entry));
+ 	}
+ 	ldap_mods[num_attribs] = NULL;
++	if (assert_len > 0) {
++		if ((i = ldap_create_assertion_control_value(ld->link, assert, assert_ctrl)) != LDAP_SUCCESS) {
++			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Assert: %s", ldap_err2string(i));
++			RETVAL_FALSE;
++		}
++	}
+ 
+ /* check flag to see if do_mod was called to perform full add , gerrit thomson */
+ 	if (is_full_add == 1) {
+-		if ((i = ldap_add_s(ld->link, dn, ldap_mods)) != LDAP_SUCCESS) {
++		if ((i = ldap_add_ext_s(ld->link, dn, ldap_mods, assert_ctrl, NULL)) != LDAP_SUCCESS) {
+ 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Add: %s", ldap_err2string(i));
+ 			RETVAL_FALSE;
+ 		} else RETVAL_TRUE;
+ 	} else {
+-		if ((i = ldap_modify_ext_s(ld->link, dn, ldap_mods, NULL, NULL)) != LDAP_SUCCESS) {
++		if ((i = ldap_modify_ext_s(ld->link, dn, ldap_mods, assert_ctrl, NULL)) != LDAP_SUCCESS) {
+ 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Modify: %s", ldap_err2string(i));
+ 			RETVAL_FALSE;
+ 		} else RETVAL_TRUE;	
+@@ -2502,6 +2508,7 @@
+ 	ZEND_ARG_INFO(0, link_identifier)
+ 	ZEND_ARG_INFO(0, dn)
+ 	ZEND_ARG_INFO(0, entry)
++	ZEND_ARG_INFO(0, assert)
+ ZEND_END_ARG_INFO()
+ 
+ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_delete, 0, 0, 2)
+@@ -2519,18 +2526,21 @@
+ 	ZEND_ARG_INFO(0, link_identifier)
+ 	ZEND_ARG_INFO(0, dn)
+ 	ZEND_ARG_INFO(0, entry)
++	ZEND_ARG_INFO(0, assert)
+ ZEND_END_ARG_INFO()
+ 
+ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_replace, 0, 0, 3)
+ 	ZEND_ARG_INFO(0, link_identifier)
+ 	ZEND_ARG_INFO(0, dn)
+ 	ZEND_ARG_INFO(0, entry)
++	ZEND_ARG_INFO(0, assert)
+ ZEND_END_ARG_INFO()
+ 
+ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_del, 0, 0, 3)
+ 	ZEND_ARG_INFO(0, link_identifier)
+ 	ZEND_ARG_INFO(0, dn)
+ 	ZEND_ARG_INFO(0, entry)
++	ZEND_ARG_INFO(0, assert)
+ ZEND_END_ARG_INFO()
+ 
+ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_err2str, 0, 0, 1)

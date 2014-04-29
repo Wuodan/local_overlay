@@ -1,0 +1,931 @@
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/mac80211_hwsim.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/mac80211_hwsim.c	2013-02-12 21:39:38.242631480 +0100
+@@ -2062,25 +2062,27 @@
+ 
+ 	if (channels > 1) {
+ 		hwsim_if_comb.num_different_channels = channels;
+-		mac80211_hwsim_ops.hw_scan = mac80211_hwsim_hw_scan;
+-		mac80211_hwsim_ops.cancel_hw_scan =
++		pax_open_kernel();
++		*(void **)&mac80211_hwsim_ops.hw_scan = mac80211_hwsim_hw_scan;
++		*(void **)&mac80211_hwsim_ops.cancel_hw_scan =
+ 			mac80211_hwsim_cancel_hw_scan;
+-		mac80211_hwsim_ops.sw_scan_start = NULL;
+-		mac80211_hwsim_ops.sw_scan_complete = NULL;
+-		mac80211_hwsim_ops.remain_on_channel =
++		*(void **)&mac80211_hwsim_ops.sw_scan_start = NULL;
++		*(void **)&mac80211_hwsim_ops.sw_scan_complete = NULL;
++		*(void **)&mac80211_hwsim_ops.remain_on_channel =
+ 			mac80211_hwsim_roc;
+-		mac80211_hwsim_ops.cancel_remain_on_channel =
++		*(void **)&mac80211_hwsim_ops.cancel_remain_on_channel =
+ 			mac80211_hwsim_croc;
+-		mac80211_hwsim_ops.add_chanctx =
++		*(void **)&mac80211_hwsim_ops.add_chanctx =
+ 			mac80211_hwsim_add_chanctx;
+-		mac80211_hwsim_ops.remove_chanctx =
++		*(void **)&mac80211_hwsim_ops.remove_chanctx =
+ 			mac80211_hwsim_remove_chanctx;
+-		mac80211_hwsim_ops.change_chanctx =
++		*(void **)&mac80211_hwsim_ops.change_chanctx =
+ 			mac80211_hwsim_change_chanctx;
+-		mac80211_hwsim_ops.assign_vif_chanctx =
++		*(void **)&mac80211_hwsim_ops.assign_vif_chanctx =
+ 			mac80211_hwsim_assign_vif_chanctx;
+-		mac80211_hwsim_ops.unassign_vif_chanctx =
++		*(void **)&mac80211_hwsim_ops.unassign_vif_chanctx =
+ 			mac80211_hwsim_unassign_vif_chanctx;
++		pax_close_kernel();
+ 	}
+ 
+ 	spin_lock_init(&hwsim_radio_lock);
+--- compat-drivers-3.8-rc7-1-u.orig/net/bluetooth/af_bluetooth.c	2013-02-11 00:31:59.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/net/bluetooth/af_bluetooth.c	2013-02-12 22:07:04.971703708 +0100
+@@ -647,11 +647,13 @@
+ 
+ 	sk_list->custom_seq_show = seq_show;
+ 
+-	sk_list->fops.owner     = module;
+-	sk_list->fops.open      = bt_seq_open;
+-	sk_list->fops.read      = seq_read;
+-	sk_list->fops.llseek    = seq_lseek;
+-	sk_list->fops.release   = seq_release_private;
++	pax_open_kernel();
++	*(void **)&sk_list->fops.owner     = module;
++	*(void **)&sk_list->fops.open      = bt_seq_open;
++	*(void **)&sk_list->fops.read      = seq_read;
++	*(void **)&sk_list->fops.llseek    = seq_lseek;
++	*(void **)&sk_list->fops.release   = seq_release_private;
++	pax_close_kernel();
+ 
+ 	pde = proc_net_fops_create(net, name, 0, &sk_list->fops);
+ 	if (!pde)
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/ath/ath9k/init.c	2013-02-11 00:31:59.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/ath/ath9k/init.c	2013-02-13 21:31:13.977164678 +0100
+@@ -573,9 +573,11 @@
+ 
+ 	ah->hw = sc->hw;
+ 	ah->hw_version.devid = devid;
+-	ah->reg_ops.read = ath9k_ioread32;
+-	ah->reg_ops.write = ath9k_iowrite32;
+-	ah->reg_ops.rmw = ath9k_reg_rmw;
++	pax_open_kernel();
++	*(void **)&ah->reg_ops.read = ath9k_ioread32;
++	*(void **)&ah->reg_ops.write = ath9k_iowrite32;
++	*(void **)&ah->reg_ops.rmw = ath9k_reg_rmw;
++	pax_close_kernel();
+ 	atomic_set(&ah->intr_ref_cnt, -1);
+ 	sc->sc_ah = ah;
+ 
+--- compat-drivers-3.8-rc7-1-u.orig/net/wireless/core.c	2013-02-11 00:31:59.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/net/wireless/core.c	2013-02-12 22:56:39.216834168 +0100
+@@ -359,10 +359,12 @@
+ 	wiphy_net_set(&rdev->wiphy, &init_net);
+ #endif
+ 
+-	rdev->rfkill_ops.set_block = cfg80211_rfkill_set_block;
+-	rdev->rfkill = rfkill_alloc(dev_name(&rdev->wiphy.dev),
++	pax_open_kernel();
++	*(void **)&rdev->rfkill_ops.set_block = cfg80211_rfkill_set_block;
++	*(void **)&rdev->rfkill = rfkill_alloc(dev_name(&rdev->wiphy.dev),
+ 				   &rdev->wiphy.dev, RFKILL_TYPE_WLAN,
+ 				   &rdev->rfkill_ops, rdev);
++	pax_close_kernel();
+ 
+ 	if (!rdev->rfkill) {
+ 		kfree(rdev);
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/brcm80211/brcmsmac/phy/phy_lcn.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/brcm80211/brcmsmac/phy/phy_lcn.c	2013-02-13 22:15:10.352986761 +0100
+@@ -5081,15 +5081,17 @@
+ 	pi->xtalfreq = si_pmu_alp_clock(pi->sh->sih);
+ 	pi_lcn->lcnphy_papd_rxGnCtrl_init = 0;
+ 
+-	pi->pi_fptr.init = wlc_phy_init_lcnphy;
+-	pi->pi_fptr.calinit = wlc_phy_cal_init_lcnphy;
+-	pi->pi_fptr.chanset = wlc_phy_chanspec_set_lcnphy;
+-	pi->pi_fptr.txpwrrecalc = wlc_phy_txpower_recalc_target_lcnphy;
+-	pi->pi_fptr.txiqccget = wlc_lcnphy_get_tx_iqcc;
+-	pi->pi_fptr.txiqccset = wlc_lcnphy_set_tx_iqcc;
+-	pi->pi_fptr.txloccget = wlc_lcnphy_get_tx_locc;
+-	pi->pi_fptr.radioloftget = wlc_lcnphy_get_radio_loft;
+-	pi->pi_fptr.detach = wlc_phy_detach_lcnphy;
++	pax_open_kernel();
++	*(void **)&pi->pi_fptr.init = wlc_phy_init_lcnphy;
++	*(void **)&pi->pi_fptr.calinit = wlc_phy_cal_init_lcnphy;
++	*(void **)&pi->pi_fptr.chanset = wlc_phy_chanspec_set_lcnphy;
++	*(void **)&pi->pi_fptr.txpwrrecalc = wlc_phy_txpower_recalc_target_lcnphy;
++	*(void **)&pi->pi_fptr.txiqccget = wlc_lcnphy_get_tx_iqcc;
++	*(void **)&pi->pi_fptr.txiqccset = wlc_lcnphy_set_tx_iqcc;
++	*(void **)&pi->pi_fptr.txloccget = wlc_lcnphy_get_tx_locc;
++	*(void **)&pi->pi_fptr.radioloftget = wlc_lcnphy_get_radio_loft;
++	*(void **)&pi->pi_fptr.detach = wlc_phy_detach_lcnphy;
++	pax_close_kernel();
+ 
+ 	if (!wlc_phy_txpwr_srom_read_lcnphy(pi))
+ 		return false;
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/brcm80211/brcmsmac/phy/phy_n.c	2013-02-11 00:31:59.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/brcm80211/brcmsmac/phy/phy_n.c	2013-02-13 21:36:59.898141330 +0100
+@@ -14653,10 +14653,12 @@
+ 	if (pi->nphy_txpwrctrl == PHY_TPC_HW_ON)
+ 		pi->hwpwrctrl_capable = true;
+ 
+-	pi->pi_fptr.init = wlc_phy_init_nphy;
+-	pi->pi_fptr.calinit = wlc_phy_cal_init_nphy;
+-	pi->pi_fptr.chanset = wlc_phy_chanspec_set_nphy;
+-	pi->pi_fptr.txpwrrecalc = wlc_phy_txpower_recalc_target_nphy;
++	pax_open_kernel();
++	*(void **)&pi->pi_fptr.init = wlc_phy_init_nphy;
++	*(void **)&pi->pi_fptr.calinit = wlc_phy_cal_init_nphy;
++	*(void **)&pi->pi_fptr.chanset = wlc_phy_chanspec_set_nphy;
++	*(void **)&pi->pi_fptr.txpwrrecalc = wlc_phy_txpower_recalc_target_nphy;
++	pax_close_kernel();
+ 
+ 	if (!wlc_phy_txpwr_srom_read_nphy(pi))
+ 		return false;
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/ath/ath9k/htc_drv_init.c	2013-02-11 00:31:59.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/ath/ath9k/htc_drv_init.c	2013-02-13 12:44:14.547012281 +0100
+@@ -627,12 +627,14 @@
+ 	ah->hw_version.devid = devid;
+ 	ah->hw_version.usbdev = drv_info;
+ 	ah->ah_flags |= AH_USE_EEPROM;
+-	ah->reg_ops.read = ath9k_regread;
+-	ah->reg_ops.multi_read = ath9k_multi_regread;
+-	ah->reg_ops.write = ath9k_regwrite;
+-	ah->reg_ops.enable_write_buffer = ath9k_enable_regwrite_buffer;
+-	ah->reg_ops.write_flush = ath9k_regwrite_flush;
+-	ah->reg_ops.rmw = ath9k_reg_rmw;
++	pax_open_kernel();
++	*(void **)&ah->reg_ops.read = ath9k_regread;
++	*(void **)&ah->reg_ops.multi_read = ath9k_multi_regread;
++	*(void **)&ah->reg_ops.write = ath9k_regwrite;
++	*(void **)&ah->reg_ops.enable_write_buffer = ath9k_enable_regwrite_buffer;
++	*(void **)&ah->reg_ops.write_flush = ath9k_regwrite_flush;
++	*(void **)&ah->reg_ops.rmw = ath9k_reg_rmw;
++	pax_close_kernel();
+ 	priv->ah = ah;
+ 
+ 	common = ath9k_hw_common(ah);
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/iwlegacy/3945-mac.c	2013-02-11 00:31:59.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/iwlegacy/3945-mac.c	2013-02-13 21:27:12.995180939 +0100
+@@ -3617,7 +3617,9 @@
+ 	 */
+ 	if (il3945_mod_params.disable_hw_scan) {
+ 		D_INFO("Disabling hw_scan\n");
+-		il3945_mac_ops.hw_scan = NULL;
++		pax_open_kernel();
++		*(void **)&il3945_mac_ops.hw_scan = NULL;
++		pax_close_kernel();
+ 	}
+ 
+ 	D_INFO("*** LOAD DRIVER ***\n");
+--- compat-drivers-3.8-rc7-1-u.orig/net/wireless/core.c	2013-02-13 21:44:48.796109689 +0100
++++ compat-drivers-3.8-rc7-1-u/net/wireless/core.c	2013-02-13 21:47:19.559099514 +0100
+@@ -632,7 +632,9 @@
+ 
+ 	if (!rdev->ops->rfkill_poll)
+ 		return;
+-	rdev->rfkill_ops.poll = cfg80211_rfkill_poll;
++	pax_open_kernel();
++	*(void **)&rdev->rfkill_ops.poll = cfg80211_rfkill_poll;
++	pax_close_kernel();
+ 	rfkill_resume_polling(rdev->rfkill);
+ }
+ EXPORT_SYMBOL(wiphy_rfkill_start_polling);
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/ath/ath9k/ar9002_hw.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/ath/ath9k/ar9002_hw.c	2013-02-13 22:17:09.666978709 +0100
+@@ -414,10 +414,12 @@
+ 	struct ath_hw_private_ops *priv_ops = ath9k_hw_private_ops(ah);
+ 	struct ath_hw_ops *ops = ath9k_hw_ops(ah);
+ 
+-	priv_ops->init_mode_regs = ar9002_hw_init_mode_regs;
+-	priv_ops->init_mode_gain_regs = ar9002_hw_init_mode_gain_regs;
++	pax_open_kernel();
++	*(void **)&priv_ops->init_mode_regs = ar9002_hw_init_mode_regs;
++	*(void **)&priv_ops->init_mode_gain_regs = ar9002_hw_init_mode_gain_regs;
+ 
+-	ops->config_pci_powersave = ar9002_hw_configpcipowersave;
++	*(void **)&ops->config_pci_powersave = ar9002_hw_configpcipowersave;
++	pax_close_kernel();
+ 
+ 	ar5008_hw_attach_phy_ops(ah);
+ 	if (AR_SREV_9280_20_OR_LATER(ah))
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/ath/ath9k/ar9003_hw.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/ath/ath9k/ar9003_hw.c	2013-02-13 22:20:36.847964727 +0100
+@@ -673,10 +673,12 @@
+ 	struct ath_hw_private_ops *priv_ops = ath9k_hw_private_ops(ah);
+ 	struct ath_hw_ops *ops = ath9k_hw_ops(ah);
+ 
+-	priv_ops->init_mode_regs = ar9003_hw_init_mode_regs;
+-	priv_ops->init_mode_gain_regs = ar9003_hw_init_mode_gain_regs;
++	pax_open_kernel();
++	*(void **)&priv_ops->init_mode_regs = ar9003_hw_init_mode_regs;
++	*(void **)&priv_ops->init_mode_gain_regs = ar9003_hw_init_mode_gain_regs;
+ 
+-	ops->config_pci_powersave = ar9003_hw_configpcipowersave;
++	*(void **)&ops->config_pci_powersave = ar9003_hw_configpcipowersave;
++	pax_close_kernel();
+ 
+ 	ar9003_hw_attach_phy_ops(ah);
+ 	ar9003_hw_attach_calib_ops(ah);
+--- compat-drivers-3.8-rc7-1-u.orig/include/drm/ttm/ttm_memory.h	2013-01-23 21:02:34.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/include/drm/ttm/ttm_memory.h	2013-02-13 22:22:06.796958656 +0100
+@@ -100,7 +100,9 @@
+ static inline void ttm_mem_init_shrink(struct ttm_mem_shrink *shrink,
+ 				       int (*func) (struct ttm_mem_shrink *))
+ {
+-	shrink->do_shrink = func;
++	pax_open_kernel();
++	*(void **)&shrink->do_shrink = func;
++	pax_close_kernel();
+ }
+ 
+ /**
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/gpu/drm/radeon/radeon_asic.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/gpu/drm/radeon/radeon_asic.c	2013-02-13 22:28:05.234934468 +0100
+@@ -150,13 +150,17 @@
+ 			rdev->family == CHIP_R423) {
+ 		DRM_INFO("Forcing AGP to PCIE mode\n");
+ 		rdev->flags |= RADEON_IS_PCIE;
+-		rdev->asic->gart.tlb_flush = &rv370_pcie_gart_tlb_flush;
+-		rdev->asic->gart.set_page = &rv370_pcie_gart_set_page;
++		pax_open_kernel();
++		*(void **)&rdev->asic->gart.tlb_flush = &rv370_pcie_gart_tlb_flush;
++		*(void **)&rdev->asic->gart.set_page = &rv370_pcie_gart_set_page;
++		pax_close_kernel();
+ 	} else {
+ 		DRM_INFO("Forcing AGP to PCI mode\n");
+ 		rdev->flags |= RADEON_IS_PCI;
+-		rdev->asic->gart.tlb_flush = &r100_pci_gart_tlb_flush;
+-		rdev->asic->gart.set_page = &r100_pci_gart_set_page;
++		pax_open_kernel();
++		*(void **)&rdev->asic->gart.tlb_flush = &r100_pci_gart_tlb_flush;
++		*(void **)&rdev->asic->gart.set_page = &r100_pci_gart_set_page;
++		pax_close_kernel();
+ 	}
+ 	rdev->mc.gtt_size = radeon_gart_size * 1024 * 1024;
+ }
+@@ -1858,11 +1862,13 @@
+ 		rdev->asic = &r420_asic;
+ 		/* handle macs */
+ 		if (rdev->bios == NULL) {
+-			rdev->asic->pm.get_engine_clock = &radeon_legacy_get_engine_clock;
+-			rdev->asic->pm.set_engine_clock = &radeon_legacy_set_engine_clock;
+-			rdev->asic->pm.get_memory_clock = &radeon_legacy_get_memory_clock;
+-			rdev->asic->pm.set_memory_clock = NULL;
+-			rdev->asic->display.set_backlight_level = &radeon_legacy_set_backlight_level;
++			pax_open_kernel();
++			*(void **)&rdev->asic->pm.get_engine_clock = &radeon_legacy_get_engine_clock;
++			*(void **)&rdev->asic->pm.set_engine_clock = &radeon_legacy_set_engine_clock;
++			*(void **)&rdev->asic->pm.get_memory_clock = &radeon_legacy_get_memory_clock;
++			*(void **)&rdev->asic->pm.set_memory_clock = NULL;
++			*(void **)&rdev->asic->display.set_backlight_level = &radeon_legacy_set_backlight_level;
++			pax_close_kernel();
+ 		}
+ 		break;
+ 	case CHIP_RS400:
+@@ -1954,8 +1960,10 @@
+ 	}
+ 
+ 	if (rdev->flags & RADEON_IS_IGP) {
+-		rdev->asic->pm.get_memory_clock = NULL;
+-		rdev->asic->pm.set_memory_clock = NULL;
++		pax_open_kernel();
++		*(void **)&rdev->asic->pm.get_memory_clock = NULL;
++		*(void **)&rdev->asic->pm.set_memory_clock = NULL;
++		pax_close_kernel();
+ 	}
+ 
+ 	return 0;
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/ath/ath9k/ar9003_phy.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/ath/ath9k/ar9003_phy.c	2013-02-13 23:50:48.883599508 +0100
+@@ -1450,26 +1450,28 @@
+ 		AR_PHY_EXT_CCA_2,
+ 	};
+ 
+-	priv_ops->rf_set_freq = ar9003_hw_set_channel;
+-	priv_ops->spur_mitigate_freq = ar9003_hw_spur_mitigate;
+-	priv_ops->compute_pll_control = ar9003_hw_compute_pll_control;
+-	priv_ops->set_channel_regs = ar9003_hw_set_channel_regs;
+-	priv_ops->init_bb = ar9003_hw_init_bb;
+-	priv_ops->process_ini = ar9003_hw_process_ini;
+-	priv_ops->set_rfmode = ar9003_hw_set_rfmode;
+-	priv_ops->mark_phy_inactive = ar9003_hw_mark_phy_inactive;
+-	priv_ops->set_delta_slope = ar9003_hw_set_delta_slope;
+-	priv_ops->rfbus_req = ar9003_hw_rfbus_req;
+-	priv_ops->rfbus_done = ar9003_hw_rfbus_done;
+-	priv_ops->ani_control = ar9003_hw_ani_control;
+-	priv_ops->do_getnf = ar9003_hw_do_getnf;
+-	priv_ops->ani_cache_ini_regs = ar9003_hw_ani_cache_ini_regs;
+-	priv_ops->set_radar_params = ar9003_hw_set_radar_params;
+-	priv_ops->fast_chan_change = ar9003_hw_fast_chan_change;
++	pax_open_kernel();
++	*(void **)&priv_ops->rf_set_freq = ar9003_hw_set_channel;
++	*(void **)&priv_ops->spur_mitigate_freq = ar9003_hw_spur_mitigate;
++	*(void **)&priv_ops->compute_pll_control = ar9003_hw_compute_pll_control;
++	*(void **)&priv_ops->set_channel_regs = ar9003_hw_set_channel_regs;
++	*(void **)&priv_ops->init_bb = ar9003_hw_init_bb;
++	*(void **)&priv_ops->process_ini = ar9003_hw_process_ini;
++	*(void **)&priv_ops->set_rfmode = ar9003_hw_set_rfmode;
++	*(void **)&priv_ops->mark_phy_inactive = ar9003_hw_mark_phy_inactive;
++	*(void **)&priv_ops->set_delta_slope = ar9003_hw_set_delta_slope;
++	*(void **)&priv_ops->rfbus_req = ar9003_hw_rfbus_req;
++	*(void **)&priv_ops->rfbus_done = ar9003_hw_rfbus_done;
++	*(void **)&priv_ops->ani_control = ar9003_hw_ani_control;
++	*(void **)&priv_ops->do_getnf = ar9003_hw_do_getnf;
++	*(void **)&priv_ops->ani_cache_ini_regs = ar9003_hw_ani_cache_ini_regs;
++	*(void **)&priv_ops->set_radar_params = ar9003_hw_set_radar_params;
++	*(void **)&priv_ops->fast_chan_change = ar9003_hw_fast_chan_change;
+ 
+-	ops->antdiv_comb_conf_get = ar9003_hw_antdiv_comb_conf_get;
+-	ops->antdiv_comb_conf_set = ar9003_hw_antdiv_comb_conf_set;
+-	ops->antctrl_shared_chain_lnadiv = ar9003_hw_antctrl_shared_chain_lnadiv;
++	*(void **)&ops->antdiv_comb_conf_get = ar9003_hw_antdiv_comb_conf_get;
++	*(void **)&ops->antdiv_comb_conf_set = ar9003_hw_antdiv_comb_conf_set;
++	*(void **)&ops->antctrl_shared_chain_lnadiv = ar9003_hw_antctrl_shared_chain_lnadiv;
++	pax_close_kernel();
+ 
+ 	ar9003_hw_set_nf_limits(ah);
+ 	ar9003_hw_set_radar_conf(ah);
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/gpu/drm/i915/i915_drv.h	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/gpu/drm/i915/i915_drv.h	2013-02-13 23:59:41.913563524 +0100
+@@ -284,12 +284,12 @@
+ 	/* render clock increase/decrease */
+ 	/* display clock increase/decrease */
+ 	/* pll clock increase/decrease */
+-};
++} __no_const;
+ 
+ struct drm_i915_gt_funcs {
+ 	void (*force_wake_get)(struct drm_i915_private *dev_priv);
+ 	void (*force_wake_put)(struct drm_i915_private *dev_priv);
+-};
++} __no_const;
+ 
+ #define DEV_INFO_FLAGS \
+ 	DEV_INFO_FLAG(is_mobile) DEV_INFO_SEP \
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/ath/ath9k/ar9002_phy.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/ath/ath9k/ar9002_phy.c	2013-02-13 23:55:17.715581353 +0100
+@@ -560,17 +560,19 @@
+ 	struct ath_hw_private_ops *priv_ops = ath9k_hw_private_ops(ah);
+ 	struct ath_hw_ops *ops = ath9k_hw_ops(ah);
+ 
+-	priv_ops->set_rf_regs = NULL;
+-	priv_ops->rf_alloc_ext_banks = NULL;
+-	priv_ops->rf_free_ext_banks = NULL;
+-	priv_ops->rf_set_freq = ar9002_hw_set_channel;
+-	priv_ops->spur_mitigate_freq = ar9002_hw_spur_mitigate;
+-	priv_ops->olc_init = ar9002_olc_init;
+-	priv_ops->compute_pll_control = ar9002_hw_compute_pll_control;
+-	priv_ops->do_getnf = ar9002_hw_do_getnf;
++	pax_open_kernel();
++	*(void **)&priv_ops->set_rf_regs = NULL;
++	*(void **)&priv_ops->rf_alloc_ext_banks = NULL;
++	*(void **)&priv_ops->rf_free_ext_banks = NULL;
++	*(void **)&priv_ops->rf_set_freq = ar9002_hw_set_channel;
++	*(void **)&priv_ops->spur_mitigate_freq = ar9002_hw_spur_mitigate;
++	*(void **)&priv_ops->olc_init = ar9002_olc_init;
++	*(void **)&priv_ops->compute_pll_control = ar9002_hw_compute_pll_control;
++	*(void **)&priv_ops->do_getnf = ar9002_hw_do_getnf;
+ 
+-	ops->antdiv_comb_conf_get = ar9002_hw_antdiv_comb_conf_get;
+-	ops->antdiv_comb_conf_set = ar9002_hw_antdiv_comb_conf_set;
++	*(void **)&ops->antdiv_comb_conf_get = ar9002_hw_antdiv_comb_conf_get;
++	*(void **)&ops->antdiv_comb_conf_set = ar9002_hw_antdiv_comb_conf_set;
++	pax_close_kernel();
+ 
+ 	ar9002_hw_set_nf_limits(ah);
+ }
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/gpu/drm/radeon/radeon_ttm.c	2013-02-11 00:31:59.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/gpu/drm/radeon/radeon_ttm.c	2013-02-14 00:06:06.890537545 +0100
+@@ -832,8 +832,10 @@
+ 	}
+ 	if (unlikely(ttm_vm_ops == NULL)) {
+ 		ttm_vm_ops = vma->vm_ops;
+-		radeon_ttm_vm_ops = *ttm_vm_ops;
+-		radeon_ttm_vm_ops.fault = &radeon_ttm_fault;
++		pax_open_kernel();
++		*(void **)&radeon_ttm_vm_ops = *ttm_vm_ops;
++		*(void **)&radeon_ttm_vm_ops.fault = &radeon_ttm_fault;
++		pax_close_kernel();
+ 	}
+ 	vma->vm_ops = &radeon_ttm_vm_ops;
+ 	return 0;
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/ath/ath9k/ar9002_calib.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/ath/ath9k/ar9002_calib.c	2013-02-14 00:07:28.992532005 +0100
+@@ -981,9 +981,11 @@
+ 	struct ath_hw_private_ops *priv_ops = ath9k_hw_private_ops(ah);
+ 	struct ath_hw_ops *ops = ath9k_hw_ops(ah);
+ 
+-	priv_ops->init_cal_settings = ar9002_hw_init_cal_settings;
+-	priv_ops->init_cal = ar9002_hw_init_cal;
+-	priv_ops->setup_calibration = ar9002_hw_setup_calibration;
++	pax_open_kernel();
++	*(void **)&priv_ops->init_cal_settings = ar9002_hw_init_cal_settings;
++	*(void **)&priv_ops->init_cal = ar9002_hw_init_cal;
++	*(void **)&priv_ops->setup_calibration = ar9002_hw_setup_calibration;
+ 
+-	ops->calibrate = ar9002_hw_calibrate;
++	*(void **)&ops->calibrate = ar9002_hw_calibrate;
++	pax_close_kernel();
+ }
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/ath/ath9k/ar5008_phy.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/ath/ath9k/ar5008_phy.c	2013-02-14 00:31:07.491436276 +0100
+@@ -1392,31 +1392,35 @@
+ 		AR_PHY_CH2_EXT_CCA
+ 	};
+ 
+-	priv_ops->rf_set_freq = ar5008_hw_set_channel;
+-	priv_ops->spur_mitigate_freq = ar5008_hw_spur_mitigate;
++	pax_open_kernel();
+ 
+-	priv_ops->rf_alloc_ext_banks = ar5008_hw_rf_alloc_ext_banks;
+-	priv_ops->rf_free_ext_banks = ar5008_hw_rf_free_ext_banks;
+-	priv_ops->set_rf_regs = ar5008_hw_set_rf_regs;
+-	priv_ops->set_channel_regs = ar5008_hw_set_channel_regs;
+-	priv_ops->init_bb = ar5008_hw_init_bb;
+-	priv_ops->process_ini = ar5008_hw_process_ini;
+-	priv_ops->set_rfmode = ar5008_hw_set_rfmode;
+-	priv_ops->mark_phy_inactive = ar5008_hw_mark_phy_inactive;
+-	priv_ops->set_delta_slope = ar5008_hw_set_delta_slope;
+-	priv_ops->rfbus_req = ar5008_hw_rfbus_req;
+-	priv_ops->rfbus_done = ar5008_hw_rfbus_done;
+-	priv_ops->restore_chainmask = ar5008_restore_chainmask;
+-	priv_ops->do_getnf = ar5008_hw_do_getnf;
+-	priv_ops->set_radar_params = ar5008_hw_set_radar_params;
++	*(void **)&priv_ops->rf_set_freq = ar5008_hw_set_channel;
++	*(void **)&priv_ops->spur_mitigate_freq = ar5008_hw_spur_mitigate;
+ 
+-	priv_ops->ani_control = ar5008_hw_ani_control_new;
+-	priv_ops->ani_cache_ini_regs = ar5008_hw_ani_cache_ini_regs;
++	*(void **)&priv_ops->rf_alloc_ext_banks = ar5008_hw_rf_alloc_ext_banks;
++	*(void **)&priv_ops->rf_free_ext_banks = ar5008_hw_rf_free_ext_banks;
++	*(void **)&priv_ops->set_rf_regs = ar5008_hw_set_rf_regs;
++	*(void **)&priv_ops->set_channel_regs = ar5008_hw_set_channel_regs;
++	*(void **)&priv_ops->init_bb = ar5008_hw_init_bb;
++	*(void **)&priv_ops->process_ini = ar5008_hw_process_ini;
++	*(void **)&priv_ops->set_rfmode = ar5008_hw_set_rfmode;
++	*(void **)&priv_ops->mark_phy_inactive = ar5008_hw_mark_phy_inactive;
++	*(void **)&priv_ops->set_delta_slope = ar5008_hw_set_delta_slope;
++	*(void **)&priv_ops->rfbus_req = ar5008_hw_rfbus_req;
++	*(void **)&priv_ops->rfbus_done = ar5008_hw_rfbus_done;
++	*(void **)&priv_ops->restore_chainmask = ar5008_restore_chainmask;
++	*(void **)&priv_ops->do_getnf = ar5008_hw_do_getnf;
++	*(void **)&priv_ops->set_radar_params = ar5008_hw_set_radar_params;
++
++	*(void **)&priv_ops->ani_control = ar5008_hw_ani_control_new;
++	*(void **)&priv_ops->ani_cache_ini_regs = ar5008_hw_ani_cache_ini_regs;
+ 
+ 	if (AR_SREV_9100(ah) || AR_SREV_9160_10_OR_LATER(ah))
+-		priv_ops->compute_pll_control = ar9160_hw_compute_pll_control;
++		*(void **)&priv_ops->compute_pll_control = ar9160_hw_compute_pll_control;
+ 	else
+-		priv_ops->compute_pll_control = ar5008_hw_compute_pll_control;
++		*(void **)&priv_ops->compute_pll_control = ar5008_hw_compute_pll_control;
++
++	pax_close_kernel();
+ 
+ 	ar5008_hw_set_nf_limits(ah);
+ 	ar5008_hw_set_radar_conf(ah);
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/gpu/drm/nouveau/nv10_fence.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/gpu/drm/nouveau/nv10_fence.c	2013-02-14 00:15:12.081500752 +0100
+@@ -179,12 +179,14 @@
+ 	if (!priv)
+ 		return -ENOMEM;
+ 
+-	priv->base.dtor = nv10_fence_destroy;
+-	priv->base.context_new = nv10_fence_context_new;
+-	priv->base.context_del = nv10_fence_context_del;
+-	priv->base.emit = nv10_fence_emit;
+-	priv->base.read = nv10_fence_read;
+-	priv->base.sync = nv10_fence_sync;
++	pax_open_kernel();
++	*(void **)&priv->base.dtor = nv10_fence_destroy;
++	*(void **)&priv->base.context_new = nv10_fence_context_new;
++	*(void **)&priv->base.context_del = nv10_fence_context_del;
++	*(void **)&priv->base.emit = nv10_fence_emit;
++	*(void **)&priv->base.read = nv10_fence_read;
++	*(void **)&priv->base.sync = nv10_fence_sync;
++	pax_close_kernel();
+ 	spin_lock_init(&priv->lock);
+ 
+ 	if (nv_device(drm->device)->chipset >= 0x17) {
+@@ -203,8 +205,10 @@
+ 
+ 		if (ret == 0) {
+ 			nouveau_bo_wr32(priv->bo, 0x000, 0x00000000);
+-			priv->base.sync = nv17_fence_sync;
+-			priv->base.resume = nv17_fence_resume;
++			pax_open_kernel();
++			*(void **)&priv->base.sync = nv17_fence_sync;
++			*(void **)&priv->base.resume = nv17_fence_resume;
++			pax_close_kernel();
+ 		}
+ 	}
+ 
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/gpu/drm/nouveau/nv04_fence.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/gpu/drm/nouveau/nv04_fence.c	2013-02-14 00:23:13.846468239 +0100
+@@ -101,11 +101,13 @@
+ 	if (!priv)
+ 		return -ENOMEM;
+ 
+-	priv->base.dtor = nv04_fence_destroy;
+-	priv->base.context_new = nv04_fence_context_new;
+-	priv->base.context_del = nv04_fence_context_del;
+-	priv->base.emit = nv04_fence_emit;
+-	priv->base.sync = nv04_fence_sync;
+-	priv->base.read = nv04_fence_read;
++	pax_open_kernel();
++	*(void **)&priv->base.dtor = nv04_fence_destroy;
++	*(void **)&priv->base.context_new = nv04_fence_context_new;
++	*(void **)&priv->base.context_del = nv04_fence_context_del;
++	*(void **)&priv->base.emit = nv04_fence_emit;
++	*(void **)&priv->base.sync = nv04_fence_sync;
++	*(void **)&priv->base.read = nv04_fence_read;
++	pax_close_kernel();
+ 	return 0;
+ }
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/gpu/drm/nouveau/nv50_fence.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/gpu/drm/nouveau/nv50_fence.c	2013-02-14 00:25:12.959460199 +0100
+@@ -98,12 +98,14 @@
+ 	if (!priv)
+ 		return -ENOMEM;
+ 
+-	priv->base.dtor = nv10_fence_destroy;
+-	priv->base.context_new = nv50_fence_context_new;
+-	priv->base.context_del = nv10_fence_context_del;
+-	priv->base.emit = nv10_fence_emit;
+-	priv->base.read = nv10_fence_read;
+-	priv->base.sync = nv17_fence_sync;
++	pax_open_kernel();
++	*(void **)&priv->base.dtor = nv10_fence_destroy;
++	*(void **)&priv->base.context_new = nv50_fence_context_new;
++	*(void **)&priv->base.context_del = nv10_fence_context_del;
++	*(void **)&priv->base.emit = nv10_fence_emit;
++	*(void **)&priv->base.read = nv10_fence_read;
++	*(void **)&priv->base.sync = nv17_fence_sync;
++	pax_close_kernel();
+ 	spin_lock_init(&priv->lock);
+ 
+ 	ret = nouveau_bo_new(drm->dev, 4096, 0x1000, TTM_PL_FLAG_VRAM,
+@@ -121,8 +123,10 @@
+ 
+ 	if (ret == 0) {
+ 		nouveau_bo_wr32(priv->bo, 0x000, 0x00000000);
+-		priv->base.sync = nv17_fence_sync;
+-		priv->base.resume = nv17_fence_resume;
++		pax_open_kernel();
++		*(void **)&priv->base.sync = nv17_fence_sync;
++		*(void **)&priv->base.resume = nv17_fence_resume;
++		pax_close_kernel();
+ 	}
+ 
+ 	if (ret)
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/gpu/drm/nouveau/nv84_fence.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/gpu/drm/nouveau/nv84_fence.c	2013-02-14 00:26:36.775454543 +0100
+@@ -167,12 +167,14 @@
+ 	if (!priv)
+ 		return -ENOMEM;
+ 
+-	priv->base.dtor = nv84_fence_destroy;
+-	priv->base.context_new = nv84_fence_context_new;
+-	priv->base.context_del = nv84_fence_context_del;
+-	priv->base.emit = nv84_fence_emit;
+-	priv->base.sync = nv84_fence_sync;
+-	priv->base.read = nv84_fence_read;
++	pax_open_kernel();
++	*(void **)&priv->base.dtor = nv84_fence_destroy;
++	*(void **)&priv->base.context_new = nv84_fence_context_new;
++	*(void **)&priv->base.context_del = nv84_fence_context_del;
++	*(void **)&priv->base.emit = nv84_fence_emit;
++	*(void **)&priv->base.sync = nv84_fence_sync;
++	*(void **)&priv->base.read = nv84_fence_read;
++	pax_close_kernel();
+ 
+ 	ret = nouveau_gpuobj_new(drm->device, NULL, chan * 16, 0x1000, 0,
+ 				&priv->mem);
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/gpu/drm/nouveau/nvc0_fence.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/gpu/drm/nouveau/nvc0_fence.c	2013-02-14 00:27:46.158449863 +0100
+@@ -208,14 +208,16 @@
+ 	if (!priv)
+ 		return -ENOMEM;
+ 
+-	priv->base.dtor = nvc0_fence_destroy;
+-	priv->base.suspend = nvc0_fence_suspend;
+-	priv->base.resume = nvc0_fence_resume;
+-	priv->base.context_new = nvc0_fence_context_new;
+-	priv->base.context_del = nvc0_fence_context_del;
+-	priv->base.emit = nvc0_fence_emit;
+-	priv->base.sync = nvc0_fence_sync;
+-	priv->base.read = nvc0_fence_read;
++	pax_open_kernel();
++	*(void **)&priv->base.dtor = nvc0_fence_destroy;
++	*(void **)&priv->base.suspend = nvc0_fence_suspend;
++	*(void **)&priv->base.resume = nvc0_fence_resume;
++	*(void **)&priv->base.context_new = nvc0_fence_context_new;
++	*(void **)&priv->base.context_del = nvc0_fence_context_del;
++	*(void **)&priv->base.emit = nvc0_fence_emit;
++	*(void **)&priv->base.sync = nvc0_fence_sync;
++	*(void **)&priv->base.read = nvc0_fence_read;
++	pax_close_kernel();
+ 
+ 	ret = nouveau_bo_new(drm->dev, 16 * (pfifo->max + 1), 0,
+ 			     TTM_PL_FLAG_VRAM, 0, 0, NULL, &priv->bo);
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/ath/ath9k/ar9003_calib.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/ath/ath9k/ar9003_calib.c	2013-02-14 00:38:12.670407583 +0100
+@@ -1165,9 +1165,11 @@
+ 	struct ath_hw_private_ops *priv_ops = ath9k_hw_private_ops(ah);
+ 	struct ath_hw_ops *ops = ath9k_hw_ops(ah);
+ 
+-	priv_ops->init_cal_settings = ar9003_hw_init_cal_settings;
+-	priv_ops->init_cal = ar9003_hw_init_cal;
+-	priv_ops->setup_calibration = ar9003_hw_setup_calibration;
++	pax_open_kernel();
++	*(void **)&priv_ops->init_cal_settings = ar9003_hw_init_cal_settings;
++	*(void **)&priv_ops->init_cal = ar9003_hw_init_cal;
++	*(void **)&priv_ops->setup_calibration = ar9003_hw_setup_calibration;
+ 
+-	ops->calibrate = ar9003_hw_calibrate;
++	*(void **)&ops->calibrate = ar9003_hw_calibrate;
++	pax_close_kernel();
+ }
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/ath/ath9k/ar9002_mac.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/ath/ath9k/ar9002_mac.c	2013-02-14 00:46:25.324374337 +0100
+@@ -184,8 +184,8 @@
+ 	ads->ds_txstatus6 = ads->ds_txstatus7 = 0;
+ 	ads->ds_txstatus8 = ads->ds_txstatus9 = 0;
+ 
+-	ACCESS_ONCE(ads->ds_link) = i->link;
+-	ACCESS_ONCE(ads->ds_data) = i->buf_addr[0];
++	ACCESS_ONCE_RW(ads->ds_link) = i->link;
++	ACCESS_ONCE_RW(ads->ds_data) = i->buf_addr[0];
+ 
+ 	ctl1 = i->buf_len[0] | (i->is_last ? 0 : AR_TxMore);
+ 	ctl6 = SM(i->keytype, AR_EncrType);
+@@ -199,26 +199,26 @@
+ 
+ 	if ((i->is_first || i->is_last) &&
+ 	    i->aggr != AGGR_BUF_MIDDLE && i->aggr != AGGR_BUF_LAST) {
+-		ACCESS_ONCE(ads->ds_ctl2) = set11nTries(i->rates, 0)
++		ACCESS_ONCE_RW(ads->ds_ctl2) = set11nTries(i->rates, 0)
+ 			| set11nTries(i->rates, 1)
+ 			| set11nTries(i->rates, 2)
+ 			| set11nTries(i->rates, 3)
+ 			| (i->dur_update ? AR_DurUpdateEna : 0)
+ 			| SM(0, AR_BurstDur);
+ 
+-		ACCESS_ONCE(ads->ds_ctl3) = set11nRate(i->rates, 0)
++		ACCESS_ONCE_RW(ads->ds_ctl3) = set11nRate(i->rates, 0)
+ 			| set11nRate(i->rates, 1)
+ 			| set11nRate(i->rates, 2)
+ 			| set11nRate(i->rates, 3);
+ 	} else {
+-		ACCESS_ONCE(ads->ds_ctl2) = 0;
+-		ACCESS_ONCE(ads->ds_ctl3) = 0;
++		ACCESS_ONCE_RW(ads->ds_ctl2) = 0;
++		ACCESS_ONCE_RW(ads->ds_ctl3) = 0;
+ 	}
+ 
+ 	if (!i->is_first) {
+-		ACCESS_ONCE(ads->ds_ctl0) = 0;
+-		ACCESS_ONCE(ads->ds_ctl1) = ctl1;
+-		ACCESS_ONCE(ads->ds_ctl6) = ctl6;
++		ACCESS_ONCE_RW(ads->ds_ctl0) = 0;
++		ACCESS_ONCE_RW(ads->ds_ctl1) = ctl1;
++		ACCESS_ONCE_RW(ads->ds_ctl6) = ctl6;
+ 		return;
+ 	}
+ 
+@@ -243,7 +243,7 @@
+ 		break;
+ 	}
+ 
+-	ACCESS_ONCE(ads->ds_ctl0) = (i->pkt_len & AR_FrameLen)
++	ACCESS_ONCE_RW(ads->ds_ctl0) = (i->pkt_len & AR_FrameLen)
+ 		| (i->flags & ATH9K_TXDESC_VMF ? AR_VirtMoreFrag : 0)
+ 		| SM(i->txpower, AR_XmitPower)
+ 		| (i->flags & ATH9K_TXDESC_VEOL ? AR_VEOL : 0)
+@@ -253,19 +253,19 @@
+ 		| (i->flags & ATH9K_TXDESC_RTSENA ? AR_RTSEnable :
+ 		   (i->flags & ATH9K_TXDESC_CTSENA ? AR_CTSEnable : 0));
+ 
+-	ACCESS_ONCE(ads->ds_ctl1) = ctl1;
+-	ACCESS_ONCE(ads->ds_ctl6) = ctl6;
++	ACCESS_ONCE_RW(ads->ds_ctl1) = ctl1;
++	ACCESS_ONCE_RW(ads->ds_ctl6) = ctl6;
+ 
+ 	if (i->aggr == AGGR_BUF_MIDDLE || i->aggr == AGGR_BUF_LAST)
+ 		return;
+ 
+-	ACCESS_ONCE(ads->ds_ctl4) = set11nPktDurRTSCTS(i->rates, 0)
++	ACCESS_ONCE_RW(ads->ds_ctl4) = set11nPktDurRTSCTS(i->rates, 0)
+ 		| set11nPktDurRTSCTS(i->rates, 1);
+ 
+-	ACCESS_ONCE(ads->ds_ctl5) = set11nPktDurRTSCTS(i->rates, 2)
++	ACCESS_ONCE_RW(ads->ds_ctl5) = set11nPktDurRTSCTS(i->rates, 2)
+ 		| set11nPktDurRTSCTS(i->rates, 3);
+ 
+-	ACCESS_ONCE(ads->ds_ctl7) = set11nRateFlags(i->rates, 0)
++	ACCESS_ONCE_RW(ads->ds_ctl7) = set11nRateFlags(i->rates, 0)
+ 		| set11nRateFlags(i->rates, 1)
+ 		| set11nRateFlags(i->rates, 2)
+ 		| set11nRateFlags(i->rates, 3)
+@@ -361,9 +361,11 @@
+ {
+ 	struct ath_hw_ops *ops = ath9k_hw_ops(ah);
+ 
+-	ops->rx_enable = ar9002_hw_rx_enable;
+-	ops->set_desc_link = ar9002_hw_set_desc_link;
+-	ops->get_isr = ar9002_hw_get_isr;
+-	ops->set_txdesc = ar9002_set_txdesc;
+-	ops->proc_txdesc = ar9002_hw_proc_txdesc;
++	pax_open_kernel();
++	*(void **)&ops->rx_enable = ar9002_hw_rx_enable;
++	*(void **)&ops->set_desc_link = ar9002_hw_set_desc_link;
++	*(void **)&ops->get_isr = ar9002_hw_get_isr;
++	*(void **)&ops->set_txdesc = ar9002_set_txdesc;
++	*(void **)&ops->proc_txdesc = ar9002_hw_proc_txdesc;
++	pax_close_kernel();
+ }
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/ti/wl12xx/main.c	2013-02-11 00:31:59.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/ti/wl12xx/main.c	2013-02-14 00:56:45.039332513 +0100
+@@ -644,7 +644,9 @@
+ 		       sizeof(wl->conf.mem));
+ 
+ 		/* read data preparation is only needed by wl127x */
+-		wl->ops->prepare_read = wl127x_prepare_read;
++		pax_open_kernel();
++		*(void **)&wl->ops->prepare_read = wl127x_prepare_read;
++		pax_close_kernel();
+ 
+ 		wlcore_set_min_fw_ver(wl, WL127X_CHIP_VER, WL127X_IFTYPE_VER,
+ 				      WL127X_MAJOR_VER, WL127X_SUBTYPE_VER,
+@@ -665,7 +667,9 @@
+ 		       sizeof(wl->conf.mem));
+ 
+ 		/* read data preparation is only needed by wl127x */
+-		wl->ops->prepare_read = wl127x_prepare_read;
++		pax_open_kernel();
++		*(void **)&wl->ops->prepare_read = wl127x_prepare_read;
++		pax_close_kernel();
+ 
+ 		wlcore_set_min_fw_ver(wl, WL127X_CHIP_VER, WL127X_IFTYPE_VER,
+ 				      WL127X_MAJOR_VER, WL127X_SUBTYPE_VER,
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/ti/wl18xx/main.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/ti/wl18xx/main.c	2013-02-14 00:58:13.185326566 +0100
+@@ -1489,8 +1489,10 @@
+ 	}
+ 
+ 	if (!checksum_param) {
+-		wl18xx_ops.set_rx_csum = NULL;
+-		wl18xx_ops.init_vif = NULL;
++		pax_open_kernel();
++		*(void **)&wl18xx_ops.set_rx_csum = NULL;
++		*(void **)&wl18xx_ops.init_vif = NULL;
++		pax_close_kernel();
+ 	}
+ 
+ 	/* Enable 11a Band only if we have 5G antennas */
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/ti/wl1251/sdio.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/ti/wl1251/sdio.c	2013-02-14 01:00:05.076319016 +0100
+@@ -269,13 +269,17 @@
+ 
+ 		irq_set_irq_type(wl->irq, IRQ_TYPE_EDGE_RISING);
+ 
+-		wl1251_sdio_ops.enable_irq = wl1251_enable_line_irq;
+-		wl1251_sdio_ops.disable_irq = wl1251_disable_line_irq;
++		pax_open_kernel();
++		*(void **)&wl1251_sdio_ops.enable_irq = wl1251_enable_line_irq;
++		*(void **)&wl1251_sdio_ops.disable_irq = wl1251_disable_line_irq;
++		pax_close_kernel();
+ 
+ 		wl1251_info("using dedicated interrupt line");
+ 	} else {
+-		wl1251_sdio_ops.enable_irq = wl1251_sdio_enable_irq;
+-		wl1251_sdio_ops.disable_irq = wl1251_sdio_disable_irq;
++		pax_open_kernel();
++		*(void **)&wl1251_sdio_ops.enable_irq = wl1251_sdio_enable_irq;
++		*(void **)&wl1251_sdio_ops.disable_irq = wl1251_sdio_disable_irq;
++		pax_close_kernel();
+ 
+ 		wl1251_info("using SDIO interrupt");
+ 	}
+--- compat-drivers-3.8-rc7-1-u.orig/drivers/net/wireless/ath/ath9k/ar9003_mac.c	2013-02-11 00:31:58.000000000 +0100
++++ compat-drivers-3.8-rc7-1-u/drivers/net/wireless/ath/ath9k/ar9003_mac.c	2013-02-14 01:22:52.693226721 +0100
+@@ -39,47 +39,47 @@
+ 	      (i->qcu << AR_TxQcuNum_S) | desc_len;
+ 
+ 	checksum += val;
+-	ACCESS_ONCE(ads->info) = val;
++	ACCESS_ONCE_RW(ads->info) = val;
+ 
+ 	checksum += i->link;
+-	ACCESS_ONCE(ads->link) = i->link;
++	ACCESS_ONCE_RW(ads->link) = i->link;
+ 
+ 	checksum += i->buf_addr[0];
+-	ACCESS_ONCE(ads->data0) = i->buf_addr[0];
++	ACCESS_ONCE_RW(ads->data0) = i->buf_addr[0];
+ 	checksum += i->buf_addr[1];
+-	ACCESS_ONCE(ads->data1) = i->buf_addr[1];
++	ACCESS_ONCE_RW(ads->data1) = i->buf_addr[1];
+ 	checksum += i->buf_addr[2];
+-	ACCESS_ONCE(ads->data2) = i->buf_addr[2];
++	ACCESS_ONCE_RW(ads->data2) = i->buf_addr[2];
+ 	checksum += i->buf_addr[3];
+-	ACCESS_ONCE(ads->data3) = i->buf_addr[3];
++	ACCESS_ONCE_RW(ads->data3) = i->buf_addr[3];
+ 
+ 	checksum += (val = (i->buf_len[0] << AR_BufLen_S) & AR_BufLen);
+-	ACCESS_ONCE(ads->ctl3) = val;
++	ACCESS_ONCE_RW(ads->ctl3) = val;
+ 	checksum += (val = (i->buf_len[1] << AR_BufLen_S) & AR_BufLen);
+-	ACCESS_ONCE(ads->ctl5) = val;
++	ACCESS_ONCE_RW(ads->ctl5) = val;
+ 	checksum += (val = (i->buf_len[2] << AR_BufLen_S) & AR_BufLen);
+-	ACCESS_ONCE(ads->ctl7) = val;
++	ACCESS_ONCE_RW(ads->ctl7) = val;
+ 	checksum += (val = (i->buf_len[3] << AR_BufLen_S) & AR_BufLen);
+-	ACCESS_ONCE(ads->ctl9) = val;
++	ACCESS_ONCE_RW(ads->ctl9) = val;
+ 
+ 	checksum = (u16) (((checksum & 0xffff) + (checksum >> 16)) & 0xffff);
+-	ACCESS_ONCE(ads->ctl10) = checksum;
++	ACCESS_ONCE_RW(ads->ctl10) = checksum;
+ 
+ 	if (i->is_first || i->is_last) {
+-		ACCESS_ONCE(ads->ctl13) = set11nTries(i->rates, 0)
++		ACCESS_ONCE_RW(ads->ctl13) = set11nTries(i->rates, 0)
+ 			| set11nTries(i->rates, 1)
+ 			| set11nTries(i->rates, 2)
+ 			| set11nTries(i->rates, 3)
+ 			| (i->dur_update ? AR_DurUpdateEna : 0)
+ 			| SM(0, AR_BurstDur);
+ 
+-		ACCESS_ONCE(ads->ctl14) = set11nRate(i->rates, 0)
++		ACCESS_ONCE_RW(ads->ctl14) = set11nRate(i->rates, 0)
+ 			| set11nRate(i->rates, 1)
+ 			| set11nRate(i->rates, 2)
+ 			| set11nRate(i->rates, 3);
+ 	} else {
+-		ACCESS_ONCE(ads->ctl13) = 0;
+-		ACCESS_ONCE(ads->ctl14) = 0;
++		ACCESS_ONCE_RW(ads->ctl13) = 0;
++		ACCESS_ONCE_RW(ads->ctl14) = 0;
+ 	}
+ 
+ 	ads->ctl20 = 0;
+@@ -89,17 +89,17 @@
+ 
+ 	ctl17 = SM(i->keytype, AR_EncrType);
+ 	if (!i->is_first) {
+-		ACCESS_ONCE(ads->ctl11) = 0;
+-		ACCESS_ONCE(ads->ctl12) = i->is_last ? 0 : AR_TxMore;
+-		ACCESS_ONCE(ads->ctl15) = 0;
+-		ACCESS_ONCE(ads->ctl16) = 0;
+-		ACCESS_ONCE(ads->ctl17) = ctl17;
+-		ACCESS_ONCE(ads->ctl18) = 0;
+-		ACCESS_ONCE(ads->ctl19) = 0;
++		ACCESS_ONCE_RW(ads->ctl11) = 0;
++		ACCESS_ONCE_RW(ads->ctl12) = i->is_last ? 0 : AR_TxMore;
++		ACCESS_ONCE_RW(ads->ctl15) = 0;
++		ACCESS_ONCE_RW(ads->ctl16) = 0;
++		ACCESS_ONCE_RW(ads->ctl17) = ctl17;
++		ACCESS_ONCE_RW(ads->ctl18) = 0;
++		ACCESS_ONCE_RW(ads->ctl19) = 0;
+ 		return;
+ 	}
+ 
+-	ACCESS_ONCE(ads->ctl11) = (i->pkt_len & AR_FrameLen)
++	ACCESS_ONCE_RW(ads->ctl11) = (i->pkt_len & AR_FrameLen)
+ 		| (i->flags & ATH9K_TXDESC_VMF ? AR_VirtMoreFrag : 0)
+ 		| SM(i->txpower, AR_XmitPower)
+ 		| (i->flags & ATH9K_TXDESC_VEOL ? AR_VEOL : 0)
+@@ -135,22 +135,22 @@
+ 	val = (i->flags & ATH9K_TXDESC_PAPRD) >> ATH9K_TXDESC_PAPRD_S;
+ 	ctl12 |= SM(val, AR_PAPRDChainMask);
+ 
+-	ACCESS_ONCE(ads->ctl12) = ctl12;
+-	ACCESS_ONCE(ads->ctl17) = ctl17;
++	ACCESS_ONCE_RW(ads->ctl12) = ctl12;
++	ACCESS_ONCE_RW(ads->ctl17) = ctl17;
+ 
+-	ACCESS_ONCE(ads->ctl15) = set11nPktDurRTSCTS(i->rates, 0)
++	ACCESS_ONCE_RW(ads->ctl15) = set11nPktDurRTSCTS(i->rates, 0)
+ 		| set11nPktDurRTSCTS(i->rates, 1);
+ 
+-	ACCESS_ONCE(ads->ctl16) = set11nPktDurRTSCTS(i->rates, 2)
++	ACCESS_ONCE_RW(ads->ctl16) = set11nPktDurRTSCTS(i->rates, 2)
+ 		| set11nPktDurRTSCTS(i->rates, 3);
+ 
+-	ACCESS_ONCE(ads->ctl18) = set11nRateFlags(i->rates, 0)
++	ACCESS_ONCE_RW(ads->ctl18) = set11nRateFlags(i->rates, 0)
+ 		| set11nRateFlags(i->rates, 1)
+ 		| set11nRateFlags(i->rates, 2)
+ 		| set11nRateFlags(i->rates, 3)
+ 		| SM(i->rtscts_rate, AR_RTSCTSRate);
+ 
+-	ACCESS_ONCE(ads->ctl19) = AR_Not_Sounding;
++	ACCESS_ONCE_RW(ads->ctl19) = AR_Not_Sounding;
+ }
+ 
+ static u16 ar9003_calc_ptr_chksum(struct ar9003_txc *ads)

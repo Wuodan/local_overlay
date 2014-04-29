@@ -1,0 +1,1 @@
+/var/lib/layman/pentoo/eclass/firefox-plugin.eclass
